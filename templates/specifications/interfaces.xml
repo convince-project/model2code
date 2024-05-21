@@ -1,0 +1,46 @@
+<interfaces xmlns="..." xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="...">
+
+    <types path="./types.xml" />
+
+    <interface id="SkillInterface">
+        <function id="tick">
+            <protocol>
+                <ROS2data>
+                    <interface type="sync-service" />
+                </ROS2data>
+            </protocol>
+            <returnValue>
+                <dataType>enum</dataType>
+                <enum refid="TickResponse" />
+            </returnValue>
+        </function>
+        <function id="halt">
+            <protocol>
+                <ROS2data>
+                    <interface type="sync-service" />
+                </ROS2data>
+            </protocol>
+        </function>
+    </interface>
+
+    <interface id="template_interfaces">
+        <function id="Function1">
+            <protocol>
+                <ROS2data>
+                    <interface type="sync-service" />
+                </ROS2data>
+            </protocol>
+        </function>
+        <function id="Function2">
+            <protocol>
+                <ROS2data>
+                    <interface type="sync-service" />
+                </ROS2data>
+            </protocol>
+            <returnValue>
+                <dataType>bool</dataType>
+                <dataField>is_active</dataField>
+            </returnValue>
+        </function>
+    </interface>
+</interfaces>

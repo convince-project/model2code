@@ -1,0 +1,16 @@
+<specification xmlns="..." xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="...">
+
+  <model>
+
+    <componentList>
+      <componentDeclaration id="TemplateComponent" interface="">
+        <componentDefinition />
+      </componentDeclaration>      
+    </componentList>
+
+    <interfaces path="./interfaces.xml"/>
+
+  </model>
+
+</specification>

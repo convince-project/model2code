@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2024-2024 Istituto Italiano di Tecnologia (IIT)
+# SPDX-License-Identifier: BSD-3-Clause
+cmake_minimum_required(VERSION 3.16)
+project(model2code)
+
+find_package(tinyxml2 CONFIG REQUIRED)
+
+add_executable(${PROJECT_NAME} code/src/main.cpp)
+
+target_include_directories(${PROJECT_NAME} PRIVATE 
+  ${TinyXML2_INCLUDE_DIRS}  # Include TinyXML2 directories
+  ${CMAKE_CURRENT_SOURCE_DIR}/code/include/
+)
+
+
+target_link_libraries(${PROJECT_NAME} PRIVATE tinyxml2::tinyxml2)
+
+install(
+  TARGETS ${PROJECT_NAME}
+  COMPONENT utilities
+  DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+target_sources( ${PROJECT_NAME} PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/code/src/main.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/code/src/utils.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/code/src/Generator.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/code/src/ExtractFromXML.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/code/src/ExtractFromElement.cpp 
+  )
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY FOLDER "Command Line Tools")
+
+
+
+
+

@@ -1,0 +1,160 @@
+/**
+ * @file ExtractFromElement.cpp
+ * @brief This file contains the functions to extract data from an XML element.
+ * @version 0.1
+ * @date 2024-05-20
+ * 
+ */
+
+#include "ExtractFromElement.h"
+
+/**
+ * \defgroup ExtractFromXMLFunctions Extract from XML Functions
+ * Functions to get data from XML file.
+ * @{
+ */
+/**
+ * \defgroup getFromElement Get from Element
+ * \ingroup ExtractFromXMLFunctions
+ * Get from Element object functions
+ * @{
+ */
+/**
+ * @brief Gets the value of a specific attribute of a given XML element
+ * 
+ * @param element 
+ * @param attribute 
+ * @param attributeValue 
+ * @return bool
+ */
+bool getElementAttValue(tinyxml2::XMLElement* element, const std::string attribute, std::string& attributeValue)
+{
+    const char* value = element->Attribute(attribute.c_str());
+    if (value){
+        attributeValue = std::string(value);
+        return true;
+    }
+    else{
+        std::cerr << "Attribute '" << attribute << "' of element '"<< element->Value()<<"' not found or has no value" << std::endl;
+        return false;
+    }
+}
+
+/**
+ * @brief Gets the text of a given XML element
+ * 
+ * @param element 
+ * @param textValue 
+ * @return bool 
+ */
+bool getElementText(tinyxml2::XMLElement* element, std::string& textValue)
+{
+    const char* text = element->GetText();
+    if (text){
+        textValue = std::string(text);
+        return true;
+    }
+    else{
+        std::cerr << "Text of element '"<< element->Value()<<"' not found or has no value" << std::endl;
+        return false;
+    }
+}
+/** @} */ // end of getFromElement subgroup
+/**
+ * \defgroup findElements Find Elements
+ * \ingroup ExtractFromXMLFunctions
+ * Find Elements functions
+ * @{
+ */
+
+/**
+ * @brief Find a XML element by tag and attribute name and value
+ * 
+ * @param root 
+ * @param tag 
+ * @param attributeName 
+ * @param attributeValue 
+ * @param element 
+ * @return true 
+ * @return false 
+ */
+bool findElementByTagAndAttValue(tinyxml2::XMLElement* root, const std::string tag, const std::string attributeName, const std::string attributeValue, tinyxml2::XMLElement*& element)
+{
+    for (tinyxml2::XMLElement* child = root->FirstChildElement(); child; child = child->NextSiblingElement()) {
+        if (strcmp(child->Value(), tag.c_str()) == 0) {
+            const char* id = child->Attribute(attributeName.c_str());
+            if (id && std::string(id) == attributeValue){
+                element = child;
+                return true;
+            }
+        }
+        if (findElementByTagAndAttValue(child, tag, attributeName, attributeValue, element)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * @brief Find a XML element by tag
+ * 
+ * @param root 
+ * @param tag 
+ * @param element 
+ * @return true 
+ * @return false 
+ */
+bool findElementByTag(tinyxml2::XMLElement* root, const std::string tag, tinyxml2::XMLElement*& element)
+{
+    for (tinyxml2::XMLElement* child = root->FirstChildElement(); child; child = child->NextSiblingElement()) {
+        if (strcmp(child->Value(), tag.c_str()) == 0){
+            element = child;
+            return true;
+        }
+        if (findElementByTag(child, tag, element)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * @brief Find a vector of XML elements by tag and attribute name
+ * 
+ * @param root 
+ * @param tag 
+ * @param attribute 
+ * @param elementVector 
+ */
+void findElementVectorByTagAndAttribute(tinyxml2::XMLElement* root, const std::string tag, const std::string attribute, std::vector<tinyxml2::XMLElement*>& elementVector)
+{
+    for (tinyxml2::XMLElement* child = root->FirstChildElement(); child; child = child->NextSiblingElement()){
+        if (strcmp(child->Value(), tag.c_str()) == 0) {
+            const char* childAttribute = child->Attribute(attribute.c_str());
+            if (childAttribute) {
+                elementVector.push_back(child);
+            }
+        }
+        findElementVectorByTagAndAttribute(child, tag, attribute, elementVector);
+    }
+}
+
+/**
+ * @brief Find a vector of XML elements by tag
+ * 
+ * @param root 
+ * @param tag 
+ * @param elementVector 
+ */
+void findElementVectorByTag(tinyxml2::XMLElement* root, const std::string tag, std::vector<tinyxml2::XMLElement*>& elementVector)
+{
+    for (tinyxml2::XMLElement* child = root->FirstChildElement(); child; child = child->NextSiblingElement()){
+        if (strcmp(child->Value(), tag.c_str()) == 0) {
+            elementVector.push_back(child);
+        }
+        findElementVectorByTag(child, tag, elementVector);
+    }
+}
+/** @} */ // end of findElements subgroup
