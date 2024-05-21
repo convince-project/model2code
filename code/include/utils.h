@@ -9,8 +9,26 @@
 #include <string>
 #include <iostream>
 
-void turnToSnakeCase(const std::string, std::string&);
+/**
+ * @brief Convert string to snake case
+ * 
+ * @param input 
+ * @param output 
+ */
+void turnToSnakeCase(const std::string input, std::string& output);
 
-void getDataTypePath(const std::string, std::string&);
+/**
+ * @brief Get data type path from data type name (e.g. from "sensor_msgs::msg::BatteryState" to "sensor_msgs/msg/battery_state")
+ * 
+ * @param input 
+ * @param output 
+ */
+void getDataTypePath(const std::string input, std::string& output);
 
-void getPath(const std::string, std::string&);
+/**
+ * @brief Get the path 
+ * 
+ * @param filePath 
+ * @param output 
+ */
+void getPath(const std::string filePath, std::string& output);

@@ -54,6 +54,12 @@ void getDataTypePath(const std::string input, std::string& output)
     turnToSnakeCase(temp, output);
 }
 
+/**
+ * @brief Get the path 
+ * 
+ * @param filePath 
+ * @param output 
+ */
 void getPath(const std::string filePath, std::string& output) {
     // searching for the second to last appearance of '/' to get the path
     size_t pos = filePath.find_last_of('/');

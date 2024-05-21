@@ -8,8 +8,34 @@
 #include "Data.h"
 #include "ExtractFromElement.h"
 
-bool extractInterfaceName(const std::string, eventDataStr&);
+/**
+ * @brief Extract the interface name from the model file
+ * 
+ * @param fileName 
+ * @param eventData 
+ * @return bool
+ */
+bool extractInterfaceName(const std::string fileName, eventDataStr& eventData);
 
-bool extractInterfaceType(const std::string, eventDataStr&);
+/**
+ * @brief Extract the interface data from the interface file
+ * 
+ * @param fileName 
+ * @param eventData 
+ * @return true 
+ * @return false 
+ */
+bool extractInterfaceType(const std::string fileName, eventDataStr& eventData);
 
-bool extractFromSCXML(tinyxml2::XMLDocument&, const std::string, std::string&, std::vector<tinyxml2::XMLElement*>&, std::vector<tinyxml2::XMLElement*>&);
+/**
+ * @brief Extract data from SCXML file
+ * 
+ * @param doc 
+ * @param fileName 
+ * @param rootName 
+ * @param elementsTransition 
+ * @param elementsSend 
+ * @return true 
+ * @return false 
+ */
+bool extractFromSCXML(tinyxml2::XMLDocument& doc, const std::string fileName, std::string& rootName, std::vector<tinyxml2::XMLElement*>& elementsTransition, std::vector<tinyxml2::XMLElement*>& elementsSend); 

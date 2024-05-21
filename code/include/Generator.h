@@ -67,37 +67,145 @@ struct topicCodeStr
     std::string callbacksCode;
 };
 
+/**
+ * @brief Get component and function data from event name
+ * 
+ * @param eventData 
+ */
+void getDataFromEvent(eventDataStr& eventData);
 
-void getDataFromEvent(eventDataStr&);
+/**
+ * @brief Get the skill Data From SCXML Root Name object
+ * 
+ * @param attributeName 
+ * @param skillData 
+ * @return bool 
+ */
+bool getDataFromRootName(const std::string attributeName, skillDataStr& skillData);
 
-bool getDataFromRootName(const std::string, skillDataStr&);
+/**
+ * @brief Prints the event data
+ * 
+ * @param eventData 
+ */
+void printEventData(eventDataStr eventData);
 
-void printEventData(eventDataStr);
+/**
+ * @brief Prints the skill data
+ * 
+ * @param skillData 
+ */
+void printSkillData(skillDataStr skillData);
 
-void printSkillData(skillDataStr);
+/**
+ * @brief Process the event data
+ * 
+ * @param eventData 
+ * @param skillData 
+ * @param target 
+ * @param hCode 
+ * @param cppCode 
+ * @param topicCode 
+ */
+void processEvent(fileDataStr fileData, eventDataStr eventData, const skillDataStr skillData, std::string target, hCodeStr& hCode, cppCodeStr& cppCode, topicCodeStr& topicCode);
 
-void processEvent(fileDataStr fileData, eventDataStr, const skillDataStr, std::string, hCodeStr&, cppCodeStr&, topicCodeStr&);
+/**
+ * @brief Generate the code for the events
+ * 
+ * @param elementsTransition 
+ * @param elementsSend 
+ * @param skillData 
+ * @param hCode 
+ * @param cppCode 
+ * @param topicCode 
+ */
+void getEventsCode(fileDataStr fileData, const std::vector<tinyxml2::XMLElement*> elementsTransition, const std::vector<tinyxml2::XMLElement*> elementsSend, skillDataStr skillData, hCodeStr& hCode, cppCodeStr& cppCode, topicCodeStr& topicCode);
 
-void getEventsCode(fileDataStr fileData, const std::vector<tinyxml2::XMLElement*>, const std::vector<tinyxml2::XMLElement*>, skillDataStr, hCodeStr&, cppCodeStr&, topicCodeStr&);
+/**
+ * @brief Write the header code
+ * 
+ * @param skillData 
+ * @param code 
+ * @param datamodel_mode 
+ */
+void writeHCode(const skillDataStr skillData, hCodeStr& code, bool datamodel_mode);
 
-void writeHCode(const skillDataStr, hCodeStr&, bool);
+/**
+ * @brief Write the cpp code
+ * 
+ * @param skillData 
+ * @param code 
+ * @param datamodel_mode 
+ */
+void writeCppCode(const skillDataStr skillData, cppCodeStr& code, bool datamodel_mode);
 
-void writeCppCode(const skillDataStr, cppCodeStr&, bool);
+/**
+ * @brief Write the header code for the data model
+ * 
+ * @param skillData 
+ * @param code 
+ */
+void writeDataModelHCode(const skillDataStr skillData, hCodeStr& code);
 
-void writeDataModelHCode(const skillDataStr, hCodeStr&);
+/**
+ * @brief Write the cpp code for the data model
+ * 
+ * @param skillData 
+ * @param code 
+ */
+void writeDataModelCppCode(const skillDataStr skillData, cppDataModelCodeStr& code);
 
-void writeDataModelCppCode(const skillDataStr, cppDataModelCodeStr&);
+/**
+ * @brief Generate the data model header file
+ * 
+ * @param outputPath 
+ * @param outputFileName 
+ * @param code 
+ */
+void generateDataModelHFile(const std::string outputPath, const std::string outputFileName, hCodeStr code);
 
-void generateDataModelHFile(const std::string, const std::string, hCodeStr);
+/**
+ * @brief Generate the data model cpp file
+ * 
+ * @param outputPath 
+ * @param outputFileName 
+ * @param code 
+ */
+void generateDataModelCppFile(const std::string outputPath, const std::string outputFileName, cppDataModelCodeStr code);
 
-void generateDataModelCppFile(const std::string, const std::string, cppDataModelCodeStr);
+/**
+ * @brief Generate the header file
+ * 
+ * @param outputPath 
+ * @param outputFileName 
+ * @param skillData 
+ * @param code 
+ */
+void generateHFile(const std::string outputPath, const std::string outputFileName, const skillDataStr skillData, hCodeStr code);
 
-void generateHFile(const std::string, const std::string, const skillDataStr, hCodeStr);
+/**
+ * @brief Generate the cpp file
+ * 
+ * @param outputPath 
+ * @param outputFileName 
+ * @param skillData 
+ * @param code 
+ */
+void generateCppFile(const std::string outputPath, const std::string outputFileName, const skillDataStr skillData, cppCodeStr code);
 
-void generateCppFile(const std::string, const std::string, const skillDataStr, cppCodeStr);
-
+/**
+ * @brief Print the help message
+ * 
+ */
 void print_help();
 
+/**
+ * @brief Generator function
+ * 
+ * @param fileData 
+ * @return true 
+ * @return false 
+ */
 bool generator(fileDataStr fileData);
 
 
