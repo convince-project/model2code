@@ -1,5 +1,5 @@
 # Configuration file for the Sphinx documentation builder.
-
+from cgitb import html
 # -- Project information
 
 project = 'MODEL2CODE'
@@ -10,28 +10,31 @@ release = '0.1'
 version = '0.1.0'
 
 # -- General configuration
+# Breathe/exhale configuration
+breathe_projects = {"model2code":"../build/doxygen/xml"}
+breathe_default_project = "model2code"
+
+exhale_args = {
+        "containmentFolder"    : "./API",
+        "rootFileName"         : "api.rst",
+        "rootFileTitle"        : "API",
+        "doxygenStripFromPath" : "..",
+        "createTreeView": True
+    }
+
+# Tell sphinx what the primary language being documented is.
+primary_domain = 'cpp'
+
+# Tell sphinx what the pygments highlight language should be.
+highlight_language = 'cpp' 
 
 extensions = [
-    # 'sphinx.ext.autosummary',
-    # 'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
-    "sphinx.ext.napoleon",
-    "autoapi.extension",    
-    # 'myst_parser',
-    # 'sphinxcontrib.mermaid',
-    # 'sphinxcontrib.plantuml',
-    # 'autodoc2',
+    'breathe',
+    'exhale'
 ]
-
-autoapi_options = [
-    "members",
-    "undoc-members",
-    "show-inheritance",
-    "show-module-summary",
-    "imported-members",
-]
-
-autoapi_dirs = ["../../src"]
 
 # intersphinx_mapping = {
 #     'python': ('https://docs.python.org/3/', None),

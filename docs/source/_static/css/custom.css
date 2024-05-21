@@ -19,6 +19,10 @@
 .wy-side-nav-search {
     background-color: darkgray;
 }
+/* Top Navigation (relevant e.g. on mobile) */
+.wy-nav-top {
+    background-color: darkgray;
+}
 
 /* Link on top of logo */
 .wy-side-nav-search a {

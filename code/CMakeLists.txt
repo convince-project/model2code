@@ -5,11 +5,11 @@ project(model2code)
 
 find_package(tinyxml2 CONFIG REQUIRED)
 
-add_executable(${PROJECT_NAME} code/src/main.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE 
   ${TinyXML2_INCLUDE_DIRS}  # Include TinyXML2 directories
-  ${CMAKE_CURRENT_SOURCE_DIR}/code/include/
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/
 )
 
 
@@ -22,11 +22,11 @@ install(
 )
 
 target_sources( ${PROJECT_NAME} PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR}/code/src/main.cpp 
-  ${CMAKE_CURRENT_SOURCE_DIR}/code/src/utils.cpp 
-  ${CMAKE_CURRENT_SOURCE_DIR}/code/src/Generator.cpp 
-  ${CMAKE_CURRENT_SOURCE_DIR}/code/src/ExtractFromXML.cpp 
-  ${CMAKE_CURRENT_SOURCE_DIR}/code/src/ExtractFromElement.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/utils.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Generator.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ExtractFromXML.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ExtractFromElement.cpp 
   )
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY FOLDER "Command Line Tools")
