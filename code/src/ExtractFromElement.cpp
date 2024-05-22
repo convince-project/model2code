@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2024-2024 Istituto Italiano di Tecnologia (IIT)
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 /**
  * @file ExtractFromElement.cpp
  * @brief This file contains the functions to extract data from an XML element.

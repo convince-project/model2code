@@ -1,9 +1,7 @@
-/******************************************************************************
- *                                                                            *
- * Copyright (C) 2020 Fondazione Istituto Italiano di Tecnologia (IIT)        *
- * All Rights Reserved.                                                       *
- *                                                                            *
- ******************************************************************************/
+/*
+ * SPDX-FileCopyrightText: 2024-2024 Istituto Italiano di Tecnologia (IIT)
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
 
 # pragma once
 

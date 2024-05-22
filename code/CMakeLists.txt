@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2024-2024 Istituto Italiano di Tecnologia (IIT)
 # SPDX-License-Identifier: BSD-3-Clause
+
 cmake_minimum_required(VERSION 3.16)
 project(model2code)
 

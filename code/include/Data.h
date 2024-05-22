@@ -2,6 +2,7 @@
  * SPDX-FileCopyrightText: 2024-2024 Istituto Italiano di Tecnologia (IIT)
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 /**
  * @file Data.h
  * @brief This file contains the structures used in the code generation.
