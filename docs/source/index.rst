@@ -1,7 +1,6 @@
 CONVINCE model2code Documentation
 ==================================
-This is the documentation for the CONVINCE model2code tool. The tool is developed as part of the CONVINCE project.
-The tool is used mainly to generate skill level code starting from an SCXML model.
+The tool is developed as part of the CONVINCE project and is used mainly to generate skill level code starting from an SCXML model.
 The inputs of the program are: 
 - an SCXML model that describes the behavior of the skill,
 - an XML file that describes the full model of the program, which includes the behavior tree, the skills and the components used in the system,
@@ -29,6 +28,7 @@ The parameters required to run the program are:
 
 by default the program will generate the code in the directory where the SCXML file passed by the parameter ``--input_filename`` is located, but you can specify a different directory by using the parameter ``--output_path``.
 
+The skills generated are based on a behavior tree structure and will have a ROS2 tick service in case they are a condition a ROS2 tick and halt services in case they are an action.
 
 Contents
 ----------

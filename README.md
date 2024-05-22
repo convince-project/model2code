@@ -20,7 +20,7 @@ To install see [TinyXML2 Installation](https://github.com/leethomason/tinyxml2/t
 To compile the code run the following commands
 '''bash
 git clone https://github.com/convince-project/model2code.git
-cd model2code
+cd model2code/code
 mkdir build
 cd build
 cmake ..
