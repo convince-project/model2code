@@ -11,8 +11,8 @@
 /**
  * @brief Extract the interface name from the model file
  * 
- * @param fileName 
- * @param eventData 
+ * @param fileName model file name
+ * @param eventData event data structure, where the interface name will be stored, returned by reference 
  * @return bool
  */
 bool extractInterfaceName(const std::string fileName, eventDataStr& eventData);
@@ -20,8 +20,8 @@ bool extractInterfaceName(const std::string fileName, eventDataStr& eventData);
 /**
  * @brief Extract the interface data from the interface file
  * 
- * @param fileName 
- * @param eventData 
+ * @param fileName interface file name
+ * @param eventData event data structure, where the interface data will be stored, returned by reference
  * @return true 
  * @return false 
  */
@@ -30,11 +30,11 @@ bool extractInterfaceType(const std::string fileName, eventDataStr& eventData);
 /**
  * @brief Extract data from SCXML file
  * 
- * @param doc 
- * @param fileName 
- * @param rootName 
- * @param elementsTransition 
- * @param elementsSend 
+ * @param doc document object
+ * @param fileName scxml file name
+ * @param rootName root name
+ * @param elementsTransition vector of transition event elements 
+ * @param elementsSend vector of send event elements
  * @return true 
  * @return false 
  */

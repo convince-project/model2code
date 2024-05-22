@@ -70,15 +70,15 @@ struct topicCodeStr
 /**
  * @brief Get component and function data from event name
  * 
- * @param eventData 
+ * @param eventData event data structure passed by reference from which the event string is extracted and the component and function data are stored
  */
 void getDataFromEvent(eventDataStr& eventData);
 
 /**
  * @brief Get the skill Data From SCXML Root Name object
  * 
- * @param attributeName 
- * @param skillData 
+ * @param attributeName root attribute name from which the skill data is extracted
+ * @param skillData skill data structure passed by reference where the skill data is stored
  * @return bool 
  */
 bool getDataFromRootName(const std::string attributeName, skillDataStr& skillData);
@@ -86,110 +86,112 @@ bool getDataFromRootName(const std::string attributeName, skillDataStr& skillDat
 /**
  * @brief Prints the event data
  * 
- * @param eventData 
+ * @param eventData event data structure to be printed
  */
 void printEventData(eventDataStr eventData);
 
 /**
  * @brief Prints the skill data
  * 
- * @param skillData 
+ * @param skillData skill data structure to be printed
  */
 void printSkillData(skillDataStr skillData);
 
 /**
  * @brief Process the event data
  * 
- * @param eventData 
- * @param skillData 
- * @param target 
- * @param hCode 
- * @param cppCode 
- * @param topicCode 
+ * @param fileData the file data structure contianing the model and the interface file paths
+ * @param eventData event data structure 
+ * @param skillData skill data structure
+ * @param target event target state
+ * @param hCode structure where the header code is stored
+ * @param cppCode structure where the cpp code is stored
+ * @param topicCode structure where the topic code is stored
  */
 void processEvent(fileDataStr fileData, eventDataStr eventData, const skillDataStr skillData, std::string target, hCodeStr& hCode, cppCodeStr& cppCode, topicCodeStr& topicCode);
 
 /**
  * @brief Generate the code for the events
  * 
- * @param elementsTransition 
- * @param elementsSend 
- * @param skillData 
- * @param hCode 
- * @param cppCode 
- * @param topicCode 
+ * @param fileData the file data structure contianing the model and the interface file paths
+ * @param elementsTransition vector of transition elements
+ * @param elementsSend vector of send elements
+ * @param skillData skill data structure
+ * @param hCode structure where the header code is stored
+ * @param cppCode structure where the cpp code is stored
+ * @param topicCode structure where the topic code is stored
  */
 void getEventsCode(fileDataStr fileData, const std::vector<tinyxml2::XMLElement*> elementsTransition, const std::vector<tinyxml2::XMLElement*> elementsSend, skillDataStr skillData, hCodeStr& hCode, cppCodeStr& cppCode, topicCodeStr& topicCode);
 
 /**
  * @brief Write the header code
  * 
- * @param skillData 
- * @param code 
- * @param datamodel_mode 
+ * @param skillData skill data structure 
+ * @param code code structure where the header code is stored
+ * @param datamodel_mode data model mode flag
  */
 void writeHCode(const skillDataStr skillData, hCodeStr& code, bool datamodel_mode);
 
 /**
  * @brief Write the cpp code
  * 
- * @param skillData 
- * @param code 
- * @param datamodel_mode 
+ * @param skillData skill data structure
+ * @param code code structure where the cpp code is stored
+ * @param datamodel_mode data model mode flag
  */
 void writeCppCode(const skillDataStr skillData, cppCodeStr& code, bool datamodel_mode);
 
 /**
  * @brief Write the header code for the data model
  * 
- * @param skillData 
- * @param code 
+ * @param skillData skill data structure
+ * @param code code structure where the data model header code is stored
  */
 void writeDataModelHCode(const skillDataStr skillData, hCodeStr& code);
 
 /**
  * @brief Write the cpp code for the data model
  * 
- * @param skillData 
- * @param code 
+ * @param skillData skill data structure
+ * @param code code structure where the data model cpp code is stored
  */
 void writeDataModelCppCode(const skillDataStr skillData, cppDataModelCodeStr& code);
 
 /**
  * @brief Generate the data model header file
  * 
- * @param outputPath 
- * @param outputFileName 
- * @param code 
+ * @param outputPath path where to save the output file
+ * @param outputFileName filename of the output file
+ * @param code code structure where the data model header code is stored
  */
 void generateDataModelHFile(const std::string outputPath, const std::string outputFileName, hCodeStr code);
 
 /**
  * @brief Generate the data model cpp file
  * 
- * @param outputPath 
- * @param outputFileName 
- * @param code 
+ * @param outputPath path where to save the output file
+ * @param outputFileName filename of the output file
+ * @param code code structure where the data model cpp code is stored
  */
 void generateDataModelCppFile(const std::string outputPath, const std::string outputFileName, cppDataModelCodeStr code);
 
 /**
  * @brief Generate the header file
  * 
- * @param outputPath 
- * @param outputFileName 
- * @param skillData 
- * @param code 
+ * @param outputPath path where to save the output file
+ * @param outputFileName filename of the output file
+ * @param skillData skill data structure
+ * @param code code structure where the header code is stored
  */
 void generateHFile(const std::string outputPath, const std::string outputFileName, const skillDataStr skillData, hCodeStr code);
 
 /**
  * @brief Generate the cpp file
  * 
- * @param outputPath 
- * @param outputFileName 
- * @param skillData 
- * @param code 
+ * @param outputPath path where to save the output file
+ * @param outputFileName filename of the output file
+ * @param skillData skill data structure
+ * @param code code structure where the cpp code is stored
  */
 void generateCppFile(const std::string outputPath, const std::string outputFileName, const skillDataStr skillData, cppCodeStr code);
 
