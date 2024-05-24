@@ -4,7 +4,7 @@
   <model>
 
     <componentList>
-      <componentDeclaration id="TemplateComponent" interface="">
+      <componentDeclaration id="TemplateComponent" interface="template_interfaces">
         <componentDefinition />
       </componentDeclaration>      
     </componentList>

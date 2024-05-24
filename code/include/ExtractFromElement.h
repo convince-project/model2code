@@ -1,8 +1,3 @@
-/*
- * SPDX-FileCopyrightText: 2024-2024 Istituto Italiano di Tecnologia (IIT)
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
 /**
  * @file ExtractFromElement.h
  * @brief This file is the header file for the ExtractFromElement.cpp file.
@@ -42,7 +37,7 @@ bool getElementText(tinyxml2::XMLElement* element, std::string& textValue);
  * @param root root element from which to start the search
  * @param tag tag name to look for
  * @param attributeName attribute name to look for inside the tag
- * @param attributeValue attribute value associated with the attribute name
+ * @param attributeValue attribute value associated with the attribute name to look for
  * @param element element found returned by reference
  * @return true 
  * @return false 
@@ -66,7 +61,7 @@ bool findElementByTag(tinyxml2::XMLElement* root, const std::string tag, tinyxml
  * @param root root element from which to start the search
  * @param tag tag name to look for
  * @param attribute attribute name to look for inside the tag
- * @param elementVector vector of elements found returned by reference
+ * @param elementVector element vector containing the elements found 
  */
 void findElementVectorByTagAndAttribute(tinyxml2::XMLElement* root, const std::string tag, const std::string attribute, std::vector<tinyxml2::XMLElement*>& elementVector);
 
@@ -75,7 +70,7 @@ void findElementVectorByTagAndAttribute(tinyxml2::XMLElement* root, const std::s
  * 
  * @param root root element from which to start the search
  * @param tag tag name to look for
- * @param elementVector vector of elements found returned by reference
+ * @param elementVector element vector containing the elements found
  */
 void findElementVectorByTag(tinyxml2::XMLElement* root, const std::string tag, std::vector<tinyxml2::XMLElement*>& elementVector);
 

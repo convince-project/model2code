@@ -1,8 +1,3 @@
-/*
- * SPDX-FileCopyrightText: 2024-2024 Istituto Italiano di Tecnologia (IIT)
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
 /**
  * @file ExtractFromXML.h
  * @brief This file is the header file for the ExtractFromXML.cpp file.
@@ -16,8 +11,8 @@
 /**
  * @brief Extract the interface name from the model file
  * 
- * @param fileName model file name
- * @param eventData event data structure, where the interface name will be stored, returned by reference 
+ * @param fileName model file name from which to extract the interface name
+ * @param eventData event data structure, where the interface name will be stored, returned by reference
  * @return bool
  */
 bool extractInterfaceName(const std::string fileName, eventDataStr& eventData);
@@ -25,7 +20,7 @@ bool extractInterfaceName(const std::string fileName, eventDataStr& eventData);
 /**
  * @brief Extract the interface data from the interface file
  * 
- * @param fileName interface file name
+ * @param fileName interface file name from which to extract the interface data
  * @param eventData event data structure, where the interface data will be stored, returned by reference
  * @return true 
  * @return false 
@@ -33,13 +28,13 @@ bool extractInterfaceName(const std::string fileName, eventDataStr& eventData);
 bool extractInterfaceType(const std::string fileName, eventDataStr& eventData);
 
 /**
- * @brief Extract data from SCXML file
+ * @brief Extract data from SCXML file (rootname, transition and send event elements)
  * 
- * @param doc document object
- * @param fileName scxml file name
- * @param rootName root name
- * @param elementsTransition vector of transition event elements 
- * @param elementsSend vector of send event elements
+ * @param doc SCXML document object
+ * @param fileName file name of the SCXML file
+ * @param rootName name value of the root element of the SCXML file
+ * @param elementsTransition vector of transition event elements found in the SCXML file
+ * @param elementsSend vector of send event elements found in the SCXML file
  * @return true 
  * @return false 
  */

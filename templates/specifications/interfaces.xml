@@ -41,6 +41,10 @@
                 <dataType>bool</dataType>
                 <dataField>is_active</dataField>
             </returnValue>
+            <returnValue>
+                <dataType>bool</dataType>
+                <dataField>is_active2</dataField>
+            </returnValue>
         </function>
     </interface>
 </interfaces>

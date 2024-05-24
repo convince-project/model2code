@@ -1,6 +1,5 @@
 # SPDX-FileCopyrightText: 2024-2024 Istituto Italiano di Tecnologia (IIT)
 # SPDX-License-Identifier: BSD-3-Clause
-
 cmake_minimum_required(VERSION 3.16)
 project(model2code)
 
@@ -24,8 +23,9 @@ install(
 
 target_sources( ${PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp 
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/utils.cpp 
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Generator.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Data.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/strManipulation.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Replacer.cpp 
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ExtractFromXML.cpp 
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ExtractFromElement.cpp 
   )

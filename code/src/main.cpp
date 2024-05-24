@@ -1,8 +1,3 @@
-/*
- * SPDX-FileCopyrightText: 2024-2024 Istituto Italiano di Tecnologia (IIT)
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
 /**
  * @file main.cpp
  * @brief this file contains the main function.
@@ -11,32 +6,41 @@
  * 
  */
 
-#include "Generator.h"
+#include "Replacer.h"
 
 /**
- * @brief Main function
+ * @brief Print the help message
  * 
- * @param argc 
- * @param argv 
- * @return int 
  */
-int main(int argc, char* argv[])
+void print_help()
 {
-    fileDataStr fileData;
-    // Default values
-    fileData.modelFileName      = modelFilePath;
-    fileData.interfaceFileName  = interfaceFilePath;
-    fileData.debug_mode         = false;
-    fileData.datamodel_mode     = false;
+    std::cout << "Welcome to model2code tool.\n";
+    std::cout << "Syntax:\n";
+    std::cout << "model2code --input_filename \"inputFileName.scxml\" \n";
+    std::cout << "--model_filename \"modelFileName.scxml\"\n";
+    std::cout << "--interface_filename \"interfaceFileName.scxml\"\n";
+    std::cout << "--output_path \"path/to/output/directory\"\n";
+    std::cout << "--template_path \"path/to/template_skill/directory\"\n";
+    std::cout << "--datamodel_mode \n";
+}
 
-    #if 0 //debug only!
-        std::cout << "Invocation command " << argc << ":";
-        for (size_t i = 0; i < argc; ++i)
-        {
-                std::cout << argv[i] << " ";
-        }
-        std::cout << "<EOL>"<<std::endl;
-    #endif
+/**
+ * @brief Handle the inputs
+ * 
+ * @param argc number of input arguments
+ * @param argv vector of input arguments
+ * @param fileData file data structure passed by reference where the file data is stored
+ * @param templateFileData template file data structure passed by reference where the template file data is stored
+ * @return true 
+ * @return false 
+ */
+bool handleInputs(int argc, char* argv[], fileDataStr& fileData, templateFileDataStr& templateFileData)
+{
+    // Default values
+    fileData.modelFileName          = modelFilePath;
+    fileData.interfaceFileName      = interfaceFilePath;
+    fileData.datamodel_mode         = false;
+    templateFileData.templatePath   = templateFilePath;
 
     if (argc == 1)
     {
@@ -67,11 +71,12 @@ int main(int argc, char* argv[])
             fileData.interfaceFileName = argv[i + 1];
             i++;
         }
+        else if (arg == "--template_path" && i+1 < argc && argv[i+1][0] != '-') {
+            templateFileData.templatePath = argv[i+1];
+            i++;
+        }
         else if (arg == "--datamodel_mode") {
             fileData.datamodel_mode = true;
-        }
-        else if (arg == "--debug_mode") {
-            fileData.debug_mode = true;
         }
     }
     
@@ -100,13 +105,33 @@ int main(int argc, char* argv[])
         }
     }
 
-    fileData.outputPathHFile = fileData.outputPath + "/include/";
-    fileData.outputPathCppFile = fileData.outputPath + "/src/";
+    fileData.outputPathInclude = fileData.outputPath + "include/";
+    fileData.outputPathSrc = fileData.outputPath + "src/";
+    return RETURN_CODE_OK;
+}
 
-    if(!generator(fileData))
+/**
+ * @brief Main function
+ * 
+ * @param argc number of input arguments
+ * @param argv vector of input arguments
+ * @return int 
+ */
+int main(int argc, char* argv[])
+{
+    fileDataStr fileData;
+    templateFileDataStr templateFileData;
+
+    if(handleInputs(argc, argv, fileData, templateFileData))
+    {
+        std::cout << "Error in input handling" << std::endl;
+        return RETURN_CODE_ERROR;
+    }
+
+    if(!Replacer(fileData, templateFileData))
     {
         std::cout << "Error in code generation" << std::endl;
     }
     
-    return 0;
+    return RETURN_CODE_OK;
 };
