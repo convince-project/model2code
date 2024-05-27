@@ -18,14 +18,14 @@ To install see [TinyXML2 Installation](https://github.com/leethomason/tinyxml2/t
 
 ## Compiling
 To compile the code run the following commands
-'''
+```
 git clone https://github.com/convince-project/model2code.git
 cd model2code/code
 mkdir build
 cd build
 cmake ..
 make install
-'''
+```
 
 ## Execution
 In order to run the `model2code` tool you need three different files:
