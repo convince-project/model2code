@@ -68,11 +68,11 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
  * @brief function that checks if a string is present in another string
  * 
  * @param str main string where the search is done
- * @param str2 string to be searched
+ * @param subStr string to be searched
  * @return true 
  * @return false 
  */
-bool checkIfStrPresent(const std::string str, const std::string str2);
+bool checkIfStrPresent(const std::string str, const std::string subStr);
 
 /**
  * @brief function that deletes a section of a string that is between two strings
