@@ -1,3 +1,3 @@
 Tutorials
 =========
-To see the tutorial please see [model2code repository](https://convince-project.github.io/model2code/)
+To see the tutorial please visit the `model2code repository <https://github.com/convince-project/model2code>`_.
