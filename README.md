@@ -23,22 +23,23 @@ git clone https://github.com/convince-project/model2code.git
 cd model2code/code
 mkdir build
 cd build
-cmake ..
+cmake ../code
 make install
 '''
 
 ## Execution
-In order to run the `model2code` tool you need three different files:
+To run the `model2code` tool you need three different files:
 - An SCXML file with your state machine
 - An XML file with the definition of your model
 - An XML file with the definition of your interfaces
+- A directory containing the templates of the files to generate
 
 To run the `model2code` tool use the following command
 ```
-model2code --input_filename "input_filename.scxml" --model_filename "model_filename.scxml" --interface_filename "interface_filename.scxml" --output_path "path/to/output/directory"
+model2code --input_filename "input_filename.scxml" --model_filename "model_filename.scxml" --interface_filename "interface_filename.scxml" --output_path "path/to/output/directory" --template_path "path/to/template_skill/directory"
 ```
-replace `input_filename.scxml`, `model_filename.scxml`, `interface_filename.scxml` and `path/to/output/directory` with your needs.
-By default the `path/to/output/directory` is set to the location of `input_filename.scxml`.
+replace `input_filename.scxml`, `model_filename.scxml`, `interface_filename.scxml`, `path/to/output/directory` and `path/to/template_skill/directory` with your needs.
+By default the `path/to/output/directory` is set to the location of `input_filename.scxml` and `path/to/template_skill/directory` is set to the 'templates/skills/template_skill' directory of this repository.
 
 ## Run examples
 To run an example of MODEL2CODE go to the main directory and run the following commands:
