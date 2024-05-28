@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2024 Humanoid Sensing and Perception, Istituto Italiano di Tecnologia
+// SPDX-License-Identifier:  APACHE-2.0
+
 /**
  * @file strManipulation.h
  * @brief Functions to manipulate strings.

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2024 Humanoid Sensing and Perception, Istituto Italiano di Tecnologia
+// SPDX-License-Identifier:  APACHE-2.0
+
 /**
  * @file Data.h
  * @brief This file contains the structures used in the code generation and functions to manipulate the data.
@@ -16,13 +19,13 @@
 #define interfaceFilePath "./templates/specifications/interfaces.xml"
 
 #define templateFilePath "./templates/skills/template_skill/"
-#define cppTemplateFileRelativePath "src/TemplateSkill.cpp"
-#define hTemplateFileRelativePath "include/TemplateSkill.h"
-#define cppDataModelTemplateFileRelativePath "src/TemplateSkillDataModel.cpp"
-#define hDataModelTemplateFileRelativePath "include/TemplateSkillDataModel.h"
-#define mainTemplateFileRelativePath "src/main.cpp"
-#define cMakeTemplateFileRelativePath "CMakeLists.txt"
-#define pkgTemplateFileRelativePath "package.xml"
+#define cppTemplateFileRelativePath "/src/TemplateSkill.cpp"
+#define hTemplateFileRelativePath "/include/TemplateSkill.h"
+#define cppDataModelTemplateFileRelativePath "/src/TemplateSkillDataModel.cpp"
+#define hDataModelTemplateFileRelativePath "/include/TemplateSkillDataModel.h"
+#define mainTemplateFileRelativePath "/src/main.cpp"
+#define cMakeTemplateFileRelativePath "/CMakeLists.txt"
+#define pkgTemplateFileRelativePath "/package.xml"
 
 #define RETURN_CODE_ERROR 1
 #define RETURN_CODE_OK    0

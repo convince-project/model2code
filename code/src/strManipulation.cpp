@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2024 Humanoid Sensing and Perception, Istituto Italiano di Tecnologia
+// SPDX-License-Identifier:  APACHE-2.0
+
 /**
  * @file strManipulation.cpp
  * @brief Functions to manipulate strings.
@@ -118,6 +121,7 @@ bool writeFile(const std::string filePath, const std::string fileContent)
     }
     outputFile << fileContent;
     outputFile.close();
+    std::cout << filePath << " file generated" << std::endl;
     return true;
 }
 

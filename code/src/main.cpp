@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2024 Humanoid Sensing and Perception, Istituto Italiano di Tecnologia
+// SPDX-License-Identifier:  APACHE-2.0
+
 /**
  * @file main.cpp
  * @brief this file contains the main function.
@@ -105,8 +108,9 @@ bool handleInputs(int argc, char* argv[], fileDataStr& fileData, templateFileDat
         }
     }
 
-    fileData.outputPathInclude = fileData.outputPath + "include/";
-    fileData.outputPathSrc = fileData.outputPath + "src/";
+    fileData.outputPath = fileData.outputPath + "/";
+    fileData.outputPathInclude = fileData.outputPath + "/include/";
+    fileData.outputPathSrc = fileData.outputPath + "/src/";
     return RETURN_CODE_OK;
 }
 
@@ -124,7 +128,6 @@ int main(int argc, char* argv[])
 
     if(handleInputs(argc, argv, fileData, templateFileData))
     {
-        std::cout << "Error in input handling" << std::endl;
         return RETURN_CODE_ERROR;
     }
 

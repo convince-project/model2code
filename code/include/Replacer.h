@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2024 Humanoid Sensing and Perception, Istituto Italiano di Tecnologia
+// SPDX-License-Identifier:  APACHE-2.0
+
 /**
  * @file Replacer.h
  * @brief This file contains the functions to replace the placeholders in the template files with the data from the input file.
