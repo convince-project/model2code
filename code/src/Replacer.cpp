@@ -243,6 +243,51 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
         }
 
     }
+    else if(eventData.eventType == "transition")
+    {
+        if(eventData.interfaceType == "topic")
+        {
+            std::string topicCallbackC = savedCode.topicCallbackC;
+            std::string topicCallbackH = savedCode.topicCallbackH;
+            std::string topicSubscriptionC = savedCode.topicSubscriptionC;
+            std::string topicSubscriptionH = savedCode.topicSubscriptionH;
+            std::string interfaceCodeH = savedCode.interfaceH;
+            std::string interfaceCodeCMake = savedCode.interfaceCMake;
+            std::string packageCodeCMake = savedCode.packageCMake;
+            std::string interfaceCodeXML = savedCode.interfaceXML;
+            //CPP
+            replaceAll(topicCallbackC, "$eventData.interfaceName$", eventData.interfaceName);
+            replaceAll(topicSubscriptionC, "$eventData.interfaceName$", eventData.interfaceName);
+            replaceAll(topicCallbackC, "$eventData.functionName$", eventData.functionName);
+            replaceAll(topicSubscriptionC, "$eventData.functionName$", eventData.functionName);
+            replaceAll(topicCallbackC, "$eventData.componentName$", eventData.componentName);
+            writeAfterCommand(str, "/*TOPIC_SUBSCRIPTIONS_LIST*/", topicSubscriptionC);
+            writeAfterCommand(str, "/*TOPIC_CALLBACK_LIST*/", topicCallbackC);
+            //H
+            replaceAll(topicCallbackH, "$eventData.interfaceName$", eventData.interfaceName);
+            replaceAll(topicSubscriptionH, "$eventData.interfaceName$", eventData.interfaceName);
+            replaceAll(topicCallbackH, "$eventData.functionName$", eventData.functionName);
+            replaceAll(topicSubscriptionH, "$eventData.functionName$", eventData.functionName);
+            writeAfterCommand(str, "/*TOPIC_SUBSCRIPTIONS_LIST_H*/", topicSubscriptionH);
+            writeAfterCommand(str, "/*TOPIC_CALLBACK_LIST_H*/", topicCallbackH);
+
+            //CMakeLists.txt
+            replaceAll(interfaceCodeCMake, "$interfaceName$", eventData.interfaceName);
+            if(!checkIfStrPresent(str, interfaceCodeCMake)){
+                writeAfterCommand(str, "#INTERFACE_LIST#", interfaceCodeCMake);
+            }
+            replaceAll(packageCodeCMake, "$interfaceName$", eventData.interfaceName);
+            if(!checkIfStrPresent(str, packageCodeCMake)){
+                writeAfterCommand(str, "#PACKAGE_LIST#", packageCodeCMake);
+            }
+
+            //package.xml
+            replaceAll(interfaceCodeXML, "$interfaceName$", eventData.interfaceName);
+            if(!checkIfStrPresent(str, interfaceCodeXML)){
+                writeAfterCommand(str, "<!--INTERFACE_LIST-->", interfaceCodeXML);
+            }
+        }
+    }
 
 }
 
@@ -261,9 +306,17 @@ void saveCode(savedCodeStr& savedCode, std::string& code)
     deleteSection(code, "/*RETURN_PARAM*/", "/*END_RETURN_PARAM*/");
     saveSection(code, "/*SEND_EVENT_SRV*/", "/*END_SEND_EVENT_SRV*/", savedCode.eventC);
     deleteSection(code, "/*SEND_EVENT_SRV*/", "/*END_SEND_EVENT_SRV*/");
+    saveSection(code, "/*TOPIC_CALLBACK*/", "/*END_TOPIC_CALLBACK*/", savedCode.topicCallbackC);
+    deleteSection(code, "/*TOPIC_CALLBACK*/", "/*END_TOPIC_CALLBACK*/");
+    saveSection(code, "/*TOPIC_SUBSCRIPTION*/", "/*END_TOPIC_SUBSCRIPTION*/", savedCode.topicSubscriptionC);
+    deleteSection(code, "/*TOPIC_SUBSCRIPTION*/", "/*END_TOPIC_SUBSCRIPTION*/");
     //H
     saveSection(code, "/*INTERFACE*/", "/*END_INTERFACE*/", savedCode.interfaceH);
     deleteSection(code, "/*INTERFACE*/", "/*END_INTERFACE*/");
+    saveSection(code, "/*TOPIC_CALLBACK_H*/", "/*END_TOPIC_CALLBACK_H*/", savedCode.topicCallbackH);
+    deleteSection(code, "/*TOPIC_CALLBACK_H*/", "/*END_TOPIC_CALLBACK_H*/");
+    saveSection(code, "/*TOPIC_SUBSCRIPTION_H*/", "/*END_TOPIC_SUBSCRIPTION_H*/", savedCode.topicSubscriptionH);
+    deleteSection(code, "/*TOPIC_SUBSCRIPTION_H*/", "/*END_TOPIC_SUBSCRIPTION_H*/");
     //CMakeLists.txt
     saveSection(code, "#INTERFACE#", "#END_INTERFACE#", savedCode.interfaceCMake);
     deleteSection(code, "#INTERFACE#", "#END_INTERFACE#");
@@ -291,6 +344,10 @@ void replaceEventCode(std::map <std::string, std::string>& codeMap){
         { 
             if(itEv->first != cmdTick && itEv->first != cmdHalt && itEv->first != rspTick && itEv->first != rspHalt){
                 eventDataStr eventData = itEv->second;
+                if(eventData.interfaceName == "blackboard_interfaces")
+                {
+                    eventData.functionNameSnakeCase += "_blackboard";
+                }
                 handleGenericEvent(eventData, savedCode, it->second);
             } 
         }
@@ -298,8 +355,12 @@ void replaceEventCode(std::map <std::string, std::string>& codeMap){
         deleteCommand(it->second, "/*SEND_EVENT_LIST*/");
         deleteCommand(it->second, "/*PARAM_LIST*/");
         deleteCommand(it->second, "/*RETURN_PARAM_LIST*/");
+        deleteCommand(it->second, "/*TOPIC_SUBSCRIPTIONS_LIST*/");
+        deleteCommand(it->second, "/*TOPIC_CALLBACK_LIST*/");
         //H
         deleteCommand(it->second, "/*INTERFACES_LIST*/");
+        deleteCommand(it->second, "/*TOPIC_SUBSCRIPTIONS_LIST_H*/");
+        deleteCommand(it->second, "/*TOPIC_CALLBACK_LIST_H*/");
         //CMakeLists.txt
         deleteCommand(it->second, "#INTERFACE_LIST#");
         deleteCommand(it->second, "#PACKAGE_LIST#");

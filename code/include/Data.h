@@ -82,6 +82,7 @@ struct fileDataStr{
     std::string outputFileNameCPP;
     bool debug_mode;
     bool datamodel_mode;   
+    bool translate_mode;   
 };
 
 struct templateFileDataStr{
@@ -103,6 +104,10 @@ struct savedCodeStr{
     std::string interfaceCMake;
     std::string packageCMake;
     std::string interfaceXML;
+    std::string topicSubscriptionC;
+    std::string topicCallbackC;  
+    std::string topicSubscriptionH;
+    std::string topicCallbackH;  
 };
 
 struct cppCodeStr

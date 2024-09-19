@@ -69,6 +69,12 @@ bool $className$::start(int argc, char*argv[])
                                                                             	this,
                                                                             	std::placeholders::_1,
                                                                             	std::placeholders::_2));/*END_HALT*/
+
+    /*TOPIC_SUBSCRIPTIONS_LIST*//*TOPIC_SUBSCRIPTION*/
+    m_subscription_$eventData.functionName$ = m_node->create_subscription<$eventData.interfaceName$>(
+		"$eventData.functionName$", 10, std::bind(&$className$::topic_callback_$eventData.functionName$, this, std::placeholders::_1));
+    /*END_TOPIC_SUBSCRIPTION*/
+
     /*SEND_EVENT_LIST*//*SEND_EVENT_SRV*/
     m_stateMachine.connectToEvent("$eventData.event$", [this]([[maybe_unused]]const QScxmlEvent & event){
         std::shared_ptr<rclcpp::Node> $eventData.nodeName$ = rclcpp::Node::make_shared(m_name + "SkillNode$eventData.functionName$");
@@ -188,3 +194,18 @@ void $className$::halt( [[maybe_unused]] const std::shared_ptr<bt_interfaces::sr
     response->is_ok = true;
 }
 /*END_HALT_CMD*/
+
+
+/*TOPIC_CALLBACK_LIST*//*TOPIC_CALLBACK*/
+void $className$::topic_callback_$eventData.functionName$(const $eventData.interfaceName$::SharedPtr msg) {
+    std::cout << "callback" << std::endl;
+    QVariantMap data;
+    m_statusMutex.lock();
+	m_status = msg->data;
+    data.insert("status", m_status);
+
+    m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.Sub", data);
+    m_statusMutex.unlock();
+    RCLCPP_INFO(m_node->get_logger(), "$eventData.componentName$.$eventData.functionName$.Sub");
+}
+/*END_TOPIC_CALLBACK*/

@@ -34,6 +34,8 @@ public:
 	/*HALT_CMD*/
 	void halt( [[maybe_unused]] const std::shared_ptr<bt_interfaces::srv::HaltAction::Request> request,
 			   [[maybe_unused]] std::shared_ptr<bt_interfaces::srv::HaltAction::Response> response);/*END_HALT_CMD*/
+	/*TOPIC_CALLBACK_LIST_H*/
+	/*TOPIC_CALLBACK_H*/void topic_callback_$eventData.functionName$(const $eventData.interfaceName$::SharedPtr msg);/*END_TOPIC_CALLBACK_H*/
 
 private:
 	std::shared_ptr<std::thread> m_threadSpin;
@@ -42,9 +44,11 @@ private:
 	std::string m_name;
 	$SMName$ m_stateMachine;
 	/*TICK_RESPONSE*/std::atomic<Status> m_tickResult{Status::undefined};/*END_TICK_RESPONSE*/
-	/*TICK_CMD*/rclcpp::Service<bt_interfaces::srv::TickAction>::SharedPtr m_tickService;/*END_TICK_CMD*/
+	/*TICK_CMD*/rclcpp::Service<bt_interfaces::srv::Tick$skillType$>::SharedPtr m_tickService;/*END_TICK_CMD*/
 	/*HALT_RESPONSE*/std::atomic<bool> m_haltResult{false};/*END_HALT_RESPONSE*/
 	/*HALT_CMD*/rclcpp::Service<bt_interfaces::srv::HaltAction>::SharedPtr m_haltService;/*END_HALT_CMD*/
 	/*DATAMODEL*/$skillName$SkillDataModel m_dataModel; /*END_DATAMODEL*/
+	/*TOPIC_SUBSCRIPTIONS_LIST_H*/
+	/*TOPIC_SUBSCRIPTION_H*/rclcpp::Subscription<$eventData.interfaceName$>::SharedPtr m_subscription_$eventData.functionName$;/*END_TOPIC_SUBSCRIPTION_H*/
 };
 
