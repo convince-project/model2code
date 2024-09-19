@@ -9,7 +9,8 @@
  * 
  */
 
-#include "Replacer.h"
+// #include "Replacer.h"
+#include "Translator.h"
 
 /**
  * @brief Print the help message
@@ -43,6 +44,7 @@ bool handleInputs(int argc, char* argv[], fileDataStr& fileData, templateFileDat
     fileData.modelFileName          = modelFilePath;
     fileData.interfaceFileName      = interfaceFilePath;
     fileData.datamodel_mode         = false;
+    fileData.translate_mode         = false;
     templateFileData.templatePath   = templateFilePath;
 
     if (argc == 1)
@@ -80,6 +82,9 @@ bool handleInputs(int argc, char* argv[], fileDataStr& fileData, templateFileDat
         }
         else if (arg == "--datamodel_mode") {
             fileData.datamodel_mode = true;
+        }
+        else if (arg == "--translate_mode") {
+            fileData.translate_mode = true;
         }
     }
     
@@ -131,10 +136,24 @@ int main(int argc, char* argv[])
         return RETURN_CODE_ERROR;
     }
 
-    if(!Replacer(fileData, templateFileData))
-    {
-        std::cout << "Error in code generation" << std::endl;
+    if(fileData.translate_mode)
+    {   
+        std::cout << "Translation request" << std::endl;
+        if(!Translator(fileData))
+        {
+            std::cout << "Error in translation" << std::endl;
+        }
+        
     }
+    else
+    {
+        std::cout << "No translation request" << std::endl;
+        if(!Replacer(fileData, templateFileData))
+        {
+            std::cout << "Error in code generation" << std::endl;
+        }
+    }
+
     
     return RETURN_CODE_OK;
 };
