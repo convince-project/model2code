@@ -71,8 +71,8 @@ bool $className$::start(int argc, char*argv[])
                                                                             	std::placeholders::_2));/*END_HALT*/
 
     /*TOPIC_SUBSCRIPTIONS_LIST*//*TOPIC_SUBSCRIPTION*/
-    m_subscription_$eventData.functionName$ = m_node->create_subscription<$eventData.interfaceName$>(
-		"$eventData.functionName$", 10, std::bind(&$className$::topic_callback_$eventData.functionName$, this, std::placeholders::_1));
+    m_subscription_$eventData.functionName$ = m_node->create_subscription<$eventData.interfaceData[interfaceDataType]$>(
+		"/$eventData.functionName$", 10, std::bind(&$className$::topic_callback_$eventData.functionName$, this, std::placeholders::_1));
     /*END_TOPIC_SUBSCRIPTION*/
 
     /*SEND_EVENT_LIST*//*SEND_EVENT_SRV*/
@@ -197,15 +197,12 @@ void $className$::halt( [[maybe_unused]] const std::shared_ptr<bt_interfaces::sr
 
 
 /*TOPIC_CALLBACK_LIST*//*TOPIC_CALLBACK*/
-void $className$::topic_callback_$eventData.functionName$(const $eventData.interfaceName$::SharedPtr msg) {
+void $className$::topic_callback_$eventData.functionName$(const $eventData.interfaceData[interfaceDataType]$::SharedPtr msg) {
     std::cout << "callback" << std::endl;
     QVariantMap data;
-    m_statusMutex.lock();
-	m_status = msg->data;
-    data.insert("status", m_status);
+    data.insert("$eventData.interfaceData[interfaceDataField]$", msg->data);
 
     m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.Sub", data);
-    m_statusMutex.unlock();
     RCLCPP_INFO(m_node->get_logger(), "$eventData.componentName$.$eventData.functionName$.Sub");
 }
 /*END_TOPIC_CALLBACK*/

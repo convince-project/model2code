@@ -251,23 +251,29 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             std::string topicCallbackH = savedCode.topicCallbackH;
             std::string topicSubscriptionC = savedCode.topicSubscriptionC;
             std::string topicSubscriptionH = savedCode.topicSubscriptionH;
+            std::string topicInterfaceH = savedCode.topicInterfaceH;
             std::string interfaceCodeH = savedCode.interfaceH;
             std::string interfaceCodeCMake = savedCode.interfaceCMake;
             std::string packageCodeCMake = savedCode.packageCMake;
             std::string interfaceCodeXML = savedCode.interfaceXML;
             //CPP
-            replaceAll(topicCallbackC, "$eventData.interfaceName$", eventData.interfaceName);
-            replaceAll(topicSubscriptionC, "$eventData.interfaceName$", eventData.interfaceName);
+            replaceAll(topicCallbackC, "$eventData.interfaceData[interfaceDataType]$", eventData.interfaceData.begin()->second);
+            replaceAll(topicCallbackC, "$eventData.interfaceData[interfaceDataField]$", eventData.interfaceData.begin()->first);
+            replaceAll(topicSubscriptionC, "$eventData.interfaceData[interfaceDataType]$", eventData.interfaceData.begin()->second);
             replaceAll(topicCallbackC, "$eventData.functionName$", eventData.functionName);
             replaceAll(topicSubscriptionC, "$eventData.functionName$", eventData.functionName);
             replaceAll(topicCallbackC, "$eventData.componentName$", eventData.componentName);
             writeAfterCommand(str, "/*TOPIC_SUBSCRIPTIONS_LIST*/", topicSubscriptionC);
             writeAfterCommand(str, "/*TOPIC_CALLBACK_LIST*/", topicCallbackC);
             //H
-            replaceAll(topicCallbackH, "$eventData.interfaceName$", eventData.interfaceName);
-            replaceAll(topicSubscriptionH, "$eventData.interfaceName$", eventData.interfaceName);
+            std::string interface;
+            getDataTypePath(eventData.interfaceData.begin()->second, interface);
+            replaceAll(topicInterfaceH, "$eventData.interfaceData[interfaceDataType]$", interface);
+            replaceAll(topicCallbackH, "$eventData.interfaceData[interfaceDataType]$", eventData.interfaceData.begin()->second);
+            replaceAll(topicSubscriptionH, "$eventData.interfaceData[interfaceDataType]$", eventData.interfaceData.begin()->second);
             replaceAll(topicCallbackH, "$eventData.functionName$", eventData.functionName);
             replaceAll(topicSubscriptionH, "$eventData.functionName$", eventData.functionName);
+            writeAfterCommand(str, "/*INTERFACES_LIST*/", topicInterfaceH);
             writeAfterCommand(str, "/*TOPIC_SUBSCRIPTIONS_LIST_H*/", topicSubscriptionH);
             writeAfterCommand(str, "/*TOPIC_CALLBACK_LIST_H*/", topicCallbackH);
 
@@ -311,8 +317,10 @@ void saveCode(savedCodeStr& savedCode, std::string& code)
     saveSection(code, "/*TOPIC_SUBSCRIPTION*/", "/*END_TOPIC_SUBSCRIPTION*/", savedCode.topicSubscriptionC);
     deleteSection(code, "/*TOPIC_SUBSCRIPTION*/", "/*END_TOPIC_SUBSCRIPTION*/");
     //H
-    saveSection(code, "/*INTERFACE*/", "/*END_INTERFACE*/", savedCode.interfaceH);
+    saveSection(code, "/*INTERFACE*/", "/*END_INTERFACE*/", savedCode.topicInterfaceH);
     deleteSection(code, "/*INTERFACE*/", "/*END_INTERFACE*/");
+    saveSection(code, "/*TOPIC_INTERFACE*/", "/*END_TOPIC_INTERFACE*/", savedCode.topicInterfaceH);
+    deleteSection(code, "/*TOPIC_INTERFACE*/", "/*END_TOPIC_INTERFACE*/");
     saveSection(code, "/*TOPIC_CALLBACK_H*/", "/*END_TOPIC_CALLBACK_H*/", savedCode.topicCallbackH);
     deleteSection(code, "/*TOPIC_CALLBACK_H*/", "/*END_TOPIC_CALLBACK_H*/");
     saveSection(code, "/*TOPIC_SUBSCRIPTION_H*/", "/*END_TOPIC_SUBSCRIPTION_H*/", savedCode.topicSubscriptionH);

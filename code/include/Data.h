@@ -107,7 +107,8 @@ struct savedCodeStr{
     std::string topicSubscriptionC;
     std::string topicCallbackC;  
     std::string topicSubscriptionH;
-    std::string topicCallbackH;  
+    std::string topicCallbackH; 
+    std::string topicInterfaceH; 
 };
 
 struct cppCodeStr

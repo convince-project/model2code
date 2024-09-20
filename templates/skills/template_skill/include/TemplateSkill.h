@@ -7,6 +7,9 @@
 #include <bt_interfaces/msg/$skillTypeLC$_response.hpp>/*INTERFACES_LIST*/
 /*INTERFACE*/
 #include <$eventData.interfaceName$/srv/$eventData.functionNameSnakeCase$.hpp> /*END_INTERFACE*/
+/*TOPIC_INTERFACE*/
+#include <$eventData.interfaceData[interfaceDataType]$.hpp>
+/*END_TOPIC_INTERFACE*/
 /*TICK*/
 #include <bt_interfaces/srv/tick_$skillTypeLC$.hpp>/*END_TICK*/
 /*HALT*/#include <bt_interfaces/srv/halt_$skillTypeLC$.hpp>/*END_HALT*/
@@ -35,7 +38,7 @@ public:
 	void halt( [[maybe_unused]] const std::shared_ptr<bt_interfaces::srv::HaltAction::Request> request,
 			   [[maybe_unused]] std::shared_ptr<bt_interfaces::srv::HaltAction::Response> response);/*END_HALT_CMD*/
 	/*TOPIC_CALLBACK_LIST_H*/
-	/*TOPIC_CALLBACK_H*/void topic_callback_$eventData.functionName$(const $eventData.interfaceName$::SharedPtr msg);/*END_TOPIC_CALLBACK_H*/
+	/*TOPIC_CALLBACK_H*/void topic_callback_$eventData.functionName$(const $eventData.interfaceData[interfaceDataType]$::SharedPtr msg);/*END_TOPIC_CALLBACK_H*/
 
 private:
 	std::shared_ptr<std::thread> m_threadSpin;
@@ -49,6 +52,7 @@ private:
 	/*HALT_CMD*/rclcpp::Service<bt_interfaces::srv::HaltAction>::SharedPtr m_haltService;/*END_HALT_CMD*/
 	/*DATAMODEL*/$skillName$SkillDataModel m_dataModel; /*END_DATAMODEL*/
 	/*TOPIC_SUBSCRIPTIONS_LIST_H*/
-	/*TOPIC_SUBSCRIPTION_H*/rclcpp::Subscription<$eventData.interfaceName$>::SharedPtr m_subscription_$eventData.functionName$;/*END_TOPIC_SUBSCRIPTION_H*/
+	/*TOPIC_SUBSCRIPTION_H*/
+	rclcpp::Subscription<$eventData.interfaceData[interfaceDataType]$>::SharedPtr m_subscription_$eventData.functionName$;/*END_TOPIC_SUBSCRIPTION_H*/
 };
 
