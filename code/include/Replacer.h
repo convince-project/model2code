@@ -95,6 +95,9 @@ void replaceEventCode(std::map <std::string, std::string>& codeMap);
  */
 bool readTemplates(templateFileDataStr& templateFileData, std::map <std::string, std::string>& codeMap);
 
+
+bool createDirectory(const std::string& path);
+
 /**
  * @brief main function to get the code from template files and replace the placeholders with the data from the input file
  * 

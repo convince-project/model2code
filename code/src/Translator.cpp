@@ -565,16 +565,6 @@ bool Translator(fileDataStr& fileData){
         return false;
     }
     getDataFromRootNameHighLevel(root->Attribute("name"), skillData);
-    // Delete server and topic declarations
-    std::vector<tinyxml2::XMLElement*> serverVector;
-    
-    findElementVectorByTag(root, std::string("ros_service_server"), serverVector); 
-    findElementVectorByTag(root, std::string("ros_topic_subscriber"), serverVector);
-    findElementVectorByTag(root, std::string("ros_service_client"), serverVector); 
-    findElementVectorByTag(root, std::string("ros_topic_publisher"), serverVector); 
-    findElementVectorByTag(root, std::string("ros_action_client"), serverVector);
-    deleteElementFromVector(serverVector);
-    
     // Get Skill Type
     tinyxml2::XMLElement* haltServerElement;
     if(findElementByTagAndAttValueContaining(root, std::string("ros_service_server"), std::string("service"), std::string("halt"), haltServerElement))
@@ -597,6 +587,16 @@ bool Translator(fileDataStr& fileData){
         return false;
     }
 
+    // Delete server and topic declarations
+    std::vector<tinyxml2::XMLElement*> serverVector;
+    
+    findElementVectorByTag(root, std::string("ros_service_server"), serverVector); 
+    findElementVectorByTag(root, std::string("ros_topic_subscriber"), serverVector);
+    findElementVectorByTag(root, std::string("ros_service_client"), serverVector); 
+    findElementVectorByTag(root, std::string("ros_topic_publisher"), serverVector); 
+    findElementVectorByTag(root, std::string("ros_action_client"), serverVector);
+    deleteElementFromVector(serverVector);
+    
     // add xmln
     replaceAttributeValue(root, "xmlns", "http://www.w3.org/2005/07/scxml");
 
@@ -638,7 +638,7 @@ bool Translator(fileDataStr& fileData){
     replaceAttributeNameFromVector(srvSendRspVector, "id", "event");
     replaceAttributeNameFromVector(srvSendRspVector, "service", "event");
     replaceAttributeValueContaingFromVector(srvSendRspVector, "event", "tick", "TICK_RESPONSE"); 
-    replaceAttributeValueContaingFromVector(srvSendRspVector, "event", "tick", "HALT_RESPONSE"); 
+    replaceAttributeValueContaingFromVector(srvSendRspVector, "event", "halt", "HALT_RESPONSE"); 
     replaceTagNameFromVector(&doc, srvSendRspVector, "send");
 
     // Translate elements with tag ros_topic_callback 
@@ -660,6 +660,8 @@ bool Translator(fileDataStr& fileData){
     tinyxml2::XMLPrinter printer;
     doc.Print(&printer);  // Print the XML document into the printer
     std::string outputContent = std::string(printer.CStr());  
+    createDirectory(fileData.outputPath);
+    createDirectory(fileData.outputPathSrc);
     writeFile(ouputFilePath, outputContent);
 
     return true;

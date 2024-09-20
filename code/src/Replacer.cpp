@@ -9,6 +9,8 @@
  * 
  */
 #include "Replacer.h"
+#include <filesystem>
+
 
 /**
  * @brief Get the Event Data from the model and interface files 
@@ -201,6 +203,7 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             replaceAll(eventCodeC, "$eventData.serverName$", eventData.serverName);
             replaceAll(eventCodeC, "$eventData.clientName$", eventData.clientName);
             replaceAll(eventCodeC, "$eventData.interfaceName$", eventData.interfaceName);
+            
             for (auto itParam =  eventData.paramMap.begin(); itParam != eventData.paramMap.end(); ++itParam) 
             {
                 std::string paramCode = savedCode.sendParam;
@@ -317,7 +320,7 @@ void saveCode(savedCodeStr& savedCode, std::string& code)
     saveSection(code, "/*TOPIC_SUBSCRIPTION*/", "/*END_TOPIC_SUBSCRIPTION*/", savedCode.topicSubscriptionC);
     deleteSection(code, "/*TOPIC_SUBSCRIPTION*/", "/*END_TOPIC_SUBSCRIPTION*/");
     //H
-    saveSection(code, "/*INTERFACE*/", "/*END_INTERFACE*/", savedCode.topicInterfaceH);
+    saveSection(code, "/*INTERFACE*/", "/*END_INTERFACE*/", savedCode.interfaceH);
     deleteSection(code, "/*INTERFACE*/", "/*END_INTERFACE*/");
     saveSection(code, "/*TOPIC_INTERFACE*/", "/*END_TOPIC_INTERFACE*/", savedCode.topicInterfaceH);
     deleteSection(code, "/*TOPIC_INTERFACE*/", "/*END_TOPIC_INTERFACE*/");
@@ -406,6 +409,24 @@ bool readTemplates(templateFileDataStr& templateFileData, std::map <std::string,
     return res;
 }
 
+bool createDirectory(const std::string& path) {
+    namespace fs = std::filesystem;
+    try {
+        // Create the directory (and any intermediate directories, if necessary)
+        if (fs::create_directories(path)) {
+            std::cout << "Directory created successfully: " << path << std::endl;
+            return true;
+        } else {
+            std::cerr << "Directory already exists or failed to create: " << path << std::endl;
+            return false;
+        }
+    } catch (const fs::filesystem_error& err) {
+        std::cerr << "Filesystem error: " << err.what() << std::endl;
+        return false;
+    }
+}
+
+
 /**
  * @brief main function to get the code from template files and replace the placeholders with the data from the input file
  * 
@@ -468,6 +489,9 @@ bool Replacer(fileDataStr& fileData, templateFileDataStr& templateFileData)
         writeFile(fileData.outputPathInclude + fileData.outputDatamodelFileNameH, codeMap["hDataModelCode"]);
         writeFile(fileData.outputPathSrc + fileData.outputDatamodelFileNameCPP, codeMap["cppDataModelCode"]);
     }
+    createDirectory(fileData.outputPath);
+    createDirectory(fileData.outputPathInclude);
+    createDirectory(fileData.outputPathSrc);
     writeFile(fileData.outputPathInclude + fileData.outputFileNameH, codeMap["hCode"]);
     writeFile(fileData.outputPathSrc + fileData.outputFileNameCPP, codeMap["cppCode"]);
     writeFile(fileData.outputPath + fileData.outputCMakeListsFileName, codeMap["cmakeCode"]);

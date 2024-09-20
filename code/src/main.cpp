@@ -153,7 +153,6 @@ int main(int argc, char* argv[])
             std::cout << "Error in code generation" << std::endl;
         }
     }
-
     
     return RETURN_CODE_OK;
 };
