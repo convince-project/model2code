@@ -9,6 +9,7 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
 #TICK#find_package(bt_interfaces REQUIRED)#END_TICK#
 #PACKAGE_LIST##PACKAGE#
 find_package($interfaceName$ REQUIRED)#END_PACKAGE#
@@ -26,6 +27,7 @@ endif()
 # find_package(<dependency> REQUIRED)
 
 ament_target_dependencies(${PROJECT_NAME} 
+  std_msgs
   #TICK#bt_interfaces #END_TICK#
   rclcpp #INTERFACE_LIST#
   #INTERFACE#

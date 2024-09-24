@@ -652,6 +652,7 @@ bool Translator(fileDataStr& fileData){
     std::vector<tinyxml2::XMLElement*> assignVector;
     findElementVectorByTag(root, std::string("assign"), assignVector);
     replaceAttributeValueSubstringFromVector(assignVector, "expr", "_msg.", "_event.");
+    replaceAttributeValueSubstringFromVector(assignVector, "expr", "_service.response.", "_event.data.");
     appendAttributeValueFromVector(assignVector, "expr", ".");
     appendAttributeValueLocationFromVector(assignVector, "expr");
 
