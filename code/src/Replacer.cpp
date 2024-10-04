@@ -489,9 +489,11 @@ bool Replacer(fileDataStr& fileData, templateFileDataStr& templateFileData)
         writeFile(fileData.outputPathInclude + fileData.outputDatamodelFileNameH, codeMap["hDataModelCode"]);
         writeFile(fileData.outputPathSrc + fileData.outputDatamodelFileNameCPP, codeMap["cppDataModelCode"]);
     }
+    std::cout << "-----------" << std::endl;
     createDirectory(fileData.outputPath);
     createDirectory(fileData.outputPathInclude);
     createDirectory(fileData.outputPathSrc);
+    std::cout << "-----------" << std::endl;
     writeFile(fileData.outputPathInclude + fileData.outputFileNameH, codeMap["hCode"]);
     writeFile(fileData.outputPathSrc + fileData.outputFileNameCPP, codeMap["cppCode"]);
     writeFile(fileData.outputPath + fileData.outputCMakeListsFileName, codeMap["cmakeCode"]);

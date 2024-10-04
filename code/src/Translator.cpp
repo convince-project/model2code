@@ -567,7 +567,7 @@ bool Translator(fileDataStr& fileData){
     getDataFromRootNameHighLevel(root->Attribute("name"), skillData);
     // Get Skill Type
     tinyxml2::XMLElement* haltServerElement;
-    if(findElementByTagAndAttValueContaining(root, std::string("ros_service_server"), std::string("service"), std::string("halt"), haltServerElement))
+    if(findElementByTagAndAttValueContaining(root, std::string("ros_service_server"), std::string("service_name"), std::string("halt"), haltServerElement))
     {
         std::cout << "Halt found => Action Skill" << std::endl;
         skillData.skillType = "Action";
@@ -608,8 +608,7 @@ bool Translator(fileDataStr& fileData){
     // Translate elements with tag ros_service_handle_request 
     std::vector<tinyxml2::XMLElement*> srvHndlReqVector;
     findElementVectorByTag(root, std::string("ros_service_handle_request"), srvHndlReqVector);
-    replaceAttributeNameFromVector(srvHndlReqVector, "id", "event");
-    replaceAttributeNameFromVector(srvHndlReqVector, "service", "event");
+    replaceAttributeNameFromVector(srvHndlReqVector, "name", "event");
     replaceAttributeValueContaingFromVector(srvHndlReqVector, "event", "tick", "CMD_TICK");
     replaceAttributeValueContaingFromVector(srvHndlReqVector, "event", "halt", "CMD_HALT");
     replaceTagNameFromVector(&doc, srvHndlReqVector, "transition");
@@ -617,17 +616,22 @@ bool Translator(fileDataStr& fileData){
     // Translate elements with tag ros_service_send_request 
     std::vector<tinyxml2::XMLElement*> srvSendReqVector;
     findElementVectorByTag(root, std::string("ros_service_send_request"), srvSendReqVector);
-    replaceAttributeNameFromVector(srvSendReqVector, "id", "event");
+    replaceAttributeNameFromVector(srvSendReqVector, "name", "event");
     replaceEventValueFromVector(srvSendReqVector);
     appendAttributeValueFromVector(srvSendReqVector, "event", ".Call");
+    for (auto& element : srvSendReqVector) {
+        std::vector<tinyxml2::XMLElement*> srvSendReqFieldVector;
+        findElementVectorByTag(element, std::string("field"), srvSendReqFieldVector);
+        replaceTagNameFromVector(&doc, srvSendReqFieldVector, "param");
+    }
     replaceTagNameFromVector(&doc, srvSendReqVector, "send");
 
     // Translate elements with tag ros_service_handle_response 
     std::vector<tinyxml2::XMLElement*> srvHndlRspVector;
     findElementVectorByTag(root, std::string("ros_service_handle_response"), srvHndlRspVector);
-    replaceAttributeNameFromVector(srvHndlRspVector, "service", "event");
+    replaceAttributeNameFromVector(srvHndlRspVector, "name", "event");
     // replaceAttributeValueFromVector(srvHndlRspVector, "event", ""); get value e modificare le / con .
-    replaceAttributeValueSubstringFromVector(srvHndlRspVector, "cond", "_service.response.", "_event.data.");
+    replaceAttributeValueSubstringFromVector(srvHndlRspVector, "cond", "_res.", "_event.data.");
     replaceEventValueFromVector(srvHndlRspVector);
     appendAttributeValueFromVector(srvHndlRspVector, "event", ".Return");
     replaceTagNameFromVector(&doc, srvHndlRspVector, "transition");
@@ -635,16 +639,21 @@ bool Translator(fileDataStr& fileData){
     // Translate elements with tag ros_service_send_response 
     std::vector<tinyxml2::XMLElement*> srvSendRspVector;
     findElementVectorByTag(root, std::string("ros_service_send_response"), srvSendRspVector);
-    replaceAttributeNameFromVector(srvSendRspVector, "id", "event");
-    replaceAttributeNameFromVector(srvSendRspVector, "service", "event");
+    replaceAttributeNameFromVector(srvSendRspVector, "name", "event");
     replaceAttributeValueContaingFromVector(srvSendRspVector, "event", "tick", "TICK_RESPONSE"); 
     replaceAttributeValueContaingFromVector(srvSendRspVector, "event", "halt", "HALT_RESPONSE"); 
+    for (auto& element : srvSendRspVector) {
+        std::vector<tinyxml2::XMLElement*> srvSendRspFieldVector;
+        findElementVectorByTag(element, std::string("field"), srvSendRspFieldVector);
+        replaceTagNameFromVector(&doc, srvSendRspFieldVector, "param");
+    }
     replaceTagNameFromVector(&doc, srvSendRspVector, "send");
+    
 
     // Translate elements with tag ros_topic_callback 
     std::vector<tinyxml2::XMLElement*> topicCallbackVector;
     findElementVectorByTag(root, std::string("ros_topic_callback"), topicCallbackVector);
-    replaceAttributeNameFromVector(topicCallbackVector, "topic", "event");
+    replaceAttributeNameFromVector(topicCallbackVector, "name", "event");
     replaceEventValueFromVector(topicCallbackVector);
     appendAttributeValueFromVector(topicCallbackVector, "event", ".Sub");
     replaceTagNameFromVector(&doc, topicCallbackVector, "transition");
@@ -652,17 +661,19 @@ bool Translator(fileDataStr& fileData){
     std::vector<tinyxml2::XMLElement*> assignVector;
     findElementVectorByTag(root, std::string("assign"), assignVector);
     replaceAttributeValueSubstringFromVector(assignVector, "expr", "_msg.", "_event.");
-    replaceAttributeValueSubstringFromVector(assignVector, "expr", "_service.response.", "_event.data.");
-    appendAttributeValueFromVector(assignVector, "expr", ".");
-    appendAttributeValueLocationFromVector(assignVector, "expr");
+    replaceAttributeValueSubstringFromVector(assignVector, "expr", "_res.", "_event.data.");
+    // appendAttributeValueFromVector(assignVector, "expr", ".");
+    // appendAttributeValueLocationFromVector(assignVector, "expr");
 
     // doc.Print();
     std::string ouputFilePath = fileData.outputPathSrc + skillData.className + "SM.scxml";
     tinyxml2::XMLPrinter printer;
     doc.Print(&printer);  // Print the XML document into the printer
     std::string outputContent = std::string(printer.CStr());  
+    std::cout << "-----------" << std::endl;
     createDirectory(fileData.outputPath);
     createDirectory(fileData.outputPathSrc);
+    std::cout << "-----------" << std::endl;
     writeFile(ouputFilePath, outputContent);
 
     return true;
