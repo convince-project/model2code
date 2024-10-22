@@ -281,20 +281,20 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             writeAfterCommand(str, "/*TOPIC_CALLBACK_LIST_H*/", topicCallbackH);
 
             //CMakeLists.txt
-            replaceAll(interfaceCodeCMake, "$interfaceName$", eventData.interfaceName);
-            if(!checkIfStrPresent(str, interfaceCodeCMake)){
-                writeAfterCommand(str, "#INTERFACE_LIST#", interfaceCodeCMake);
-            }
-            replaceAll(packageCodeCMake, "$interfaceName$", eventData.interfaceName);
-            if(!checkIfStrPresent(str, packageCodeCMake)){
-                writeAfterCommand(str, "#PACKAGE_LIST#", packageCodeCMake);
-            }
+            // replaceAll(interfaceCodeCMake, "$interfaceName$", eventData.interfaceName);
+            // if(!checkIfStrPresent(str, interfaceCodeCMake)){
+            //     writeAfterCommand(str, "#INTERFACE_LIST#", interfaceCodeCMake);
+            // }
+            // replaceAll(packageCodeCMake, "$interfaceName$", eventData.interfaceName);
+            // if(!checkIfStrPresent(str, packageCodeCMake)){
+            //     writeAfterCommand(str, "#PACKAGE_LIST#", packageCodeCMake);
+            // }
 
             //package.xml
-            replaceAll(interfaceCodeXML, "$interfaceName$", eventData.interfaceName);
-            if(!checkIfStrPresent(str, interfaceCodeXML)){
-                writeAfterCommand(str, "<!--INTERFACE_LIST-->", interfaceCodeXML);
-            }
+            // replaceAll(interfaceCodeXML, "$interfaceName$", eventData.interfaceName);
+            // if(!checkIfStrPresent(str, interfaceCodeXML)){
+            //     writeAfterCommand(str, "<!--INTERFACE_LIST-->", interfaceCodeXML);
+            // }
         }
     }
 

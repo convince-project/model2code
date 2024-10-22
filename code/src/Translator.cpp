@@ -432,6 +432,47 @@ bool appendAttributeValueLocationFromVector(std::vector<tinyxml2::XMLElement*>& 
     return updatedAny;
 }
 
+/**
+ * @brief Appends a substring to the end of the value of a given attribute in all elements in a vector
+ * only if the attribute value contains a specific substring.
+ * 
+ * @param elements vector of elements in which to append the attribute value
+ * @param attributeName the name of the attribute to be updated
+ * @param oldSubstring the substring that must be present in the attribute value
+ * @param valueToAppend the substring to append to the attribute value
+ * @return bool Returns true if at least one attribute value was successfully updated, false otherwise
+ */
+bool appendIfContainsSubstringVector(std::vector<tinyxml2::XMLElement*>& elements, const std::string& attributeName, const std::string& oldSubstring, const std::string& valueToAppend)
+{
+    bool updatedAny = false;
+
+    for (auto& element : elements) {
+        if (element) {
+            // Get the current attribute value
+            const char* attributeValue = element->Attribute(attributeName.c_str());
+            const char* locationValue = element->Attribute("location");
+            if (attributeValue && locationValue) {
+                std::string attributeStr(attributeValue);
+                // Check if the attribute value contains the old substring
+                if (attributeStr.find(oldSubstring) != std::string::npos) {
+                    // Append the new value to the end of the current value
+                    attributeStr.append(valueToAppend);
+                    attributeStr.append(locationValue);
+                    // Set the updated value for the attribute
+                    element->SetAttribute(attributeName.c_str(), attributeStr.c_str());
+                    updatedAny = true;
+                }
+            } else {
+                std::cerr << "Attribute or location value'" << attributeName << "' not found in element." << std::endl;
+            }
+        } else {
+            std::cerr << "Encountered a null element pointer in the vector." << std::endl;
+        }
+    }
+
+    return updatedAny;
+}
+
 
 /**
  * @brief Find a XML element by tag and attribute name where the attribute's value contains a specific substring
@@ -660,6 +701,7 @@ bool Translator(fileDataStr& fileData){
 
     std::vector<tinyxml2::XMLElement*> assignVector;
     findElementVectorByTag(root, std::string("assign"), assignVector);
+    appendIfContainsSubstringVector(assignVector, "expr", "_msg.", ".");
     replaceAttributeValueSubstringFromVector(assignVector, "expr", "_msg.", "_event.");
     replaceAttributeValueSubstringFromVector(assignVector, "expr", "_res.", "_event.data.");
     // appendAttributeValueFromVector(assignVector, "expr", ".");

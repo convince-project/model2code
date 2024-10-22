@@ -58,13 +58,13 @@ bool $className$::start(int argc, char*argv[])
 	std::cout << "$className$::start";
 
     /*TICK*/
-	m_tickService = m_node->create_service<bt_interfaces::srv::Tick$skillType$>(m_name + "Skill/tick",
+	m_tickService = m_node->create_service<bt_interfaces_dummy::srv::Tick$skillType$>(m_name + "Skill/tick",
                                                                            	std::bind(&$className$::tick,
                                                                            	this,
                                                                            	std::placeholders::_1,
                                                                            	std::placeholders::_2));/*END_TICK*/
     /*HALT*/
-	m_haltService = m_node->create_service<bt_interfaces::srv::Halt$skillType$>(m_name + "Skill/halt",
+	m_haltService = m_node->create_service<bt_interfaces_dummy::srv::Halt$skillType$>(m_name + "Skill/halt",
                                                                             	std::bind(&$className$::halt,
                                                                             	this,
                                                                             	std::placeholders::_1,
@@ -105,9 +105,9 @@ bool $className$::start(int argc, char*argv[])
             if (futureResult == rclcpp::FutureReturnCode::SUCCESS) 
             {
                auto response = result.get();
-               if( response->is_ok ==true) {
+               if( response->is_ok == true) {
                    QVariantMap data;
-                   data.insert("result", "SUCCESS");/*RETURN_PARAM_LIST*//*RETURN_PARAM*/
+                   data.insert("is_ok", true);/*RETURN_PARAM_LIST*//*RETURN_PARAM*/
                    data.insert("$eventData.interfaceDataField$", response->$eventData.interfaceDataField$/*STATUS*/.status/*END_STATUS*/);/*END_RETURN_PARAM*/
                    m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.Return", data);
                    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.Return");
@@ -119,23 +119,23 @@ bool $className$::start(int argc, char*argv[])
            }
         }
        QVariantMap data;
-       data.insert("result", "FAILURE");
+       data.insert("is_ok", false);
        m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.Return", data);
        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.Return");
     });/*END_SEND_EVENT_SRV*/
     /*TICK_RESPONSE*/
 	m_stateMachine.connectToEvent("TICK_RESPONSE", [this]([[maybe_unused]]const QScxmlEvent & event){
-		RCLCPP_INFO(m_node->get_logger(), "$className$::tickReturn %s", event.data().toMap()["result"].toString().toStdString().c_str());
-		std::string result = event.data().toMap()["result"].toString().toStdString();
-		if (result == "SUCCESS" )
+		RCLCPP_INFO(m_node->get_logger(), "$className$::tickReturn %s", event.data().toMap()["status"].toString().toStdString().c_str());
+		std::string result = event.data().toMap()["status"].toString().toStdString();
+		if (result == std::to_string(SKILL_SUCCESS) )
 		{
 			m_tickResult.store(Status::success);
 		}/*ACTION*/
-		else if (result == "RUNNING" )
+		else if (result == std::to_string(SKILL_RUNNING) )
 		{
 			m_tickResult.store(Status::running);
 		}/*END_ACTION*/
-		else if (result == "FAILURE" )
+		else if (result == std::to_string(SKILL_FAILURE) )
 		{ 
 			m_tickResult.store(Status::failure);
 		}
@@ -152,12 +152,11 @@ bool $className$::start(int argc, char*argv[])
 	return true;
 }
 /*TICK_CMD*/
-void $className$::tick( [[maybe_unused]] const std::shared_ptr<bt_interfaces::srv::Tick$skillType$::Request> request,
-                                std::shared_ptr<bt_interfaces::srv::Tick$skillType$::Response>      response)
+void $className$::tick( [[maybe_unused]] const std::shared_ptr<bt_interfaces_dummy::srv::Tick$skillType$::Request> request,
+                                std::shared_ptr<bt_interfaces_dummy::srv::Tick$skillType$::Response>      response)
 {
     std::lock_guard<std::mutex> lock(m_requestMutex);
     RCLCPP_INFO(m_node->get_logger(), "$className$::tick");
-    auto message = bt_interfaces::msg::$skillType$Response();
     m_tickResult.store(Status::undefined);
     m_stateMachine.submitEvent("CMD_TICK");
    
@@ -167,21 +166,21 @@ void $className$::tick( [[maybe_unused]] const std::shared_ptr<bt_interfaces::sr
     switch(m_tickResult.load()) 
     {
         /*ACTION*/case Status::running:
-            response->status.status = message.SKILL_RUNNING;
+            response->status = SKILL_RUNNING;
             break;/*END_ACTION*/
         case Status::failure:
-            response->status.status = message.SKILL_FAILURE;
+            response->status = SKILL_FAILURE;
             break;
         case Status::success:
-            response->status.status = message.SKILL_SUCCESS;
+            response->status = SKILL_SUCCESS;
             break;            
     }
     RCLCPP_INFO(m_node->get_logger(), "$className$::tickDone");
     response->is_ok = true;
 }/*END_TICK_CMD*/
 /*HALT_CMD*/
-void $className$::halt( [[maybe_unused]] const std::shared_ptr<bt_interfaces::srv::Halt$skillType$::Request> request,
-    [[maybe_unused]] std::shared_ptr<bt_interfaces::srv::Halt$skillType$::Response> response)
+void $className$::halt( [[maybe_unused]] const std::shared_ptr<bt_interfaces_dummy::srv::Halt$skillType$::Request> request,
+    [[maybe_unused]] std::shared_ptr<bt_interfaces_dummy::srv::Halt$skillType$::Response> response)
 {
     std::lock_guard<std::mutex> lock(m_requestMutex);
     RCLCPP_INFO(m_node->get_logger(), "$className$::halt");
