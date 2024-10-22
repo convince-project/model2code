@@ -717,6 +717,7 @@ bool Translator(fileDataStr& fileData){
     createDirectory(fileData.outputPathSrc);
     std::cout << "-----------" << std::endl;
     writeFile(ouputFilePath, outputContent);
+    fileData.outputFileTranslatedSM = ouputFilePath;
 
     return true;
 }

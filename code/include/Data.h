@@ -80,9 +80,11 @@ struct fileDataStr{
     std::string outputDatamodelFileNameCPP;
     std::string outputFileNameH;
     std::string outputFileNameCPP;
+    std::string outputFileTranslatedSM;
     bool debug_mode;
     bool datamodel_mode;   
     bool translate_mode;   
+    bool generate_mode;   
 };
 
 struct templateFileDataStr{

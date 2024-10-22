@@ -25,7 +25,9 @@ void print_help()
     std::cout << "--interface_filename \"interfaceFileName.scxml\"\n";
     std::cout << "--output_path \"path/to/output/directory\"\n";
     std::cout << "--template_path \"path/to/template_skill/directory\"\n";
-    std::cout << "--datamodel_mode \n";
+    // std::cout << "--datamodel_mode \n";
+    std::cout << "--translate_mode \n";
+    std::cout << "--generate_mode \n";
 }
 
 /**
@@ -45,6 +47,7 @@ bool handleInputs(int argc, char* argv[], fileDataStr& fileData, templateFileDat
     fileData.interfaceFileName      = interfaceFilePath;
     fileData.datamodel_mode         = false;
     fileData.translate_mode         = false;
+    fileData.generate_mode          = false;
     templateFileData.templatePath   = templateFilePath;
 
     if (argc == 1)
@@ -85,6 +88,9 @@ bool handleInputs(int argc, char* argv[], fileDataStr& fileData, templateFileDat
         }
         else if (arg == "--translate_mode") {
             fileData.translate_mode = true;
+        }
+        else if (arg == "--generate_mode") {
+            fileData.generate_mode = true;
         }
     }
     
@@ -145,9 +151,23 @@ int main(int argc, char* argv[])
         }
         
     }
-    else
+    else if(fileData.generate_mode)
     {
         std::cout << "No translation request" << std::endl;
+        if(!Replacer(fileData, templateFileData))
+        {
+            std::cout << "Error in code generation" << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "Translation request" << std::endl;
+        if(!Translator(fileData))
+        {
+            std::cout << "Error in translation" << std::endl;
+        }
+        fileData.inputFileName = fileData.outputFileTranslatedSM;
+        std::cout << "Code generation request" << std::endl;
         if(!Replacer(fileData, templateFileData))
         {
             std::cout << "Error in code generation" << std::endl;
