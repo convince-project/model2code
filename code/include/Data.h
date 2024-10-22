@@ -68,6 +68,7 @@ struct eventDataStr{
 
 struct fileDataStr{
     std::string inputFileName;
+    std::string inputFileNameGeneration;
     std::string interfaceFileName;
     std::string modelFileName;
     std::string outputPath;

@@ -18,7 +18,7 @@
  * @param fileData file data structure passed by reference from which the event data is extracted
  * @param eventData event data structure passed by reference where the event data is stored
  */
-void getEventData(fileDataStr fileData, eventDataStr& eventData);
+bool getEventData(fileDataStr fileData, eventDataStr& eventData);
 
 /**
  * @brief Get the Event Data from the vector of event elements
@@ -27,7 +27,7 @@ void getEventData(fileDataStr fileData, eventDataStr& eventData);
  * @param elementsTransition vector of transition event elements
  * @param elementsSend vector of send event elements
  */
-void getEventsVecData(fileDataStr fileData, const std::vector<tinyxml2::XMLElement*> elementsTransition, const std::vector<tinyxml2::XMLElement*> elementsSend);
+bool getEventsVecData(fileDataStr fileData, const std::vector<tinyxml2::XMLElement*> elementsTransition, const std::vector<tinyxml2::XMLElement*> elementsSend);
 
 /**
  * @brief function to keep or delete the sections of the code related to the Command Tick event

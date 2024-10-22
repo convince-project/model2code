@@ -142,35 +142,38 @@ int main(int argc, char* argv[])
         return RETURN_CODE_ERROR;
     }
 
+    
+    if(!fileData.translate_mode & fileData.generate_mode)
+    {
+        // Generation request without translation
+        fileData.inputFileNameGeneration = fileData.inputFileName;   
+    }
+    else if(!fileData.translate_mode & !fileData.generate_mode)
+    {
+        fileData.translate_mode= true;
+        fileData.generate_mode = true;
+    }
+
     if(fileData.translate_mode)
     {   
         std::cout << "Translation request" << std::endl;
         if(!Translator(fileData))
         {
+            std::cout << "-----------" << std::endl;
             std::cout << "Error in translation" << std::endl;
+            return RETURN_CODE_ERROR;
         }
+        fileData.inputFileNameGeneration = fileData.outputFileTranslatedSM;
         
     }
-    else if(fileData.generate_mode)
+    if(fileData.generate_mode)
     {
-        std::cout << "No translation request" << std::endl;
+
         if(!Replacer(fileData, templateFileData))
         {
+            std::cout << "-----------" << std::endl;
             std::cout << "Error in code generation" << std::endl;
-        }
-    }
-    else
-    {
-        std::cout << "Translation request" << std::endl;
-        if(!Translator(fileData))
-        {
-            std::cout << "Error in translation" << std::endl;
-        }
-        fileData.inputFileName = fileData.outputFileTranslatedSM;
-        std::cout << "Code generation request" << std::endl;
-        if(!Replacer(fileData, templateFileData))
-        {
-            std::cout << "Error in code generation" << std::endl;
+            return RETURN_CODE_ERROR;
         }
     }
     

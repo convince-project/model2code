@@ -18,11 +18,11 @@
  * @param fileData file data structure passed by reference from which the event data is extracted
  * @param eventData event data structure passed by reference where the event data is stored
  */
-void getEventData(fileDataStr fileData, eventDataStr& eventData)
+bool getEventData(fileDataStr fileData, eventDataStr& eventData)
 {
     if(eventsMap.find(eventData.event) != eventsMap.end()){
         std::cout << "Event already processed: " << eventData.event << std::endl;
-        return;
+        return true;
     } 
     eventsMap[eventData.event];
 
@@ -37,11 +37,19 @@ void getEventData(fileDataStr fileData, eventDataStr& eventData)
 
         if(extractInterfaceName(fileData.modelFileName, eventData))
         {
-            extractInterfaceType(fileData.interfaceFileName, eventData);
+            if(!extractInterfaceType(fileData.interfaceFileName, eventData))
+            {
+                return false;
+            }
             printEventData(eventData);
+        }
+        else
+        {
+            return false;
         }        
     }
     eventsMap[eventData.event] = eventData;
+    return true;
 }
 
 /**
@@ -51,7 +59,7 @@ void getEventData(fileDataStr fileData, eventDataStr& eventData)
  * @param elementsTransition vector of transition event elements
  * @param elementsSend vector of send event elements
  */
-void getEventsVecData(fileDataStr fileData, const std::vector<tinyxml2::XMLElement*> elementsTransition, const std::vector<tinyxml2::XMLElement*> elementsSend)
+bool getEventsVecData(fileDataStr fileData, const std::vector<tinyxml2::XMLElement*> elementsTransition, const std::vector<tinyxml2::XMLElement*> elementsSend)
 {
     for (const auto& element : elementsTransition) {
         const char* event = element->Attribute("event");
@@ -64,7 +72,10 @@ void getEventsVecData(fileDataStr fileData, const std::vector<tinyxml2::XMLEleme
             eventData.target = target;
             eventData.event = event;
             eventData.eventType = "transition";
-            getEventData(fileData, eventData);
+            if(!getEventData(fileData, eventData))
+            {
+                return false;
+            }
         } 
         else
         {
@@ -89,12 +100,16 @@ void getEventsVecData(fileDataStr fileData, const std::vector<tinyxml2::XMLEleme
                 eventData.paramMap[paramName] = paramExpr;
                 std::cout << "\tparamName=" << paramName << ", paramExpr=" << eventData.paramMap[paramName] << std::endl;
             }
-            getEventData(fileData, eventData);
+            if(!getEventData(fileData, eventData))
+            {
+                return false;
+            }
         } 
         else{
             std::cerr << "\tMissing attribute in <send> tag" << std::endl;
         }
     }
+    return true;
 
 }
 
@@ -443,7 +458,7 @@ bool Replacer(fileDataStr& fileData, templateFileDataStr& templateFileData)
     std::vector<tinyxml2::XMLElement *> elementsTransition, elementsSend;
     tinyxml2::XMLDocument doc;
     std::cout << "-----------" << std::endl;
-    if(!extractFromSCXML(doc, fileData.inputFileName, rootName, elementsTransition, elementsSend)){
+    if(!extractFromSCXML(doc, fileData.inputFileNameGeneration, rootName, elementsTransition, elementsSend)){
         return 0;
     }
     
@@ -481,7 +496,10 @@ bool Replacer(fileDataStr& fileData, templateFileDataStr& templateFileData)
             deleteSection(it->second, "#DATAMODEL#", "#END_DATAMODEL#");
         }
     }
-    getEventsVecData(fileData, elementsTransition, elementsSend);
+    if (!getEventsVecData(fileData, elementsTransition, elementsSend))
+    {
+        return false;
+    }
     replaceEventCode(codeMap);
     std::cout << "-----------" << std::endl;
     if(fileData.datamodel_mode)
