@@ -19,15 +19,15 @@
 void print_help()
 {
     std::cout << "Welcome to model2code tool.\n";
-    std::cout << "Syntax:\n";
-    std::cout << "model2code --input_filename \"inputFileName.scxml\" \n";
-    std::cout << "--model_filename \"modelFileName.scxml\"\n";
-    std::cout << "--interface_filename \"interfaceFileName.scxml\"\n";
+    std::cout << "Usage:\n";
+    std::cout << "model2code --input_filename \"inputFile.scxml\" ";
+    std::cout << "--model_filename \"projectModel.xml\" ";
+    std::cout << "--interface_filename \"interfaceFile.xml\" ";
+    std::cout << "--template_path \"path/to/template_skill/directory\" ";
     std::cout << "--output_path \"path/to/output/directory\"\n";
-    std::cout << "--template_path \"path/to/template_skill/directory\"\n";
     // std::cout << "--datamodel_mode \n";
-    std::cout << "--translate_mode \n";
-    std::cout << "--generate_mode \n";
+    // std::cout << "--translate_mode \n";
+    // std::cout << "--generate_mode \n";
 }
 
 /**
