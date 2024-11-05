@@ -1,38 +1,34 @@
 CONVINCE model2code Documentation
 ==================================
-The tool is developed as part of the CONVINCE project and is mainly used to generate skill-level code starting from an SCXML model.
+The model2code tool is developed as part of the CONVINCE project and is used to generate skill-level code from the high-level SCXML model of a skill.
 
-The inputs of the program are: 
+Program inputs: 
 
-- an SCXML model that describes the behavior of the skill,
-- an XML file that describes the full model of the program, which includes the behavior tree, the skills and the components used in the system,
-- an XML file that describes the interfaces used between behavior tree and skills, and between skills and components,
-- a directory containing the templates of the files to generate.
+- An SCXML model that describes the behavior of the skill,
+- An XML file that outlines the full model of the program, including the behavior tree, skills, and components used in the system.
+- An XML file that specifies the interfaces between the behavior tree and skills, as well as between skills and components.
+- A directory containing templates for the files to be generated.
 
-The output of the program is composed of:
+Program outputs:
 
-- a C++ file that contains the code of the skill,
-- a header file that contains the declaration of the skill,
-- a main C++ file that contains the main function of the skill,
-- a package.xml file that contains the information of the ROS package,
-- a CMakeLists.txt file that includes the generated files.
-
-The output above is only if the data model is ECMAscript, otherwise, you will need to add the parameter ``--datamodel_mode`` to generate the C++ data model files. 
-In this case, you will get 2 additional files:
-
-- a C++ file that contains the code of the data model,
-- a header file that contains the declaration of the data model. 
+- A C++ file containing skill code.
+- A header file declaring the skill.
+- A main C++ file that includes the main function of the skill.
+- A package.xml file with information about the ROS package.
+- A CMakeLists.txt file that incorporates the generated files.
 
 
-The parameters required to run the program are:
+Required parameters:
 
-- ``--input_filename`` : the path to the SCXML file that describes the behavior of the skill,
-- ``--model_filename`` : the path to the XML file that describes the full model of the program,
-- ``--interface_filename`` : the path to the XML file that describes the interfaces used.
+- ``--input_filename``: The path to the SCXML file that describes the behavior of the skill.
+- ``--model_filename``: The path to the XML file that describes the full model of the program.
+- ``--interface_filename``: The path to the XML file that describes the interfaces used.
 
-By default the program will generate the code in the directory where the SCXML file passed by the parameter ``--input_filename`` is located, but you can specify a different directory by using the parameter ``--output_path``.
+By default, the program generates the code in the same directory as the SCXML file specified by the ``--input_filename`` parameter. However, you can select a different output directory by using the ``--output_path`` parameter.
 
-The skills generated are based on a behavior tree structure and will have a ROS2 tick service in case they are a condition a ROS2 tick and halt services in case they are an action.
+Additionally, the program uses files from the ``templates`` directory by default to generate the code, but you can specify a different directory with the ``--templates_path`` parameter.
+
+The generated skills are based on a behavior tree structure. Skills defined as conditions will have a ROS2 tick service, while skills defined as actions will have both tick and halt services.
 
 Contents
 ----------
