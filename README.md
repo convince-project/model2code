@@ -46,6 +46,11 @@ Example XML files with the required structure for defining the project's model a
 
 ## Run examples
 To run an example of MODEL2CODE go to the main directory and run the following commands:
+Example 1:
 ```
 model2code --input_filename "tutorials/skills/first_tutorial_skill/src/FirstTutorialSkill.scxml" --model_filename "templates/specifications/full-model.xml" --interface_filename "templates/specifications/interfaces.xml" --output_path "tutorials/skills/first_tutorial_skill"
+```
+Example 2:
+```
+model2code --input_filename "tutorials/skills/second_tutorial_skill/src/SecondTutorialSkill.scxml" --model_filename "templates/specifications/full-model.xml" --interface_filename "templates/specifications/interfaces.xml"
 ```
