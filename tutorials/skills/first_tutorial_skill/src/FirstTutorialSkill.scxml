@@ -1,0 +1,52 @@
+<scxml 
+  initial="idle" 
+  version="1.0" 
+  name="FirstTutorialSkill"
+  datamodel="ecmascript"
+  xmlns="http://www.w3.org/2005/07/scxml">
+
+  <datamodel>
+    <data id="m_data" type="int32" expr="1"/>
+    <data id="SKILL_SUCCESS" type="int8" expr="0" />
+    <data id="SKILL_FAILURE" type="int8" expr="1" />
+    <data id="SKILL_RUNNING" type="int8" expr="2" />
+  </datamodel>
+
+    <!-- FirstTutorialSkillAction is a server for tick from the ROS2Action plugin-->
+    <ros_service_server service_name="/FirstTutorialSkillAction/tick" type ="bt_interfaces/TickAction"/>
+    <!-- FirstTutorialSkillAction is a server for halt from the ROS2Action plugin-->
+    <ros_service_server service_name="/FirstTutorialSkillAction/halt" type ="bt_interfaces/HaltAction"/>
+    <!-- FirstTutorialSkillAction is a client for Function1 from the TemplateComponent -->
+    <ros_service_client service_name="/TemplateComponent/Function1" type ="template_interfaces/Function1"/>
+
+
+  <state id="idle">
+    <ros_service_handle_request name="/FirstTutorialSkillAction/tick" target="start">
+      <ros_service_send_request name="/TemplateComponent/Function1">
+          <field name="data" expr="m_data"/>
+      </ros_service_send_request>
+    </ros_service_handle_request>
+    <ros_service_handle_request name="/FirstTutorialSkillAction/halt" target="idle">
+        <ros_service_send_response name="/FirstTutorialSkillAction/halt"/>
+    </ros_service_handle_request>
+  </state>
+
+  <state id="start">
+    <ros_service_handle_response name="/TemplateComponent/Function1" cond="_res.is_ok" target="idle">
+      <ros_service_send_response name="/FirstTutorialSkillAction/tick">
+          <field name="status" expr="SKILL_SUCCESS"/>
+          <field name="is_ok" expr="true"/>
+      </ros_service_send_response>
+    </ros_service_handle_response>
+    <ros_service_handle_response name="/TemplateComponent/Function1" cond="(_res.is_ok) == false" target="idle">
+        <ros_service_send_response name="/FirstTutorialSkillAction/tick">
+            <field name="status" expr="SKILL_FAILURE"/>
+            <field name="is_ok" expr="true"/>
+        </ros_service_send_response>
+    </ros_service_handle_response>
+    <ros_service_handle_request name="/FirstTutorialSkillAction/halt" target="idle">
+      <ros_service_send_response name="/FirstTutorialSkillAction/halt"/>
+  </ros_service_handle_request>
+  </state>
+
+</scxml>

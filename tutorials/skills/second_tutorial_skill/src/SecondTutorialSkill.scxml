@@ -1,0 +1,49 @@
+<scxml 
+  initial="idle" 
+  version="1.0" 
+  name="SecondTutorialSkill"
+  datamodel="ecmascript"
+  xmlns="http://www.w3.org/2005/07/scxml">
+
+  <datamodel>
+    <data id="m_data" type="int32" expr="1"/>
+    <data id="SKILL_SUCCESS" type="int8" expr="0" />
+    <data id="SKILL_FAILURE" type="int8" expr="1" />
+    <data id="SKILL_RUNNING" type="int8" expr="2" />
+  </datamodel>
+
+    <!-- SecondTutorialSkillAction is a server for tick from the ROS2Action plugin-->
+    <ros_service_server service_name="/SecondTutorialSkillAction/tick" type ="bt_interfaces/TickAction"/>
+    <!-- SecondTutorialSkillAction is a client for Function2 from the TemplateComponent -->
+    <ros_service_client service_name="/TemplateComponent/Function2" type ="template_interfaces/Function2"/>
+
+
+  <state id="idle">
+    <ros_service_handle_request name="/SecondTutorialSkillAction/tick" target="start">
+      <ros_service_send_request name="/TemplateComponent/Function2"/>
+    </ros_service_handle_request>
+  </state>
+
+  <state id="start">
+
+    <ros_service_handle_response name="/TemplateComponent/Function2" cond="(_res.is_ok) == false" target="idle">
+        <ros_service_send_response name="/SecondTutorialSkillAction/tick">
+            <field name="status" expr="SKILL_FAILURE"/>
+            <field name="is_ok" expr="true"/>
+        </ros_service_send_response>
+    </ros_service_handle_response>    
+    <ros_service_handle_response name="/TemplateComponent/Function2" cond="_res.is_active" target="idle">
+      <ros_service_send_response name="/SecondTutorialSkillAction/tick">
+          <field name="status" expr="SKILL_SUCCESS"/>
+          <field name="is_ok" expr="true"/>
+      </ros_service_send_response>
+    </ros_service_handle_response>
+    <ros_service_handle_response name="/TemplateComponent/Function2" cond="(_res.is_active) == 0" target="idle">
+      <ros_service_send_response name="/SecondTutorialSkillAction/tick">
+          <field name="status" expr="SKILL_FAILURE"/>
+          <field name="is_ok" expr="true"/>
+      </ros_service_send_response>
+    </ros_service_handle_response>
+  </state>
+
+</scxml>
