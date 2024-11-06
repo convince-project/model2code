@@ -18,7 +18,7 @@
  * @param fileData file data structure passed by reference from which the event data is extracted
  * @param eventData event data structure passed by reference where the event data is stored
  */
-void getEventData(fileDataStr fileData, eventDataStr& eventData);
+bool getEventData(fileDataStr fileData, eventDataStr& eventData);
 
 /**
  * @brief Get the Event Data from the vector of event elements
@@ -27,7 +27,7 @@ void getEventData(fileDataStr fileData, eventDataStr& eventData);
  * @param elementsTransition vector of transition event elements
  * @param elementsSend vector of send event elements
  */
-void getEventsVecData(fileDataStr fileData, const std::vector<tinyxml2::XMLElement*> elementsTransition, const std::vector<tinyxml2::XMLElement*> elementsSend);
+bool getEventsVecData(fileDataStr fileData, const std::vector<tinyxml2::XMLElement*> elementsTransition, const std::vector<tinyxml2::XMLElement*> elementsSend);
 
 /**
  * @brief function to keep or delete the sections of the code related to the Command Tick event
@@ -94,6 +94,9 @@ void replaceEventCode(std::map <std::string, std::string>& codeMap);
  * @return false 
  */
 bool readTemplates(templateFileDataStr& templateFileData, std::map <std::string, std::string>& codeMap);
+
+
+bool createDirectory(const std::string& path);
 
 /**
  * @brief main function to get the code from template files and replace the placeholders with the data from the input file

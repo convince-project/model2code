@@ -9,6 +9,8 @@
  * 
  */
 #include "Replacer.h"
+#include <filesystem>
+
 
 /**
  * @brief Get the Event Data from the model and interface files 
@@ -16,11 +18,11 @@
  * @param fileData file data structure passed by reference from which the event data is extracted
  * @param eventData event data structure passed by reference where the event data is stored
  */
-void getEventData(fileDataStr fileData, eventDataStr& eventData)
+bool getEventData(fileDataStr fileData, eventDataStr& eventData)
 {
     if(eventsMap.find(eventData.event) != eventsMap.end()){
         std::cout << "Event already processed: " << eventData.event << std::endl;
-        return;
+        return true;
     } 
     eventsMap[eventData.event];
 
@@ -35,11 +37,19 @@ void getEventData(fileDataStr fileData, eventDataStr& eventData)
 
         if(extractInterfaceName(fileData.modelFileName, eventData))
         {
-            extractInterfaceType(fileData.interfaceFileName, eventData);
+            if(!extractInterfaceType(fileData.interfaceFileName, eventData))
+            {
+                return false;
+            }
             printEventData(eventData);
+        }
+        else
+        {
+            return false;
         }        
     }
     eventsMap[eventData.event] = eventData;
+    return true;
 }
 
 /**
@@ -49,7 +59,7 @@ void getEventData(fileDataStr fileData, eventDataStr& eventData)
  * @param elementsTransition vector of transition event elements
  * @param elementsSend vector of send event elements
  */
-void getEventsVecData(fileDataStr fileData, const std::vector<tinyxml2::XMLElement*> elementsTransition, const std::vector<tinyxml2::XMLElement*> elementsSend)
+bool getEventsVecData(fileDataStr fileData, const std::vector<tinyxml2::XMLElement*> elementsTransition, const std::vector<tinyxml2::XMLElement*> elementsSend)
 {
     for (const auto& element : elementsTransition) {
         const char* event = element->Attribute("event");
@@ -62,7 +72,10 @@ void getEventsVecData(fileDataStr fileData, const std::vector<tinyxml2::XMLEleme
             eventData.target = target;
             eventData.event = event;
             eventData.eventType = "transition";
-            getEventData(fileData, eventData);
+            if(!getEventData(fileData, eventData))
+            {
+                return false;
+            }
         } 
         else
         {
@@ -87,12 +100,16 @@ void getEventsVecData(fileDataStr fileData, const std::vector<tinyxml2::XMLEleme
                 eventData.paramMap[paramName] = paramExpr;
                 std::cout << "\tparamName=" << paramName << ", paramExpr=" << eventData.paramMap[paramName] << std::endl;
             }
-            getEventData(fileData, eventData);
+            if(!getEventData(fileData, eventData))
+            {
+                return false;
+            }
         } 
         else{
             std::cerr << "\tMissing attribute in <send> tag" << std::endl;
         }
     }
+    return true;
 
 }
 
@@ -201,6 +218,7 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             replaceAll(eventCodeC, "$eventData.serverName$", eventData.serverName);
             replaceAll(eventCodeC, "$eventData.clientName$", eventData.clientName);
             replaceAll(eventCodeC, "$eventData.interfaceName$", eventData.interfaceName);
+            
             for (auto itParam =  eventData.paramMap.begin(); itParam != eventData.paramMap.end(); ++itParam) 
             {
                 std::string paramCode = savedCode.sendParam;
@@ -243,6 +261,57 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
         }
 
     }
+    else if(eventData.eventType == "transition")
+    {
+        if(eventData.interfaceType == "topic")
+        {
+            std::string topicCallbackC = savedCode.topicCallbackC;
+            std::string topicCallbackH = savedCode.topicCallbackH;
+            std::string topicSubscriptionC = savedCode.topicSubscriptionC;
+            std::string topicSubscriptionH = savedCode.topicSubscriptionH;
+            std::string topicInterfaceH = savedCode.topicInterfaceH;
+            std::string interfaceCodeH = savedCode.interfaceH;
+            std::string interfaceCodeCMake = savedCode.interfaceCMake;
+            std::string packageCodeCMake = savedCode.packageCMake;
+            std::string interfaceCodeXML = savedCode.interfaceXML;
+            //CPP
+            replaceAll(topicCallbackC, "$eventData.interfaceData[interfaceDataType]$", eventData.interfaceData.begin()->second);
+            replaceAll(topicCallbackC, "$eventData.interfaceData[interfaceDataField]$", eventData.interfaceData.begin()->first);
+            replaceAll(topicSubscriptionC, "$eventData.interfaceData[interfaceDataType]$", eventData.interfaceData.begin()->second);
+            replaceAll(topicCallbackC, "$eventData.functionName$", eventData.functionName);
+            replaceAll(topicSubscriptionC, "$eventData.functionName$", eventData.functionName);
+            replaceAll(topicCallbackC, "$eventData.componentName$", eventData.componentName);
+            writeAfterCommand(str, "/*TOPIC_SUBSCRIPTIONS_LIST*/", topicSubscriptionC);
+            writeAfterCommand(str, "/*TOPIC_CALLBACK_LIST*/", topicCallbackC);
+            //H
+            std::string interface;
+            getDataTypePath(eventData.interfaceData.begin()->second, interface);
+            replaceAll(topicInterfaceH, "$eventData.interfaceData[interfaceDataType]$", interface);
+            replaceAll(topicCallbackH, "$eventData.interfaceData[interfaceDataType]$", eventData.interfaceData.begin()->second);
+            replaceAll(topicSubscriptionH, "$eventData.interfaceData[interfaceDataType]$", eventData.interfaceData.begin()->second);
+            replaceAll(topicCallbackH, "$eventData.functionName$", eventData.functionName);
+            replaceAll(topicSubscriptionH, "$eventData.functionName$", eventData.functionName);
+            writeAfterCommand(str, "/*INTERFACES_LIST*/", topicInterfaceH);
+            writeAfterCommand(str, "/*TOPIC_SUBSCRIPTIONS_LIST_H*/", topicSubscriptionH);
+            writeAfterCommand(str, "/*TOPIC_CALLBACK_LIST_H*/", topicCallbackH);
+
+            //CMakeLists.txt
+            // replaceAll(interfaceCodeCMake, "$interfaceName$", eventData.interfaceName);
+            // if(!checkIfStrPresent(str, interfaceCodeCMake)){
+            //     writeAfterCommand(str, "#INTERFACE_LIST#", interfaceCodeCMake);
+            // }
+            // replaceAll(packageCodeCMake, "$interfaceName$", eventData.interfaceName);
+            // if(!checkIfStrPresent(str, packageCodeCMake)){
+            //     writeAfterCommand(str, "#PACKAGE_LIST#", packageCodeCMake);
+            // }
+
+            //package.xml
+            // replaceAll(interfaceCodeXML, "$interfaceName$", eventData.interfaceName);
+            // if(!checkIfStrPresent(str, interfaceCodeXML)){
+            //     writeAfterCommand(str, "<!--INTERFACE_LIST-->", interfaceCodeXML);
+            // }
+        }
+    }
 
 }
 
@@ -261,9 +330,19 @@ void saveCode(savedCodeStr& savedCode, std::string& code)
     deleteSection(code, "/*RETURN_PARAM*/", "/*END_RETURN_PARAM*/");
     saveSection(code, "/*SEND_EVENT_SRV*/", "/*END_SEND_EVENT_SRV*/", savedCode.eventC);
     deleteSection(code, "/*SEND_EVENT_SRV*/", "/*END_SEND_EVENT_SRV*/");
+    saveSection(code, "/*TOPIC_CALLBACK*/", "/*END_TOPIC_CALLBACK*/", savedCode.topicCallbackC);
+    deleteSection(code, "/*TOPIC_CALLBACK*/", "/*END_TOPIC_CALLBACK*/");
+    saveSection(code, "/*TOPIC_SUBSCRIPTION*/", "/*END_TOPIC_SUBSCRIPTION*/", savedCode.topicSubscriptionC);
+    deleteSection(code, "/*TOPIC_SUBSCRIPTION*/", "/*END_TOPIC_SUBSCRIPTION*/");
     //H
     saveSection(code, "/*INTERFACE*/", "/*END_INTERFACE*/", savedCode.interfaceH);
     deleteSection(code, "/*INTERFACE*/", "/*END_INTERFACE*/");
+    saveSection(code, "/*TOPIC_INTERFACE*/", "/*END_TOPIC_INTERFACE*/", savedCode.topicInterfaceH);
+    deleteSection(code, "/*TOPIC_INTERFACE*/", "/*END_TOPIC_INTERFACE*/");
+    saveSection(code, "/*TOPIC_CALLBACK_H*/", "/*END_TOPIC_CALLBACK_H*/", savedCode.topicCallbackH);
+    deleteSection(code, "/*TOPIC_CALLBACK_H*/", "/*END_TOPIC_CALLBACK_H*/");
+    saveSection(code, "/*TOPIC_SUBSCRIPTION_H*/", "/*END_TOPIC_SUBSCRIPTION_H*/", savedCode.topicSubscriptionH);
+    deleteSection(code, "/*TOPIC_SUBSCRIPTION_H*/", "/*END_TOPIC_SUBSCRIPTION_H*/");
     //CMakeLists.txt
     saveSection(code, "#INTERFACE#", "#END_INTERFACE#", savedCode.interfaceCMake);
     deleteSection(code, "#INTERFACE#", "#END_INTERFACE#");
@@ -291,6 +370,10 @@ void replaceEventCode(std::map <std::string, std::string>& codeMap){
         { 
             if(itEv->first != cmdTick && itEv->first != cmdHalt && itEv->first != rspTick && itEv->first != rspHalt){
                 eventDataStr eventData = itEv->second;
+                if(eventData.interfaceName == "blackboard_interfaces")
+                {
+                    eventData.functionNameSnakeCase += "_blackboard";
+                }
                 handleGenericEvent(eventData, savedCode, it->second);
             } 
         }
@@ -298,8 +381,12 @@ void replaceEventCode(std::map <std::string, std::string>& codeMap){
         deleteCommand(it->second, "/*SEND_EVENT_LIST*/");
         deleteCommand(it->second, "/*PARAM_LIST*/");
         deleteCommand(it->second, "/*RETURN_PARAM_LIST*/");
+        deleteCommand(it->second, "/*TOPIC_SUBSCRIPTIONS_LIST*/");
+        deleteCommand(it->second, "/*TOPIC_CALLBACK_LIST*/");
         //H
         deleteCommand(it->second, "/*INTERFACES_LIST*/");
+        deleteCommand(it->second, "/*TOPIC_SUBSCRIPTIONS_LIST_H*/");
+        deleteCommand(it->second, "/*TOPIC_CALLBACK_LIST_H*/");
         //CMakeLists.txt
         deleteCommand(it->second, "#INTERFACE_LIST#");
         deleteCommand(it->second, "#PACKAGE_LIST#");
@@ -337,6 +424,24 @@ bool readTemplates(templateFileDataStr& templateFileData, std::map <std::string,
     return res;
 }
 
+bool createDirectory(const std::string& path) {
+    namespace fs = std::filesystem;
+    try {
+        // Create the directory (and any intermediate directories, if necessary)
+        if (fs::create_directories(path)) {
+            std::cout << "Directory created successfully: " << path << std::endl;
+            return true;
+        } else {
+            std::cerr << "Directory already exists or failed to create: " << path << std::endl;
+            return false;
+        }
+    } catch (const fs::filesystem_error& err) {
+        std::cerr << "Filesystem error: " << err.what() << std::endl;
+        return false;
+    }
+}
+
+
 /**
  * @brief main function to get the code from template files and replace the placeholders with the data from the input file
  * 
@@ -353,7 +458,7 @@ bool Replacer(fileDataStr& fileData, templateFileDataStr& templateFileData)
     std::vector<tinyxml2::XMLElement *> elementsTransition, elementsSend;
     tinyxml2::XMLDocument doc;
     std::cout << "-----------" << std::endl;
-    if(!extractFromSCXML(doc, fileData.inputFileName, rootName, elementsTransition, elementsSend)){
+    if(!extractFromSCXML(doc, fileData.inputFileNameGeneration, rootName, elementsTransition, elementsSend)){
         return 0;
     }
     
@@ -391,7 +496,10 @@ bool Replacer(fileDataStr& fileData, templateFileDataStr& templateFileData)
             deleteSection(it->second, "#DATAMODEL#", "#END_DATAMODEL#");
         }
     }
-    getEventsVecData(fileData, elementsTransition, elementsSend);
+    if (!getEventsVecData(fileData, elementsTransition, elementsSend))
+    {
+        return false;
+    }
     replaceEventCode(codeMap);
     std::cout << "-----------" << std::endl;
     if(fileData.datamodel_mode)
@@ -399,6 +507,11 @@ bool Replacer(fileDataStr& fileData, templateFileDataStr& templateFileData)
         writeFile(fileData.outputPathInclude + fileData.outputDatamodelFileNameH, codeMap["hDataModelCode"]);
         writeFile(fileData.outputPathSrc + fileData.outputDatamodelFileNameCPP, codeMap["cppDataModelCode"]);
     }
+    std::cout << "-----------" << std::endl;
+    createDirectory(fileData.outputPath);
+    createDirectory(fileData.outputPathInclude);
+    createDirectory(fileData.outputPathSrc);
+    std::cout << "-----------" << std::endl;
     writeFile(fileData.outputPathInclude + fileData.outputFileNameH, codeMap["hCode"]);
     writeFile(fileData.outputPathSrc + fileData.outputFileNameCPP, codeMap["cppCode"]);
     writeFile(fileData.outputPath + fileData.outputCMakeListsFileName, codeMap["cmakeCode"]);

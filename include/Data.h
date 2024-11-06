@@ -68,6 +68,7 @@ struct eventDataStr{
 
 struct fileDataStr{
     std::string inputFileName;
+    std::string inputFileNameGeneration;
     std::string interfaceFileName;
     std::string modelFileName;
     std::string outputPath;
@@ -80,8 +81,11 @@ struct fileDataStr{
     std::string outputDatamodelFileNameCPP;
     std::string outputFileNameH;
     std::string outputFileNameCPP;
+    std::string outputFileTranslatedSM;
     bool debug_mode;
     bool datamodel_mode;   
+    bool translate_mode;   
+    bool generate_mode;   
 };
 
 struct templateFileDataStr{
@@ -103,6 +107,11 @@ struct savedCodeStr{
     std::string interfaceCMake;
     std::string packageCMake;
     std::string interfaceXML;
+    std::string topicSubscriptionC;
+    std::string topicCallbackC;  
+    std::string topicSubscriptionH;
+    std::string topicCallbackH; 
+    std::string topicInterfaceH; 
 };
 
 struct cppCodeStr

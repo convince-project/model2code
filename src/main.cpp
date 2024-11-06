@@ -9,7 +9,8 @@
  * 
  */
 
-#include "Replacer.h"
+// #include "Replacer.h"
+#include "Translator.h"
 
 /**
  * @brief Print the help message
@@ -18,13 +19,15 @@
 void print_help()
 {
     std::cout << "Welcome to model2code tool.\n";
-    std::cout << "Syntax:\n";
-    std::cout << "model2code --input_filename \"inputFileName.scxml\" \n";
-    std::cout << "--model_filename \"modelFileName.scxml\"\n";
-    std::cout << "--interface_filename \"interfaceFileName.scxml\"\n";
+    std::cout << "Usage:\n";
+    std::cout << "model2code --input_filename \"inputFile.scxml\" ";
+    std::cout << "--model_filename \"projectModel.xml\" ";
+    std::cout << "--interface_filename \"interfaceFile.xml\" ";
+    std::cout << "--template_path \"path/to/template_skill/directory\" ";
     std::cout << "--output_path \"path/to/output/directory\"\n";
-    std::cout << "--template_path \"path/to/template_skill/directory\"\n";
-    std::cout << "--datamodel_mode \n";
+    // std::cout << "--datamodel_mode \n";
+    // std::cout << "--translate_mode \n";
+    // std::cout << "--generate_mode \n";
 }
 
 /**
@@ -43,6 +46,8 @@ bool handleInputs(int argc, char* argv[], fileDataStr& fileData, templateFileDat
     fileData.modelFileName          = modelFilePath;
     fileData.interfaceFileName      = interfaceFilePath;
     fileData.datamodel_mode         = false;
+    fileData.translate_mode         = false;
+    fileData.generate_mode          = false;
     templateFileData.templatePath   = templateFilePath;
 
     if (argc == 1)
@@ -80,6 +85,12 @@ bool handleInputs(int argc, char* argv[], fileDataStr& fileData, templateFileDat
         }
         else if (arg == "--datamodel_mode") {
             fileData.datamodel_mode = true;
+        }
+        else if (arg == "--translate_mode") {
+            fileData.translate_mode = true;
+        }
+        else if (arg == "--generate_mode") {
+            fileData.generate_mode = true;
         }
     }
     
@@ -131,9 +142,39 @@ int main(int argc, char* argv[])
         return RETURN_CODE_ERROR;
     }
 
-    if(!Replacer(fileData, templateFileData))
+    
+    if(!fileData.translate_mode & fileData.generate_mode)
     {
-        std::cout << "Error in code generation" << std::endl;
+        // Generation request without translation
+        fileData.inputFileNameGeneration = fileData.inputFileName;   
+    }
+    else if(!fileData.translate_mode & !fileData.generate_mode)
+    {
+        fileData.translate_mode= true;
+        fileData.generate_mode = true;
+    }
+
+    if(fileData.translate_mode)
+    {   
+        std::cout << "Translation request" << std::endl;
+        if(!Translator(fileData))
+        {
+            std::cout << "-----------" << std::endl;
+            std::cout << "Error in translation" << std::endl;
+            return RETURN_CODE_ERROR;
+        }
+        fileData.inputFileNameGeneration = fileData.outputFileTranslatedSM;
+        
+    }
+    if(fileData.generate_mode)
+    {
+
+        if(!Replacer(fileData, templateFileData))
+        {
+            std::cout << "-----------" << std::endl;
+            std::cout << "Error in code generation" << std::endl;
+            return RETURN_CODE_ERROR;
+        }
     }
     
     return RETURN_CODE_OK;

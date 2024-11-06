@@ -27,6 +27,7 @@ target_sources( ${PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Data.cpp 
   ${CMAKE_CURRENT_SOURCE_DIR}/src/strManipulation.cpp 
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Replacer.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Translator.cpp 
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ExtractFromXML.cpp 
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ExtractFromElement.cpp 
   )
