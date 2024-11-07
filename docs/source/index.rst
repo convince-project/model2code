@@ -2,6 +2,10 @@ CONVINCE model2code Documentation
 ==================================
 The model2code tool is developed as part of the CONVINCE project and is used to generate skill-level code from the high-level SCXML model of a skill.
 
+Model2code can be used when the SCXML model representing the state machine of the skill is executed using an SCXML compiler. 
+To handle interfacing between the skill and the rest of the system, there is the need to write the corresponding code. 
+Model2code allows to generate the code for the skill, based on a given template. Allowing the user to focus on the high-level design of the system.
+
 Program inputs: 
 
 - An SCXML model that describes the behavior of the skill,
@@ -14,6 +18,7 @@ Program outputs:
 - A C++ file containing skill code.
 - A header file declaring the skill.
 - A main C++ file that includes the main function of the skill.
+- An SCXML standard file containing the compilable SCXML code of the skill.
 - A package.xml file with information about the ROS package.
 - A CMakeLists.txt file that incorporates the generated files.
 
@@ -28,7 +33,7 @@ By default, the program generates the code in the same directory as the SCXML fi
 
 Additionally, the program uses files from the ``templates`` directory by default to generate the code, but you can specify a different directory with the ``--templates_path`` parameter.
 
-The generated skills are based on a behavior tree structure. Skills defined as conditions will have a ROS2 tick service, while skills defined as actions will have both tick and halt services.
+The generated skills are based on a behavior tree structure. Skills corresponding to condition nodes will have a ROS2 tick service, while skills corresponding to action nodes will have both tick and halt services.
 
 Contents
 ----------
