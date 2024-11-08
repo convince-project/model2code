@@ -23,7 +23,7 @@ git clone https://github.com/convince-project/model2code.git
 cd model2code
 mkdir build
 cd build
-cmake ../code
+cmake ..
 make install
 ```
 
@@ -40,17 +40,17 @@ model2code --input_filename "input_model.scxml" --model_filename "project_model_
 ```
 replace `input_model.scxml`, `project_model_definition.scxml`, `interface_definition.scxml`, `path/to/output/directory` and `path/to/template_skill/directory` with your needs.
 
-By default the `path/to/output/directory` is set to the location of `input_model.scxml`, and `path/to/template_skill/directory` is set to the 'templates/skills/template_skill' directory of this repository.
+By default the `path/to/output/directory` is set to the location of `input_model.scxml`, and `path/to/template_skill/directory` is set to the 'template_skill' directory of this repository.
 
-Example XML files with the required structure for defining the project's model and interfaces are available in the `template/specifications` folder.
+Example XML files with the required structure for defining the project's model and interfaces are available in the `tutorials/specifications` folder.
 
 ## Run examples
 To run an example of MODEL2CODE go to the main directory and run the following commands:
 Example 1:
 ```
-model2code --input_filename "tutorials/skills/first_tutorial_skill/src/FirstTutorialSkill.scxml" --model_filename "templates/specifications/full-model.xml" --interface_filename "templates/specifications/interfaces.xml" --output_path "tutorials/skills/first_tutorial_skill"
+model2code --input_filename "tutorials/skills/first_tutorial_skill/src/FirstTutorialSkill.scxml" --model_filename "tutorials/specifications/full-model.xml" --interface_filename "tutorials/specifications/interfaces.xml" --output_path "tutorials/skills/first_tutorial_skill"
 ```
 Example 2:
 ```
-model2code --input_filename "tutorials/skills/second_tutorial_skill/src/SecondTutorialSkill.scxml" --model_filename "templates/specifications/full-model.xml" --interface_filename "templates/specifications/interfaces.xml"
+model2code --input_filename "tutorials/skills/second_tutorial_skill/src/SecondTutorialSkill.scxml" --model_filename "tutorials/specifications/full-model.xml" --interface_filename "tutorials/specifications/interfaces.xml"
 ```

@@ -18,7 +18,7 @@
 #define modelFilePath "./templates/specifications/full-model.xml"
 #define interfaceFilePath "./templates/specifications/interfaces.xml"
 
-#define templateFilePath "./templates/skills/template_skill/"
+#define templateFilePath "./template_skill/"
 #define cppTemplateFileRelativePath "/src/TemplateSkill.cpp"
 #define hTemplateFileRelativePath "/include/TemplateSkill.h"
 #define cppDataModelTemplateFileRelativePath "/src/TemplateSkillDataModel.cpp"
