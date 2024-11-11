@@ -546,7 +546,7 @@ bool getDataFromRootNameHighLevel(const std::string attributeName, skillDataStr&
 {
     // e.g. attributeName = "FirstTemplateSkill"
     if (attributeName != ""){
-        std::cout << "Root attribute name: " << attributeName << std::endl;
+        add_to_log("Root attribute name: " + attributeName);
         size_t dotPos = attributeName.find("Skill");
         if (dotPos != std::string::npos){
             skillData.SMName = attributeName; // e.g. SMName = "FirstTemplateSkill" +"Action" added later
@@ -567,12 +567,15 @@ bool getDataFromRootNameHighLevel(const std::string attributeName, skillDataStr&
 }
 
 /**
- * @brief
+ * @brief read the high level xml file
  * 
- * @param 
+ * @param doc XMLDocument to load the file
+ * @param fileContent string to store the file content
+ * @param fileName file name to read
+ * @return true if the file is read successfully
  */
 bool readHLXMLFile(tinyxml2::XMLDocument& doc, std::string& fileContent, const std::string fileName){
-    std::cout << "readFile" << std::endl;
+    add_to_log("readFile");
     if (doc.LoadFile(fileName.c_str()) != tinyxml2::XML_SUCCESS) {
         std::cerr << "Failed to load '" << fileName << "' file" << std::endl;
         return false;
@@ -585,13 +588,14 @@ bool readHLXMLFile(tinyxml2::XMLDocument& doc, std::string& fileContent, const s
 }
 
 /**
- * @brief 
+ * @brief translator function to translate the high level xml to scxml
  * 
- * @param fileData
+ * @param fileData fileDataStr structure containing the input and output file names
+ * @return true if the translation is successful
  */
 bool Translator(fileDataStr& fileData){
-    std::cout << "-----------" << std::endl;
-    std::cout << "Translator" << std::endl;
+    add_to_log("-----------");
+    add_to_log("Translator");
     skillDataStr skillData;
     tinyxml2::XMLDocument doc;
     std::string fileContent;
@@ -610,10 +614,10 @@ bool Translator(fileDataStr& fileData){
     tinyxml2::XMLElement* haltServerElement;
     if(findElementByTagAndAttValueContaining(root, std::string("ros_service_server"), std::string("service_name"), std::string("halt"), haltServerElement))
     {
-        std::cout << "Halt found => Action Skill" << std::endl;
+        add_to_log("Halt found => Action Skill");
         skillData.skillType = "Action";
     } else {
-        std::cout << "Halt not found => Condition Skill" << std::endl;
+        add_to_log("Halt not found => Condition Skill");
         skillData.skillType = "Condition"; 
     }
     skillData.SMName = skillData.SMName + skillData.skillType;
@@ -624,7 +628,7 @@ bool Translator(fileDataStr& fileData){
     } 
     if(!replaceAttributeValue(root, "name", skillData.SMName))
     {
-        std::cout << "Could not replace name attribute for root element" << std::endl;
+        add_to_log("Could not replace name attribute for root element");
         return false;
     }
 
@@ -712,11 +716,15 @@ bool Translator(fileDataStr& fileData){
     tinyxml2::XMLPrinter printer;
     doc.Print(&printer);  // Print the XML document into the printer
     std::string outputContent = std::string(printer.CStr());  
-    std::cout << "-----------" << std::endl;
+    // add_to_log("-----------");
     createDirectory(fileData.outputPath);
     createDirectory(fileData.outputPathSrc);
     std::cout << "-----------" << std::endl;
-    writeFile(ouputFilePath, outputContent);
+    std::cout << "Model2Code" << std::endl;
+    std::cout << "Generating Skill-level code for: "<< skillData.className << std::endl; 
+    std::cout << "Output directory: " << fileData.outputPath << std::endl;
+    std::cout << "-----------" << std::endl;
+    writeFile(fileData.outputPathSrc, skillData.className + "SM.scxml", outputContent);
     fileData.outputFileTranslatedSM = ouputFilePath;
 
     return true;

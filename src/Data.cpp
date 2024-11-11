@@ -11,6 +11,7 @@
 
 #include "Data.h"
 
+std::string log_str;
 /**
  * @brief Get component and function data from event string (Format: componentName.functionName.eventName)
  * 
@@ -55,7 +56,7 @@ bool getDataFromRootName(const std::string attributeName, skillDataStr& skillDat
 {
     // e.g. attributeName = "FirstTemplateSkillAction"
     if (attributeName != ""){
-        std::cout << "Root attribute name: " << attributeName << std::endl;
+        add_to_log("Root attribute name: " + attributeName);
         size_t dotPos = attributeName.find("Skill");
         if (dotPos != std::string::npos){
             skillData.SMName = attributeName; // e.g. SMName = "FirstTemplateSkillAction"
@@ -105,11 +106,11 @@ bool getDataFromRootName(const std::string attributeName, skillDataStr& skillDat
  */
 void printEventData(eventDataStr eventData)
 {
-    std::cout << "\tcomponent=" << eventData.componentName << ", service=" << eventData.functionName << ", eventName=" << eventData.eventName << std::endl;
-    std::cout<< "\tinterface=" << eventData.interfaceName << ", type=" << eventData.interfaceType;
+    add_to_log("\tcomponent=" + eventData.componentName + ", service=" + eventData.functionName + ", eventName=" + eventData.eventName);
+    add_to_log("\tinterface=" + eventData.interfaceName + ", type=" + eventData.interfaceType);
     for(auto it =  eventData.interfaceData.begin(); it != eventData.interfaceData.end(); ++it)
     {
-        std::cout << "\n\t dataField=" << it->first << ", dataType=" << it->second;
+        add_to_log("\n\t dataField=" + it->first + ", dataType=" + it->second);
     }
     std::cout << std::endl;
     
@@ -122,9 +123,9 @@ void printEventData(eventDataStr eventData)
  */
 void printSkillData(skillDataStr skillData)
 {
-    std::cout << "-----------" << std::endl;
-    std::cout << "Class name: " << skillData.className << std::endl << "Skill name: " << skillData.skillName << std::endl << "Skill type: " << skillData.skillType << std::endl;
-    std::cout << "-----------" << std::endl;
+    add_to_log("-----------");
+    add_to_log("Class name: " + skillData.className + "\nSkill name: " + skillData.skillName + "\nSkill type: " + skillData.skillType);
+    add_to_log("-----------");
 }
 /** @} */ // end of printData subgroup
 
@@ -143,4 +144,21 @@ void setFileData(fileDataStr& fileData, const skillDataStr skillData)
     fileData.outputMainFileName = "main.cpp";
     fileData.outputCMakeListsFileName = "CMakeLists.txt";
     fileData.outputPackageXMLFileName = "package.xml";
+}
+
+/**
+ * @brief Add a message to the log
+ * 
+ * @param fileName file name
+ * @param path path passed by reference where the path is stored
+ */
+void add_to_log(const std::string& message) {
+    log_str += message + "\n";
+}
+/**
+ * @brief print the log
+ * 
+ */
+void print_log() {
+    std::cout << log_str;
 }

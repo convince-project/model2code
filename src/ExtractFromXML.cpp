@@ -103,23 +103,27 @@ bool extractInterfaceType(const std::string fileName, eventDataStr& eventData)
     eventData.interfaceType = interfaceType;
     if(!findElementByTag(elementFunction, std::string("dataField"), elementDataField))
     {   
-        std::cerr << "No tag <dataField> for function '" << functionName << "'."<< std::endl;
+        // std::cerr << "No tag <dataField> for function '" << functionName << "'."<< std::endl;
+        add_to_log("No tag <dataField> for function '" + functionName + "'.");
         return true;
     } 
     if(!getElementText(elementDataField, interfaceDataField))
     {
-        std::cerr << "No value in tag <dataField> for function '" << functionName << "'."<< std::endl;
+        // std::cerr << "No value in tag <dataField> for function '" << functionName << "'."<< std::endl;
+        add_to_log("No value in tag <dataField> for function '" + functionName + "'.");
         return true;
     }
     if(!findElementByTag(elementFunction, std::string("dataType"), elementDataType))
     {   
-        std::cerr << "No tag <dataType> for function '" << functionName << "'."<< std::endl;
+        // std::cerr << "No tag <dataType> for function '" << functionName << "'."<< std::endl;
+        add_to_log("No tag <dataType> for function '" + functionName + "'.");
         //Not every interface has a defined DataType TODO
         return true;
     } 
     if(!getElementText(elementDataType, interfaceDataType))
     {
-        std::cerr << "No value in tag <dataType> for function '" << functionName << "'."<< std::endl;
+        // std::cerr << "No value in tag <dataType> for function '" << functionName << "'."<< std::endl;
+        add_to_log("No value in tag <dataType> for function '" + functionName + "'.");
         return true;
     }
     std::vector<tinyxml2::XMLElement*> elementsReturnValue;
@@ -168,21 +172,21 @@ bool extractFromSCXML(tinyxml2::XMLDocument& doc, const std::string fileName, st
     // Get transitions
     findElementVectorByTagAndAttribute(root, std::string("transition"), "event", elementsTransition);
     if (elementsTransition.empty()) {
-        std::cout << "No transition elements found." << std::endl;
+        add_to_log("No transition elements found.");
     } 
     else 
     {
-        std::cout << "Transition elements found." << std::endl;
+        add_to_log("Transition elements found.");
     }
 
     // Get Send
     findElementVectorByTagAndAttribute(root, std::string("send"), "event", elementsSend);
     if (elementsSend.empty()) {
-        std::cout << "No Send elements found." << std::endl;
+        add_to_log("No Send elements found.");
     } 
     else 
     {
-        std::cout << "Send elements found." << std::endl;
+        add_to_log("Send elements found.");
     }
     return true;
 }

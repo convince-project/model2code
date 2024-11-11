@@ -35,6 +35,8 @@
 #define rspTick "TICK_RESPONSE"
 #define rspHalt "HALT_RESPONSE"
 
+
+
 struct skillDataStr{
     std::string SMName;
     std::string className;
@@ -86,6 +88,7 @@ struct fileDataStr{
     bool datamodel_mode;   
     bool translate_mode;   
     bool generate_mode;   
+    bool log_mode;
 };
 
 struct templateFileDataStr{
@@ -197,3 +200,15 @@ void printSkillData(skillDataStr skillData);
  */
 void setFileData(fileDataStr& fileData, const skillDataStr skillData);
 
+/**
+ * @brief Add a message to the log
+ * 
+ * @param fileName file name
+ * @param path path passed by reference where the path is stored
+ */
+void add_to_log(const std::string& message);
+/**
+ * @brief print the log
+ * 
+ */
+void print_log();

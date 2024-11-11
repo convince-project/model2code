@@ -30,15 +30,18 @@ bool deleteElementAttribute(tinyxml2::XMLElement* element, const std::string& at
 bool deleteElementAttributeFromVector(std::vector<tinyxml2::XMLElement*>& elements, const std::string& attribute);
 
 /**
- * @brief
+ * @brief read the XML file
  * 
- * @param 
+ * @param doc XMLDocument to read the file
+ * @param fileName file name to read
+ * @return true if the file is read successfully
  */
 bool readHLXMLFile(tinyxml2::XMLDocument& doc, const std::string fileName);
 
 /**
- * @brief
+ * @brief translate the XML file from High-Level SCXML to SCXML
  * 
- * @param 
+ * @param fileData file data structure passed by reference where the file data is stored
+ * @return true if the translation is successful
  */
 bool Translator(fileDataStr& fileData);
