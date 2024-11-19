@@ -88,7 +88,7 @@ struct fileDataStr{
     bool datamodel_mode;   
     bool translate_mode;   
     bool generate_mode;   
-    bool log_mode;
+    bool verbose_mode;
 };
 
 struct templateFileDataStr{

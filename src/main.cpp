@@ -25,7 +25,7 @@ void print_help()
     std::cout << "--interface_filename \"interfaceFile.xml\" ";
     std::cout << "--template_path \"path/to/template_skill/directory\" ";
     std::cout << "--output_path \"path/to/output/directory\"\n";
-    std::cout << "--log_mode [to show log]\n";
+    std::cout << "--verbose_mode [to show log]\n";
     // std::cout << "--datamodel_mode \n";
     // std::cout << "--translate_mode \n";
     // std::cout << "--generate_mode \n";
@@ -49,7 +49,7 @@ bool handleInputs(int argc, char* argv[], fileDataStr& fileData, templateFileDat
     fileData.datamodel_mode         = false;
     fileData.translate_mode         = false;
     fileData.generate_mode          = false;
-    fileData.log_mode               = false;
+    fileData.verbose_mode               = false;
     templateFileData.templatePath   = templateFilePath;
 
     if (argc == 1)
@@ -94,8 +94,8 @@ bool handleInputs(int argc, char* argv[], fileDataStr& fileData, templateFileDat
         else if (arg == "--generate_mode") {
             fileData.generate_mode = true;
         }
-        else if (arg == "--log_mode") {
-            fileData.log_mode = true;
+        else if (arg == "--verbose_mode") {
+            fileData.verbose_mode = true;
         }
     }
     
@@ -182,7 +182,7 @@ int main(int argc, char* argv[])
             return RETURN_CODE_ERROR;
         }
     }
-    if(fileData.log_mode)
+    if(fileData.verbose_mode)
     {
         print_log();
     }
