@@ -32,6 +32,7 @@ To run the model2code use the following parameters:
  - `--interface_filename` (required): The path to the XML file that describes the interfaces used.
  - `--template_path`: The path to the directory containing the templates for the files to be generated. By default, the program uses the `templates` directory.
  - `--output_path`: The path to the directory where the generated files will be placed. By default, the program generates the code in the same directory as the SCXML file specified by the `--input_filename` parameter.
+ - `--log_mode`: To enable logging. By default, the program does not log.
 
 First example
 ```````````````
@@ -62,6 +63,7 @@ To generate the code for this skill, move to the model2code folder and run the f
 
 .. code-block:: bash
     
-    model2code --input_filename "tutorials/skills/second_tutorial_skill/src/SecondTutorialSkill.scxml" --model_filename "tutorials/specifications/full-model.xml" --interface_filename "tutorials/specifications/interfaces.xml" --output_path "tutorials/skills/second_tutorial_skill"
+    model2code --input_filename "tutorials/skills/second_tutorial_skill/src/SecondTutorialSkill.scxml" --model_filename "tutorials/specifications/full-model.xml" --interface_filename "tutorials/specifications/interfaces.xml" --output_path "tutorials/skills/second_tutorial_skill" --log_mode
 
 The generated code will be placed in the `tutorials/skills/second_tutorial_skill` folder. The structure of generated files follows that of the first example, with the only difference being that 'SecondTutorialSkill.cpp' omits the halt service and includes a subscriber for 'Function2'.
+In this example the `--log_mode` parameter is used to enable verbose logging.

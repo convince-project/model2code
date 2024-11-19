@@ -112,16 +112,17 @@ bool readTemplateFile(const std::string filePath, std::string& fileContent)
  * @return true 
  * @return false 
  */
-bool writeFile(const std::string filePath, const std::string fileContent)
+bool writeFile(const std::string filePath, const std::string fileName, const std::string fileContent)
 {
-    std::ofstream outputFile(filePath);
+    std::string path = filePath + fileName;
+    std::ofstream outputFile(path);
     if (!outputFile.is_open()) {
-        std::cerr << "Failed to open file for writing: " << filePath << std::endl;
+        std::cerr << "Failed to open file for writing: " << path << std::endl;
         return false;
     }
     outputFile << fileContent;
     outputFile.close();
-    std::cout << filePath << " file generated" << std::endl;
+    std::cout << fileName << " file generated" << std::endl;
     return true;
 }
 

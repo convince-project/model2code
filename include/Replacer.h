@@ -95,7 +95,12 @@ void replaceEventCode(std::map <std::string, std::string>& codeMap);
  */
 bool readTemplates(templateFileDataStr& templateFileData, std::map <std::string, std::string>& codeMap);
 
-
+/**
+ * @brief function to create a directory
+ * 
+ * @param path string of the directory path
+ * @return true if the directory is created successfully
+ */
 bool createDirectory(const std::string& path);
 
 /**

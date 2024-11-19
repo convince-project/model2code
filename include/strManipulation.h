@@ -56,7 +56,7 @@ bool readTemplateFile(const std::string filePath, std::string& fileContent);
  * @return true 
  * @return false 
  */
-bool writeFile(const std::string filePath, const std::string fileContent);
+bool writeFile(const std::string filePath, const std::string fileName, const std::string fileContent);
 
 /**
  * @brief function that replaces all the occurences of a string with another string

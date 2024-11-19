@@ -21,7 +21,7 @@
 bool getEventData(fileDataStr fileData, eventDataStr& eventData)
 {
     if(eventsMap.find(eventData.event) != eventsMap.end()){
-        std::cout << "Event already processed: " << eventData.event << std::endl;
+        add_to_log("Event already processed: " + eventData.event);
         return true;
     } 
     eventsMap[eventData.event];
@@ -67,7 +67,8 @@ bool getEventsVecData(fileDataStr fileData, const std::vector<tinyxml2::XMLEleme
     
         if (event && target) 
         {
-            std::cout << "\nTransition: event=" << event << ", target=" << target << std::endl;
+
+            add_to_log("Transition: event=" + std::string(event) + ", target=" + std::string(target));
             eventDataStr eventData;
             eventData.target = target;
             eventData.event = event;
@@ -87,7 +88,7 @@ bool getEventsVecData(fileDataStr fileData, const std::vector<tinyxml2::XMLEleme
 
         if (event) 
         {
-            std::cout << "\nSend: event=" << event << std::endl;
+            add_to_log("Send: event=" + std::string(event));
             eventDataStr eventData;
             eventData.event = event;
             eventData.eventType = "send";
@@ -98,7 +99,7 @@ bool getEventsVecData(fileDataStr fileData, const std::vector<tinyxml2::XMLEleme
                 getElementAttValue(element, "name", paramName);
                 getElementAttValue(element, "expr", paramExpr);
                 eventData.paramMap[paramName] = paramExpr;
-                std::cout << "\tparamName=" << paramName << ", paramExpr=" << eventData.paramMap[paramName] << std::endl;
+                add_to_log("\tparamName=" + paramName + ", paramExpr=" + eventData.paramMap[paramName]);
             }
             if(!getEventData(fileData, eventData))
             {
@@ -424,15 +425,21 @@ bool readTemplates(templateFileDataStr& templateFileData, std::map <std::string,
     return res;
 }
 
+/**
+ * @brief function to create a directory
+ * 
+ * @param path path to the directory
+ * @return true if the directory is created successfully
+ */
 bool createDirectory(const std::string& path) {
     namespace fs = std::filesystem;
     try {
         // Create the directory (and any intermediate directories, if necessary)
         if (fs::create_directories(path)) {
-            std::cout << "Directory created successfully: " << path << std::endl;
+            add_to_log("Directory created successfully: " + path);
             return true;
         } else {
-            std::cerr << "Directory already exists or failed to create: " << path << std::endl;
+            add_to_log("Directory already exists or failed to create: " + path);
             return false;
         }
     } catch (const fs::filesystem_error& err) {
@@ -447,8 +454,7 @@ bool createDirectory(const std::string& path) {
  * 
  * @param fileData file data structure passed by reference where the file data is stored
  * @param templateFileData template file data structure passed by reference where the template file data is stored
- * @return true 
- * @return false 
+ * @return true if the generation is successful
  */
 bool Replacer(fileDataStr& fileData, templateFileDataStr& templateFileData)
 { 
@@ -457,7 +463,7 @@ bool Replacer(fileDataStr& fileData, templateFileDataStr& templateFileData)
     std::map <std::string, std::string> codeMap;
     std::vector<tinyxml2::XMLElement *> elementsTransition, elementsSend;
     tinyxml2::XMLDocument doc;
-    std::cout << "-----------" << std::endl;
+    add_to_log("-----------");
     if(!extractFromSCXML(doc, fileData.inputFileNameGeneration, rootName, elementsTransition, elementsSend)){
         return 0;
     }
@@ -473,7 +479,6 @@ bool Replacer(fileDataStr& fileData, templateFileDataStr& templateFileData)
     }
 
     for (auto it = codeMap.begin(); it != codeMap.end(); it++) {
-        // std::cout << it->first << ": " << it->second << std::endl;
         replaceAll(it->second, "$className$", skillData.className);
         replaceAll(it->second, "$projectName$", skillData.classNameSnakeCase);
         replaceAll(it->second, "$SMName$", skillData.SMName);
@@ -501,22 +506,23 @@ bool Replacer(fileDataStr& fileData, templateFileDataStr& templateFileData)
         return false;
     }
     replaceEventCode(codeMap);
-    std::cout << "-----------" << std::endl;
+
+    add_to_log("-----------");
     if(fileData.datamodel_mode)
     {
-        writeFile(fileData.outputPathInclude + fileData.outputDatamodelFileNameH, codeMap["hDataModelCode"]);
-        writeFile(fileData.outputPathSrc + fileData.outputDatamodelFileNameCPP, codeMap["cppDataModelCode"]);
+        writeFile(fileData.outputPathInclude, fileData.outputDatamodelFileNameH, codeMap["hDataModelCode"]);
+        writeFile(fileData.outputPathSrc, fileData.outputDatamodelFileNameCPP, codeMap["cppDataModelCode"]);
     }
-    std::cout << "-----------" << std::endl;
+    add_to_log("-----------");
     createDirectory(fileData.outputPath);
     createDirectory(fileData.outputPathInclude);
     createDirectory(fileData.outputPathSrc);
-    std::cout << "-----------" << std::endl;
-    writeFile(fileData.outputPathInclude + fileData.outputFileNameH, codeMap["hCode"]);
-    writeFile(fileData.outputPathSrc + fileData.outputFileNameCPP, codeMap["cppCode"]);
-    writeFile(fileData.outputPath + fileData.outputCMakeListsFileName, codeMap["cmakeCode"]);
-    writeFile(fileData.outputPath + fileData.outputPackageXMLFileName, codeMap["packageCode"]);
-    writeFile(fileData.outputPathSrc + fileData.outputMainFileName, codeMap["mainCode"]);
+    add_to_log("-----------");
+    writeFile(fileData.outputPathInclude, fileData.outputFileNameH, codeMap["hCode"]);
+    writeFile(fileData.outputPathSrc, fileData.outputFileNameCPP, codeMap["cppCode"]);
+    writeFile(fileData.outputPath, fileData.outputCMakeListsFileName, codeMap["cmakeCode"]);
+    writeFile(fileData.outputPath, fileData.outputPackageXMLFileName, codeMap["packageCode"]);
+    writeFile(fileData.outputPathSrc, fileData.outputMainFileName, codeMap["mainCode"]);
 
     return true;
 }
