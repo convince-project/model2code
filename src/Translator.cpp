@@ -587,6 +587,70 @@ bool readHLXMLFile(tinyxml2::XMLDocument& doc, std::string& fileContent, const s
     return true;
 }
 
+void insertElementAfter(tinyxml2::XMLElement* parent, tinyxml2::XMLElement* referenceElement, tinyxml2::XMLElement* newElement) {
+    if (parent && referenceElement && newElement) {
+        parent->InsertAfterChild(referenceElement, newElement);
+    } else {
+        std::cerr << "Errore: parent, referenceElement o newElement è nullo.\n";
+    }
+}
+
+bool translateRosActionHandleGoalResponseTag(tinyxml2::XMLElement* root, std::map<std::string, std::string> nameToActionNameMap)
+{
+    std::vector<tinyxml2::XMLElement*> actionHandleGoalRspVector;
+    findElementVectorByTag(root, std::string("ros_action_handle_goal_response"), actionHandleGoalRspVector);
+    replaceAttributeNameFromVector(actionHandleGoalRspVector, "name", "event");
+    for(auto& element : actionHandleGoalRspVector){
+        const char* eventValue = element->Attribute("event");
+        if (eventValue) {
+            std::string eventStr(eventValue);
+            auto it = nameToActionNameMap.find(eventStr);
+            if (it != nameToActionNameMap.end()) {
+                // Replacing the event value with the action name
+                element->SetAttribute("event", it->second.c_str());
+                add_to_log("Updating: " + eventStr + " -> " + it->second);
+            } else {
+                add_to_log("No update for: " + eventStr);
+            }
+        } else {
+            add_to_log("No 'event' attribute found");
+        }
+        replaceEventValueFromVector(actionHandleGoalRspVector);
+            appendAttributeValueFromVector(actionHandleGoalRspVector, "event", ".GoalResponse");
+        const char* newEventValue = element->Attribute("event");
+        const char* acceptState = element->Attribute("accept");
+        const char* rejectState = element->Attribute("reject");
+        if (newEventValue && acceptState && rejectState) {
+            std::string eventStr(newEventValue);
+
+            // Crea il nodo <transition> per "accept"
+            tinyxml2::XMLElement* acceptTransition = element->GetDocument()->NewElement("transition");
+            acceptTransition->SetAttribute("event", (eventStr ).c_str());
+            acceptTransition->SetAttribute("cond", "_event.data.is_ok");
+            acceptTransition->SetAttribute("target", acceptState);
+
+            // Crea il nodo <transition> per "reject"
+            tinyxml2::XMLElement* rejectTransition = element->GetDocument()->NewElement("transition");
+            rejectTransition->SetAttribute("event", (eventStr).c_str());
+            rejectTransition->SetAttribute("cond", "_event.data.is_ok == false");
+            rejectTransition->SetAttribute("target", rejectState);
+
+            // Ottieni il genitore dell'elemento corrente
+            tinyxml2::XMLElement* parent = element->Parent()->ToElement();
+
+            // Inserisci i nuovi elementi dopo l'elemento corrente
+            insertElementAfter(parent, element, acceptTransition);
+            insertElementAfter(parent, acceptTransition, rejectTransition);
+
+            // Rimuovi l'elemento originale
+            parent->DeleteChild(element);
+        } else {
+            add_to_log("Attributi mancanti: event, accept o reject.");
+        }
+    }
+    
+}
+
 /**
  * @brief translator function to translate the high level xml to scxml
  * 
@@ -639,7 +703,23 @@ bool Translator(fileDataStr& fileData){
     findElementVectorByTag(root, std::string("ros_topic_subscriber"), serverVector);
     findElementVectorByTag(root, std::string("ros_service_client"), serverVector); 
     findElementVectorByTag(root, std::string("ros_topic_publisher"), serverVector); 
-    findElementVectorByTag(root, std::string("ros_action_client"), serverVector);
+    std::vector<tinyxml2::XMLElement*> actionVector;
+    findElementVectorByTag(root, std::string("ros_action_client"), actionVector);
+    std::map<std::string, std::string> nameToActionNameMap;
+     for (tinyxml2::XMLElement* element : actionVector) {
+        const char* name = element->Attribute("name");
+        const char* actionName = element->Attribute("action_name");
+
+        if (name && actionName) {
+            nameToActionNameMap[name] = actionName;
+        } else {
+            std::cerr << "Missing attribute in ros_action_client tag\n";
+        }
+    }
+    // for (const auto& pair : nameToActionNameMap) {
+    //     std::cout << "Name: " << pair.first << " -> Action Name: " << pair.second << "\n";
+    // }
+    deleteElementFromVector(actionVector);
     deleteElementFromVector(serverVector);
     
     // add xmln
@@ -693,7 +773,6 @@ bool Translator(fileDataStr& fileData){
         replaceTagNameFromVector(&doc, srvSendRspFieldVector, "param");
     }
     replaceTagNameFromVector(&doc, srvSendRspVector, "send");
-    
 
     // Translate elements with tag ros_topic_callback 
     std::vector<tinyxml2::XMLElement*> topicCallbackVector;
@@ -710,6 +789,136 @@ bool Translator(fileDataStr& fileData){
     replaceAttributeValueSubstringFromVector(assignVector, "expr", "_res.", "_event.data.");
     // appendAttributeValueFromVector(assignVector, "expr", ".");
     // appendAttributeValueLocationFromVector(assignVector, "expr");
+
+    // Translate elements with tag ros_action_send_goal
+    std::vector<tinyxml2::XMLElement*> actionSendGoalVector;
+    findElementVectorByTag(root, std::string("ros_action_send_goal"), actionSendGoalVector);
+    replaceAttributeNameFromVector(actionSendGoalVector, "name", "event");
+    for (auto& element : actionSendGoalVector) {
+        const char* eventValue = element->Attribute("event");
+        if (eventValue) {
+            std::string eventStr(eventValue);
+            auto it = nameToActionNameMap.find(eventStr);
+            if (it != nameToActionNameMap.end()) {
+                // Replacing the event value with the action name
+                element->SetAttribute("event", it->second.c_str());
+                add_to_log("Updating: " + eventStr + " -> " + it->second);
+            } else {
+                add_to_log("No update for: " + eventStr);
+            }
+        } else {
+            add_to_log("No 'event' attribute found");
+        }
+    }    
+    replaceEventValueFromVector(actionSendGoalVector);
+    appendAttributeValueFromVector(actionSendGoalVector, "event", ".SendGoal");
+    for (auto& element : actionSendGoalVector) {
+        std::vector<tinyxml2::XMLElement*> actionFieldVector;
+        findElementVectorByTag(element, std::string("field"), actionFieldVector);
+        replaceTagNameFromVector(&doc, actionFieldVector, "param");
+    }
+    replaceTagNameFromVector(&doc, actionSendGoalVector, "send");
+
+    // Translate elements with tag ros_action_handle_goal_response
+    translateRosActionHandleGoalResponseTag(root, nameToActionNameMap);
+
+    //Translate elements with tag ros_action_handle_feedback
+    std::vector<tinyxml2::XMLElement*> actionHandleFeedbackVector;
+    findElementVectorByTag(root, std::string("ros_action_handle_feedback"), actionHandleFeedbackVector);
+    replaceAttributeNameFromVector(actionHandleFeedbackVector, "name", "event");
+    for (auto& element : actionHandleFeedbackVector) {
+        const char* eventValue = element->Attribute("event");
+        if (eventValue) {
+            std::string eventStr(eventValue);
+            auto it = nameToActionNameMap.find(eventStr);
+            if (it != nameToActionNameMap.end()) {
+                // Replacing the event value with the action name
+                element->SetAttribute("event", it->second.c_str());
+                add_to_log("Updating: " + eventStr + " -> " + it->second);
+            } else {
+                add_to_log("No update for: " + eventStr);
+            }
+        } else {
+            add_to_log("No 'event' attribute found");
+        }
+    }
+    replaceEventValueFromVector(actionHandleFeedbackVector);
+    appendAttributeValueFromVector(actionHandleFeedbackVector, "event", ".FeedbackReturn");
+    replaceTagNameFromVector(&doc, actionHandleFeedbackVector, "transition");
+    replaceAttributeValueSubstringFromVector(assignVector, "expr", "_feedback.", "_event.data.");
+
+    // Translate elements with tag ros_action_handle_success_result
+    std::vector<tinyxml2::XMLElement*> actionHandleSuccessResultVector;
+    findElementVectorByTag(root, std::string("ros_action_handle_success_result"), actionHandleSuccessResultVector);
+    replaceAttributeNameFromVector(actionHandleSuccessResultVector, "name", "event");
+    for (auto& element : actionHandleSuccessResultVector) {
+        const char* eventValue = element->Attribute("event");
+        if (eventValue) {
+            std::string eventStr(eventValue);
+            auto it = nameToActionNameMap.find(eventStr);
+            if (it != nameToActionNameMap.end()) {
+                // Replacing the event value with the action name
+                element->SetAttribute("event", it->second.c_str());
+                add_to_log("Updating: " + eventStr + " -> " + it->second);
+            } else {
+                add_to_log("No update for: " + eventStr);
+            }
+        } else {
+            add_to_log("No 'event' attribute found");
+        }
+    }
+    replaceEventValueFromVector(actionHandleSuccessResultVector);
+    appendAttributeValueFromVector(actionHandleSuccessResultVector, "event", ".ResultResponse");
+    replaceTagNameFromVector(&doc, actionHandleSuccessResultVector, "transition");
+    replaceAttributeValueSubstringFromVector(assignVector, "expr", "_wrapped_result.result.", "_event.data.");
+
+    // Translate elements with tag ros_action_handle_cancel_response
+    std::vector<tinyxml2::XMLElement*> actionHandleCancelResultVector;
+    findElementVectorByTag(root, std::string("ros_action_handle_cancel_result"), actionHandleCancelResultVector);
+    replaceAttributeNameFromVector(actionHandleCancelResultVector, "name", "event");
+    for (auto& element : actionHandleCancelResultVector) {
+        const char* eventValue = element->Attribute("event");
+        if (eventValue) {
+            std::string eventStr(eventValue);
+            auto it = nameToActionNameMap.find(eventStr);
+            if (it != nameToActionNameMap.end()) {
+                // Replacing the event value with the action name
+                element->SetAttribute("event", it->second.c_str());
+                add_to_log("Updating: " + eventStr + " -> " + it->second);
+            } else {
+                add_to_log("No update for: " + eventStr);
+            }
+        } else {
+            add_to_log("No 'event' attribute found");
+        }
+    }
+    replaceEventValueFromVector(actionHandleCancelResultVector);
+    appendAttributeValueFromVector(actionHandleCancelResultVector, "event", ".CancelResult");
+    replaceTagNameFromVector(&doc, actionHandleCancelResultVector, "transition");
+
+    //Translate elements with tag ros_action_send_cancel
+    std::vector<tinyxml2::XMLElement*> actionSendCancelVector;
+    findElementVectorByTag(root, std::string("ros_action_send_cancel"), actionSendCancelVector);
+    replaceAttributeNameFromVector(actionSendCancelVector, "name", "event");
+    for (auto& element : actionSendCancelVector) {
+        const char* eventValue = element->Attribute("event");
+        if (eventValue) {
+            std::string eventStr(eventValue);
+            auto it = nameToActionNameMap.find(eventStr);
+            if (it != nameToActionNameMap.end()) {
+                // Replacing the event value with the action name
+                element->SetAttribute("event", it->second.c_str());
+                add_to_log("Updating: " + eventStr + " -> " + it->second);
+            } else {
+                add_to_log("No update for: " + eventStr);
+            }
+        } else {
+            add_to_log("No 'event' attribute found");
+        }
+    }
+    replaceEventValueFromVector(actionSendCancelVector);
+    appendAttributeValueFromVector(actionSendCancelVector, "event", ".SendCancel");
+    replaceTagNameFromVector(&doc, actionSendCancelVector, "send");
 
     // doc.Print();
     std::string ouputFilePath = fileData.outputPathSrc + skillData.className + "SM.scxml";
