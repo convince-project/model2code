@@ -195,6 +195,23 @@ void handleRspHaltEvent(std::string& code,const bool keepFlag)
 }
 
 /**
+ * @brief function that event placeholders in the code
+ * 
+ * @param code string of code to be modified
+ * @param eventData event data structure containing event information
+ */
+void replaceCommonEventPlaceholders(std::string& code, const eventDataStr& eventData) {
+    replaceAll(code, "$eventData.event$", eventData.event);
+    replaceAll(code, "$eventData.componentName$", eventData.componentName);
+    replaceAll(code, "$eventData.functionName$", eventData.functionName);
+    replaceAll(code, "$eventData.nodeName$", eventData.nodeName);
+    replaceAll(code, "$eventData.serverName$", eventData.serverName);
+    replaceAll(code, "$eventData.clientName$", eventData.clientName);
+    replaceAll(code, "$eventData.interfaceName$", eventData.interfaceName);
+}
+
+
+/**
  * @brief function to write the generic event code in the output string
  * 
  * @param eventData event data structure containing event information
@@ -213,14 +230,7 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
         {
             std::string eventCodeC = savedCode.eventC;
             //CPP
-            replaceAll(eventCodeC, "$eventData.event$", eventData.event);
-            replaceAll(eventCodeC, "$eventData.componentName$", eventData.componentName);
-            replaceAll(eventCodeC, "$eventData.functionName$", eventData.functionName);
-            replaceAll(eventCodeC, "$eventData.nodeName$", eventData.nodeName);
-            replaceAll(eventCodeC, "$eventData.serverName$", eventData.serverName);
-            replaceAll(eventCodeC, "$eventData.clientName$", eventData.clientName);
-            replaceAll(eventCodeC, "$eventData.interfaceName$", eventData.interfaceName);
-            
+            replaceCommonEventPlaceholders(eventCodeC, eventData);
             for (auto itParam =  eventData.paramMap.begin(); itParam != eventData.paramMap.end(); ++itParam) 
             {
                 std::string paramCode = savedCode.sendParam;
@@ -268,31 +278,19 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             std::string eventSendGoal = "SendGoal";
             if (std::string(eventData.eventName).find(eventSendGoal) != std::string::npos) {
                 std::string actionSendGoalLambda = savedCode.actionSendGoalLambda;
-                replaceAll(actionSendGoalLambda, "$eventData.event$", eventData.event);
-                replaceAll(actionSendGoalLambda, "$eventData.componentName$", eventData.componentName);
-                replaceAll(actionSendGoalLambda, "$eventData.functionName$", eventData.functionName);
-                replaceAll(actionSendGoalLambda, "$eventData.nodeName$", eventData.nodeName);
-                replaceAll(actionSendGoalLambda, "$eventData.serverName$", eventData.serverName);
-                replaceAll(actionSendGoalLambda, "$eventData.clientName$", eventData.clientName);
-                replaceAll(actionSendGoalLambda, "$eventData.interfaceName$", eventData.interfaceName);
+                replaceCommonEventPlaceholders(actionSendGoalLambda, eventData);
                 writeAfterCommand(str, "/*ACTION_LAMBDA_LIST*/", actionSendGoalLambda);
 
                 std::string actionSendGoalFnc = savedCode.actionSendGoalFnc;
-                replaceAll(actionSendGoalFnc, "$eventData.functionName$", eventData.functionName);
-                replaceAll(actionSendGoalFnc, "$eventData.componentName$", eventData.componentName);
-                replaceAll(actionSendGoalFnc, "$eventData.interfaceName$", eventData.interfaceName);
+                replaceCommonEventPlaceholders(actionSendGoalFnc, eventData);
                 writeAfterCommand(str, "/*ACTION_FNC_LIST*/", actionSendGoalFnc);
 
                 std::string actionCodeH = savedCode.actionH;
-                replaceAll(actionCodeH, "$eventData.interfaceName$", eventData.interfaceName);
-                replaceAll(actionCodeH, "$eventData.functionName$", eventData.functionName);
-                replaceAll(actionCodeH, "$eventData.componentName$", eventData.componentName);
+                replaceCommonEventPlaceholders(actionCodeH, eventData);
                 writeAfterCommand(str, "/*ACTION_LIST_H*/", actionCodeH);
 
                 std::string actionCodeC = savedCode.actionC;
-                replaceAll(actionCodeC, "$eventData.interfaceName$", eventData.interfaceName);
-                replaceAll(actionCodeC, "$eventData.functionName$", eventData.functionName);
-                replaceAll(actionCodeC, "$eventData.componentName$", eventData.componentName);
+                replaceCommonEventPlaceholders(actionCodeC, eventData);
                 writeAfterCommand(str, "/*ACTION_LIST_C*/", actionCodeC);
 
                 //H
@@ -317,7 +315,6 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
 
                 for (auto itParam =  eventData.paramMap.begin(); itParam != eventData.paramMap.end(); ++itParam) 
                 {
-                    std::cout << "paramName: " << itParam->first << " paramExpr: " << itParam->second << std::endl;
                     std::string paramCode = savedCode.actionSendParam;
                     replaceAll(paramCode, "$IT->FIRST$", itParam->first);
                     writeAfterCommand(str, "/*SEND_PARAM_LIST*/", paramCode);
@@ -387,19 +384,11 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             if (std::string(eventData.eventName).find(eventFeedbackReturn) != std::string::npos)
             {
                 std::string actionFeedbackCallback = savedCode.actionFeedbackCallback;
-                replaceAll(actionFeedbackCallback, "$eventData.event$", eventData.event);
-                replaceAll(actionFeedbackCallback, "$eventData.componentName$", eventData.componentName);
-                replaceAll(actionFeedbackCallback, "$eventData.functionName$", eventData.functionName);
-                replaceAll(actionFeedbackCallback, "$eventData.nodeName$", eventData.nodeName);
-                replaceAll(actionFeedbackCallback, "$eventData.serverName$", eventData.serverName);
-                replaceAll(actionFeedbackCallback, "$eventData.clientName$", eventData.clientName);
-                replaceAll(actionFeedbackCallback, "$eventData.interfaceName$", eventData.interfaceName);
+                replaceCommonEventPlaceholders(actionFeedbackCallback, eventData);
                 writeAfterCommand(str, "/*ACTION_FNC_LIST*/", actionFeedbackCallback);
 
                 std::string actionFeedbackLambda = savedCode.actionFeedbackLambda;
-                replaceAll(actionFeedbackLambda, "$eventData.event$", eventData.event);
-                replaceAll(actionFeedbackLambda, "$eventData.componentName$", eventData.componentName);
-                replaceAll(actionFeedbackLambda, "$eventData.functionName$", eventData.functionName);
+                replaceCommonEventPlaceholders(actionFeedbackLambda, eventData);
                 writeAfterCommand(str, "/*ACTION_LAMBDA_LIST*/", actionFeedbackLambda);
                 for (auto itParam =  eventData.interfaceData.begin(); itParam != eventData.interfaceData.end(); ++itParam) 
                 {
@@ -425,32 +414,17 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             else if(std::string(eventData.eventName).find(eventGoalResponse) != std::string::npos)
             {
                 std::string actionGoalResponseFnc = savedCode.actionGoalResponseFnc;
-                replaceAll(actionGoalResponseFnc, "$eventData.event$", eventData.event);
-                replaceAll(actionGoalResponseFnc, "$eventData.componentName$", eventData.componentName);
-                replaceAll(actionGoalResponseFnc, "$eventData.functionName$", eventData.functionName);
-                replaceAll(actionGoalResponseFnc, "$eventData.nodeName$", eventData.nodeName);
-                replaceAll(actionGoalResponseFnc, "$eventData.serverName$", eventData.serverName);
-                replaceAll(actionGoalResponseFnc, "$eventData.clientName$", eventData.clientName);
-                replaceAll(actionGoalResponseFnc, "$eventData.interfaceName$", eventData.interfaceName);
+                replaceCommonEventPlaceholders(actionGoalResponseFnc, eventData);
                 writeAfterCommand(str, "/*ACTION_FNC_LIST*/", actionGoalResponseFnc);
             }
             else if(std::string(eventData.eventName).find(eventResultResponse) != std::string::npos)
             {
                 std::string actionResultCallbackFnc = savedCode.actionResultCallbackFnc;
-                replaceAll(actionResultCallbackFnc, "$eventData.event$", eventData.event);
-                replaceAll(actionResultCallbackFnc, "$eventData.componentName$", eventData.componentName);
-                replaceAll(actionResultCallbackFnc, "$eventData.functionName$", eventData.functionName);
-                replaceAll(actionResultCallbackFnc, "$eventData.nodeName$", eventData.nodeName);
-                replaceAll(actionResultCallbackFnc, "$eventData.serverName$", eventData.serverName);
-                replaceAll(actionResultCallbackFnc, "$eventData.clientName$", eventData.clientName);
-                replaceAll(actionResultCallbackFnc, "$eventData.interfaceName$", eventData.interfaceName);
+                replaceCommonEventPlaceholders(actionResultCallbackFnc, eventData);
                 writeAfterCommand(str, "/*ACTION_FNC_LIST*/", actionResultCallbackFnc);
 
                 std::string actionResultRequestLambda = savedCode.actionResultRequestLambda;
-                replaceAll(actionResultRequestLambda, "$eventData.event$", eventData.event);
-                replaceAll(actionResultRequestLambda, "$eventData.componentName$", eventData.componentName);
-                replaceAll(actionResultRequestLambda, "$eventData.functionName$", eventData.functionName);
-                replaceAll(actionResultRequestLambda, "$eventData.interfaceName$", eventData.interfaceName);
+                replaceCommonEventPlaceholders(actionResultRequestLambda, eventData);
                 writeAfterCommand(str, "/*ACTION_LAMBDA_LIST*/", actionResultRequestLambda);
 
             }
