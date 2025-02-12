@@ -57,7 +57,7 @@ private:
 	/*DATAMODEL*/$skillName$SkillDataModel m_dataModel; /*END_DATAMODEL*/
 	/*TOPIC_SUBSCRIPTIONS_LIST_H*/
 	/*TOPIC_SUBSCRIPTION_H*/
-	rclcpp::Subscription<$eventData.interfaceName$::action::$eventData.functionName$>::SharedPtr m_subscription_$eventData.functionName$;/*END_TOPIC_SUBSCRIPTION_H*/
+	rclcpp::Subscription<$eventData.interfaceData[interfaceDataType]$>::SharedPtr m_subscription_$eventData.functionName$;/*END_TOPIC_SUBSCRIPTION_H*/
 	/*ACTION_LIST_H*//*ACTION_H*/
 	std::shared_ptr<rclcpp::Node> m_node_action;
 	std::mutex m_actionMutex;
