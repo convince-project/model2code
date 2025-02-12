@@ -32,7 +32,7 @@ Required parameters:
 By default, the program generates the code in the same directory as the SCXML file specified by the ``--input_filename`` parameter. However, you can select a different output directory by using the ``--output_path`` parameter.
 
 Additionally, the program uses files from the ``templates`` directory by default to generate the code, but you can specify a different directory with the ``--templates_path`` parameter.
-The ``--log_mode`` parameter can be used to enable verbose logging.
+The ``--verbose_mode`` parameter can be used to enable verbose logging.
 
 The generated skills are based on a behavior tree structure. Skills corresponding to condition nodes will have a ROS2 tick service, while skills corresponding to action nodes will have both tick and halt services.
 
