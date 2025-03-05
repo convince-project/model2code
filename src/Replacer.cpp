@@ -195,6 +195,23 @@ void handleRspHaltEvent(std::string& code,const bool keepFlag)
 }
 
 /**
+ * @brief function that event placeholders in the code
+ * 
+ * @param code string of code to be modified
+ * @param eventData event data structure containing event information
+ */
+void replaceCommonEventPlaceholders(std::string& code, const eventDataStr& eventData) {
+    replaceAll(code, "$eventData.event$", eventData.event);
+    replaceAll(code, "$eventData.componentName$", eventData.componentName);
+    replaceAll(code, "$eventData.functionName$", eventData.functionName);
+    replaceAll(code, "$eventData.nodeName$", eventData.nodeName);
+    replaceAll(code, "$eventData.serverName$", eventData.serverName);
+    replaceAll(code, "$eventData.clientName$", eventData.clientName);
+    replaceAll(code, "$eventData.interfaceName$", eventData.interfaceName);
+}
+
+
+/**
  * @brief function to write the generic event code in the output string
  * 
  * @param eventData event data structure containing event information
@@ -204,22 +221,16 @@ void handleRspHaltEvent(std::string& code,const bool keepFlag)
 void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCode, std::string& str)
 {
     if(eventData.eventType == "send"){
+        std::string interfaceCodeH = savedCode.interfaceH;
+        std::string actionInterfaceH = savedCode.actionInterfaceH;
+        std::string interfaceCodeCMake = savedCode.interfaceCMake;
+        std::string packageCodeCMake = savedCode.packageCMake;
+        std::string interfaceCodeXML = savedCode.interfaceXML;
         if(eventData.interfaceType == "async-service" || eventData.interfaceType == "sync-service")
         {
             std::string eventCodeC = savedCode.eventC;
-            std::string interfaceCodeH = savedCode.interfaceH;
-            std::string interfaceCodeCMake = savedCode.interfaceCMake;
-            std::string packageCodeCMake = savedCode.packageCMake;
-            std::string interfaceCodeXML = savedCode.interfaceXML;
             //CPP
-            replaceAll(eventCodeC, "$eventData.event$", eventData.event);
-            replaceAll(eventCodeC, "$eventData.componentName$", eventData.componentName);
-            replaceAll(eventCodeC, "$eventData.functionName$", eventData.functionName);
-            replaceAll(eventCodeC, "$eventData.nodeName$", eventData.nodeName);
-            replaceAll(eventCodeC, "$eventData.serverName$", eventData.serverName);
-            replaceAll(eventCodeC, "$eventData.clientName$", eventData.clientName);
-            replaceAll(eventCodeC, "$eventData.interfaceName$", eventData.interfaceName);
-            
+            replaceCommonEventPlaceholders(eventCodeC, eventData);
             for (auto itParam =  eventData.paramMap.begin(); itParam != eventData.paramMap.end(); ++itParam) 
             {
                 std::string paramCode = savedCode.sendParam;
@@ -260,7 +271,57 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
                 writeAfterCommand(str, "<!--INTERFACE_LIST-->", interfaceCodeXML);
             }
         }
+        else if(eventData.interfaceType == "action")
+        {
+            //If event is Send Goal replace tags in savedCode.actionSendGoalLambda
+            //If event is Send Cancel replace tags in savedCode.actionSendCancelLambda
+            std::string eventSendGoal = "SendGoal";
+            if (std::string(eventData.eventName).find(eventSendGoal) != std::string::npos) {
+                std::string actionSendGoalLambda = savedCode.actionSendGoalLambda;
+                replaceCommonEventPlaceholders(actionSendGoalLambda, eventData);
+                writeAfterCommand(str, "/*ACTION_LAMBDA_LIST*/", actionSendGoalLambda);
 
+                std::string actionSendGoalFnc = savedCode.actionSendGoalFnc;
+                replaceCommonEventPlaceholders(actionSendGoalFnc, eventData);
+                writeAfterCommand(str, "/*ACTION_FNC_LIST*/", actionSendGoalFnc);
+
+                std::string actionCodeH = savedCode.actionH;
+                replaceCommonEventPlaceholders(actionCodeH, eventData);
+                writeAfterCommand(str, "/*ACTION_LIST_H*/", actionCodeH);
+
+                std::string actionCodeC = savedCode.actionC;
+                replaceCommonEventPlaceholders(actionCodeC, eventData);
+                writeAfterCommand(str, "/*ACTION_LIST_C*/", actionCodeC);
+
+                //H
+                replaceAll(actionInterfaceH, "$eventData.interfaceName$", eventData.interfaceName);
+                replaceAll(actionInterfaceH, "$eventData.functionNameSnakeCase$", eventData.functionNameSnakeCase);
+                writeAfterCommand(str, "/*INTERFACES_LIST*/", actionInterfaceH);
+                //CMakeLists.txt
+                replaceAll(interfaceCodeCMake, "$interfaceName$", eventData.interfaceName);
+                if(!checkIfStrPresent(str, interfaceCodeCMake)){
+                    writeAfterCommand(str, "#INTERFACE_LIST#", interfaceCodeCMake);
+                }
+                replaceAll(packageCodeCMake, "$interfaceName$", eventData.interfaceName);
+                if(!checkIfStrPresent(str, packageCodeCMake)){
+                    writeAfterCommand(str, "#PACKAGE_LIST#", packageCodeCMake);
+                }
+
+                //package.xml
+                replaceAll(interfaceCodeXML, "$interfaceName$", eventData.interfaceName);
+                if(!checkIfStrPresent(str, interfaceCodeXML)){
+                    writeAfterCommand(str, "<!--INTERFACE_LIST-->", interfaceCodeXML);
+                }
+
+                for (auto itParam =  eventData.paramMap.begin(); itParam != eventData.paramMap.end(); ++itParam) 
+                {
+                    std::string paramCode = savedCode.actionSendParam;
+                    replaceAll(paramCode, "$IT->FIRST$", itParam->first);
+                    writeAfterCommand(str, "/*SEND_PARAM_LIST*/", paramCode);
+                }
+                
+            }
+        }
     }
     else if(eventData.eventType == "transition")
     {
@@ -312,6 +373,62 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             //     writeAfterCommand(str, "<!--INTERFACE_LIST-->", interfaceCodeXML);
             // }
         }
+        else if(eventData.interfaceType == "action")
+        {
+            //If event is Goal Response replace tags in savedCode.actionGoalResponseFnc 
+            //If event is Feedback Return replace tags in savedCode.actionFeedbackCallback, e quelli di actionFeedbackLambda?
+            //If event is Result Response replace tags in savedCode.actionResultCallbackFnc
+            std::string eventFeedbackReturn = "FeedbackReturn";
+            std::string eventGoalResponse = "GoalResponse";
+            std::string eventResultResponse = "ResultResponse";
+            if (std::string(eventData.eventName).find(eventFeedbackReturn) != std::string::npos)
+            {
+                std::string actionFeedbackCallback = savedCode.actionFeedbackCallback;
+                replaceCommonEventPlaceholders(actionFeedbackCallback, eventData);
+                writeAfterCommand(str, "/*ACTION_FNC_LIST*/", actionFeedbackCallback);
+
+                std::string actionFeedbackLambda = savedCode.actionFeedbackLambda;
+                replaceCommonEventPlaceholders(actionFeedbackLambda, eventData);
+                writeAfterCommand(str, "/*ACTION_LAMBDA_LIST*/", actionFeedbackLambda);
+                for (auto itParam =  eventData.interfaceData.begin(); itParam != eventData.interfaceData.end(); ++itParam) 
+                {
+                    std::string feedbackParamCode = savedCode.actionFeedbackParam;
+                    replaceAll(feedbackParamCode, "$eventData.interfaceDataField$", itParam->first);
+                    writeAfterCommand(str, "/*FEEDBACK_PARAM_LIST*/", feedbackParamCode);
+                }
+                for (auto itParam =  eventData.interfaceData.begin(); itParam != eventData.interfaceData.end(); ++itParam) 
+                {
+                    std::string feedbackParamCodeFnc = savedCode.actionFeedbackParamFnc;
+                    replaceAll(feedbackParamCodeFnc, "$eventData.interfaceDataField$", itParam->first);
+                    writeAfterCommand(str, "/*FEEDBACK_PARAM_LIST_FNC*/", feedbackParamCodeFnc);
+                }
+                for (auto itParam =  eventData.interfaceData.begin(); itParam != eventData.interfaceData.end(); ++itParam) 
+                {
+                    std::string feedbackData = savedCode.actionFeedbackData;
+                    replaceAll(feedbackData, "$eventData.interfaceDataField$", itParam->first);
+                    replaceAll(feedbackData, "$eventData.interfaceDataType$", itParam->second);
+                    writeAfterCommand(str, "/*FEEDBACK_DATA_LIST*/", feedbackData);
+                }
+
+            }
+            else if(std::string(eventData.eventName).find(eventGoalResponse) != std::string::npos)
+            {
+                std::string actionGoalResponseFnc = savedCode.actionGoalResponseFnc;
+                replaceCommonEventPlaceholders(actionGoalResponseFnc, eventData);
+                writeAfterCommand(str, "/*ACTION_FNC_LIST*/", actionGoalResponseFnc);
+            }
+            else if(std::string(eventData.eventName).find(eventResultResponse) != std::string::npos)
+            {
+                std::string actionResultCallbackFnc = savedCode.actionResultCallbackFnc;
+                replaceCommonEventPlaceholders(actionResultCallbackFnc, eventData);
+                writeAfterCommand(str, "/*ACTION_FNC_LIST*/", actionResultCallbackFnc);
+
+                std::string actionResultRequestLambda = savedCode.actionResultRequestLambda;
+                replaceCommonEventPlaceholders(actionResultRequestLambda, eventData);
+                writeAfterCommand(str, "/*ACTION_LAMBDA_LIST*/", actionResultRequestLambda);
+
+            }
+        }
     }
 
 }
@@ -335,6 +452,31 @@ void saveCode(savedCodeStr& savedCode, std::string& code)
     deleteSection(code, "/*TOPIC_CALLBACK*/", "/*END_TOPIC_CALLBACK*/");
     saveSection(code, "/*TOPIC_SUBSCRIPTION*/", "/*END_TOPIC_SUBSCRIPTION*/", savedCode.topicSubscriptionC);
     deleteSection(code, "/*TOPIC_SUBSCRIPTION*/", "/*END_TOPIC_SUBSCRIPTION*/");
+    saveSection(code, "/*ACTION_C*/", "/*END_ACTION_C*/", savedCode.actionC);
+    deleteSection(code, "/*ACTION_C*/", "/*END_ACTION_C*/");
+    saveSection(code, "/*SEND_PARAM*/", "/*END_SEND_PARAM*/", savedCode.actionSendParam);
+    deleteSection(code, "/*SEND_PARAM*/", "/*END_SEND_PARAM*/");
+    saveSection(code, "/*FEEDBACK_PARAM*/", "/*END_FEEDBACK_PARAM*/", savedCode.actionFeedbackParam);
+    deleteSection(code, "/*FEEDBACK_PARAM*/", "/*END_FEEDBACK_PARAM*/");
+    saveSection(code, "/*FEEDBACK_PARAM_FNC*/", "/*END_FEEDBACK_PARAM_FNC*/", savedCode.actionFeedbackParamFnc);
+    deleteSection(code, "/*FEEDBACK_PARAM_FNC*/", "/*END_FEEDBACK_PARAM_FNC*/");
+    saveSection(code, "/*FEEDBACK_DATA*/", "/*END_FEEDBACK_DATA*/", savedCode.actionFeedbackData);
+    deleteSection(code, "/*FEEDBACK_DATA*/", "/*END_FEEDBACK_DATA*/");
+    saveSection(code, "/*ACTION_SEND_GOAL*/", "/*END_ACTION_SEND_GOAL*/", savedCode.actionSendGoalLambda);
+    deleteSection(code, "/*ACTION_SEND_GOAL*/", "/*END_ACTION_SEND_GOAL*/");
+    saveSection(code, "/*ACTION_RESULT_REQUEST*/", "/*END_ACTION_RESULT_REQUEST*/", savedCode.actionResultRequestLambda);
+    deleteSection(code, "/*ACTION_RESULT_REQUEST*/", "/*END_ACTION_RESULT_REQUEST*/");
+    saveSection(code, "/*ACTION_FEEDBACK*/", "/*END_ACTION_FEEDBACK*/", savedCode.actionFeedbackLambda);
+    deleteSection(code, "/*ACTION_FEEDBACK*/", "/*END_ACTION_FEEDBACK*/");
+    saveSection(code, "/*ACTION_SEND_GOAL_FNC*/", "/*END_ACTION_SEND_GOAL_FNC*/", savedCode.actionSendGoalFnc);
+    deleteSection(code, "/*ACTION_SEND_GOAL_FNC*/", "/*END_ACTION_SEND_GOAL_FNC*/");
+    saveSection(code, "/*ACTION_RESULT_CALLBACK_FNC*/", "/*END_ACTION_RESULT_CALLBACK_FNC*/", savedCode.actionResultCallbackFnc);
+    deleteSection(code, "/*ACTION_RESULT_CALLBACK_FNC*/", "/*END_ACTION_RESULT_CALLBACK_FNC*/");
+    saveSection(code, "/*ACTION_FEEDBACK_FNC*/", "/*END_ACTION_FEEDBACK_FNC*/", savedCode.actionFeedbackCallback);
+    deleteSection(code, "/*ACTION_FEEDBACK_FNC*/", "/*END_ACTION_FEEDBACK_FNC*/");
+    saveSection(code, "/*ACTION_RESPONSE_CALLBACK_FNC*/", "/*END_ACTION_RESPONSE_CALLBACK_FNC*/", savedCode.actionGoalResponseFnc);
+    deleteSection(code, "/*ACTION_RESPONSE_CALLBACK_FNC*/", "/*END_ACTION_SEND_GOAL_FNC*/");
+
     //H
     saveSection(code, "/*INTERFACE*/", "/*END_INTERFACE*/", savedCode.interfaceH);
     deleteSection(code, "/*INTERFACE*/", "/*END_INTERFACE*/");
@@ -344,6 +486,10 @@ void saveCode(savedCodeStr& savedCode, std::string& code)
     deleteSection(code, "/*TOPIC_CALLBACK_H*/", "/*END_TOPIC_CALLBACK_H*/");
     saveSection(code, "/*TOPIC_SUBSCRIPTION_H*/", "/*END_TOPIC_SUBSCRIPTION_H*/", savedCode.topicSubscriptionH);
     deleteSection(code, "/*TOPIC_SUBSCRIPTION_H*/", "/*END_TOPIC_SUBSCRIPTION_H*/");
+    saveSection(code, "/*ACTION_H*/", "/*END_ACTION_H*/", savedCode.actionH);
+    deleteSection(code, "/*ACTION_H*/", "/*END_ACTION_H*/");
+    saveSection(code, "/*ACTION_INTERFACE*/", "/*END_ACTION_INTERFACE*/", savedCode.actionInterfaceH);
+    deleteSection(code, "/*ACTION_INTERFACE*/", "/*END_ACTION_INTERFACE*/");
     //CMakeLists.txt
     saveSection(code, "#INTERFACE#", "#END_INTERFACE#", savedCode.interfaceCMake);
     deleteSection(code, "#INTERFACE#", "#END_INTERFACE#");
@@ -383,11 +529,19 @@ void replaceEventCode(std::map <std::string, std::string>& codeMap){
         deleteCommand(it->second, "/*PARAM_LIST*/");
         deleteCommand(it->second, "/*RETURN_PARAM_LIST*/");
         deleteCommand(it->second, "/*TOPIC_SUBSCRIPTIONS_LIST*/");
-        deleteCommand(it->second, "/*TOPIC_CALLBACK_LIST*/");
+        deleteCommand(it->second, "/*TOPIC_CALLBACK_LIST*/"); 
+        deleteCommand(it->second, "/*ACTION_LIST_C*/"); 
+        deleteCommand(it->second, "/*SEND_PARAM_LIST*/");
+        deleteCommand(it->second, "/*FEEDBACK_PARAM_LIST*/");
+        deleteCommand(it->second, "/*FEEDBACK_PARAM_LIST_FNC*/");
+        deleteCommand(it->second, "/*FEEDBACK_DATA_LIST*/");
+        deleteCommand(it->second, "/*ACTION_LAMBDA_LIST*/"); 
+        deleteCommand(it->second, "/*ACTION_FNC_LIST*/"); 
         //H
         deleteCommand(it->second, "/*INTERFACES_LIST*/");
         deleteCommand(it->second, "/*TOPIC_SUBSCRIPTIONS_LIST_H*/");
         deleteCommand(it->second, "/*TOPIC_CALLBACK_LIST_H*/");
+        deleteCommand(it->second, "/*ACTION_LIST_H*/");
         //CMakeLists.txt
         deleteCommand(it->second, "#INTERFACE_LIST#");
         deleteCommand(it->second, "#PACKAGE_LIST#");

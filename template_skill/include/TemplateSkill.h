@@ -3,15 +3,16 @@
 #include <mutex>
 #include <thread>
 #include <rclcpp/rclcpp.hpp>
+#include "rclcpp_action/rclcpp_action.hpp"
 #include "$className$SM.h"
 #include <bt_interfaces_dummy/msg/$skillTypeLC$_response.hpp>/*INTERFACES_LIST*/
 /*INTERFACE*/
 #include <$eventData.interfaceName$/srv/$eventData.functionNameSnakeCase$.hpp> /*END_INTERFACE*/
+/*ACTION_INTERFACE*/
+#include <$eventData.interfaceName$/action/$eventData.functionNameSnakeCase$.hpp> /*END_ACTION_INTERFACE*/
 /*TOPIC_INTERFACE*/
-#include <$eventData.interfaceData[interfaceDataType]$.hpp>
-/*END_TOPIC_INTERFACE*/
-/*TICK*/
-#include <bt_interfaces_dummy/srv/tick_$skillTypeLC$.hpp>/*END_TICK*/
+#include <$eventData.interfaceData[interfaceDataType]$.hpp> /*END_TOPIC_INTERFACE*/
+/*TICK*/#include <bt_interfaces_dummy/srv/tick_$skillTypeLC$.hpp>/*END_TICK*/
 /*HALT*/#include <bt_interfaces_dummy/srv/halt_$skillTypeLC$.hpp>/*END_HALT*/
 /*DATAMODEL*/
 #include "$skillName$SkillDataModel.h" /*END_DATAMODEL*/
@@ -57,5 +58,22 @@ private:
 	/*TOPIC_SUBSCRIPTIONS_LIST_H*/
 	/*TOPIC_SUBSCRIPTION_H*/
 	rclcpp::Subscription<$eventData.interfaceData[interfaceDataType]$>::SharedPtr m_subscription_$eventData.functionName$;/*END_TOPIC_SUBSCRIPTION_H*/
+	/*ACTION_LIST_H*//*ACTION_H*/
+	std::shared_ptr<rclcpp::Node> m_node_action;
+	std::mutex m_actionMutex;
+	std::mutex m_feedbackMutex;
+	rclcpp_action::Client<$eventData.interfaceName$::action::$eventData.functionName$>::SendGoalOptions m_send_goal_options;
+	rclcpp_action::Client<$eventData.interfaceName$::action::$eventData.functionName$>::SharedPtr m_actionClient;
+	void goal_response_callback(const  rclcpp_action::ClientGoalHandle<$eventData.interfaceName$::action::$eventData.functionName$>::SharedPtr & goal_handle);
+	void send_goal($eventData.interfaceName$::action::$eventData.functionName$::Goal);
+	void feedback_callback(
+    	rclcpp_action::ClientGoalHandle<$eventData.interfaceName$::action::$eventData.functionName$>::SharedPtr,
+    	const std::shared_ptr<const $eventData.interfaceName$::action::$eventData.functionName$::Feedback> feedback);
+	void result_callback(const  rclcpp_action::ClientGoalHandle<$eventData.interfaceName$::action::$eventData.functionName$>::WrappedResult & result);
+	/*END_ACTION_H*/
+	/*FEEDBACK_DATA_LIST*//*FEEDBACK_DATA*/
+  	$eventData.interfaceDataType$ m_$eventData.interfaceDataField$;
+  	/*END_FEEDBACK_DATA*/
+
 };
 

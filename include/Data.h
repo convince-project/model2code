@@ -115,6 +115,20 @@ struct savedCodeStr{
     std::string topicSubscriptionH;
     std::string topicCallbackH; 
     std::string topicInterfaceH; 
+    std::string actionC;
+    std::string actionH;
+    std::string actionInterfaceH;
+    std::string actionSendParam;
+    std::string actionFeedbackParam;
+    std::string actionFeedbackParamFnc;
+    std::string actionFeedbackData;
+    std::string actionSendGoalLambda;
+    std::string actionResultRequestLambda;
+    std::string actionFeedbackLambda;   
+    std::string actionSendGoalFnc; 
+    std::string actionResultCallbackFnc; 
+    std::string actionFeedbackCallback; 
+    std::string actionGoalResponseFnc; 
 };
 
 struct cppCodeStr
