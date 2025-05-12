@@ -358,6 +358,27 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             writeAfterCommand(str, "/*TOPIC_CALLBACK_LIST_H*/", topicCallbackH);
 
             //CMakeLists.txt
+            // printEventData(eventData);
+            if (eventData.virtualInterface)
+            {
+                for(auto it =  eventData.interfaceData.begin(); it != eventData.interfaceData.end(); ++it)
+                {
+                    if (it->second.find("msg") != std::string::npos) 
+                    {
+                        std::string ros_package = it->second.substr(0, it->second.find("::msg::"));
+                        add_to_log("ROS package: " + ros_package);
+                        replaceAll(interfaceCodeCMake, "$interfaceName$", ros_package);
+                        if(!checkIfStrPresent(str, interfaceCodeCMake)){
+                            writeAfterCommand(str, "#INTERFACE_LIST#", interfaceCodeCMake);
+                        }
+                        replaceAll(packageCodeCMake, "$interfaceName$", ros_package);
+                        if(!checkIfStrPresent(str, packageCodeCMake)){
+                            writeAfterCommand(str, "#PACKAGE_LIST#", packageCodeCMake);
+                        }
+                    }
+                }
+            }
+
             // replaceAll(interfaceCodeCMake, "$interfaceName$", eventData.interfaceName);
             // if(!checkIfStrPresent(str, interfaceCodeCMake)){
             //     writeAfterCommand(str, "#INTERFACE_LIST#", interfaceCodeCMake);
