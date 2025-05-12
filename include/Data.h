@@ -8,12 +8,15 @@
  * @date 2024-05-24
  * 
  */
+#pragma once
+
 
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <map>
 #include "strManipulation.h"
+#include <vector>
 
 #define modelFilePath "./templates/specifications/full-model.xml"
 #define interfaceFilePath "./templates/specifications/interfaces.xml"
@@ -63,8 +66,18 @@ struct eventDataStr{
     std::string nodeName;
     std::string serverName;
     std::string clientName;
-    std::string interfaceName;
-    std::string interfaceType;
+    std::string topicName;
+    std::string interfaceName; 
+    std::string interfaceType; // type of the interface (e.g. "sync-service", "async-service", "action", "topic")
+    
+    std::string messageInterfaceType; // type of the interface (e.g. std_msgs::srv::AddTwoInts, blackboard_interfaces::BlackboardInterface, std_msgs::msg::String)
+    std::string rosInterfaceType; //type of the interface in ROS (e.g. "sync-service", "async-service", "action", "topic")
+    std::string scxmlInterfaceName; //name of the interface in the scxml file
+    bool virtualInterface;
+
+    std::vector<std::string> interfaceRequestFields; //list of interfaces used in the event
+    std::vector<std::string> interfaceResponseFields; //list of interfaces used in the event
+    std::vector<std::string> interfaceTopicFields; //list of interfaces used in the event
     std::map<std::string, std::string> interfaceData; //field and type
 };
 
@@ -89,6 +102,7 @@ struct fileDataStr{
     bool translate_mode;   
     bool generate_mode;   
     bool verbose_mode;
+    bool is_action_skill; // true if the skill is an action skill, false otherwise
 };
 
 struct templateFileDataStr{
@@ -115,6 +129,7 @@ struct savedCodeStr{
     std::string topicSubscriptionH;
     std::string topicCallbackH; 
     std::string topicInterfaceH; 
+    std::string topicParamList;
     std::string actionC;
     std::string actionH;
     std::string actionInterfaceH;
@@ -198,6 +213,13 @@ bool getDataFromRootName(const std::string attributeName, skillDataStr& skillDat
  * @param eventData event data structure to be printed
  */
 void printEventData(eventDataStr eventData);
+
+/**
+ * @brief Prints the event data to cerr
+ * 
+ * @param eventData event data structure to be printed
+ */
+void printEventDataToCerr(eventDataStr eventData);
 
 /**
  * @brief Prints the skill data

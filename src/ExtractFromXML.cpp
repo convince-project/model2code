@@ -19,125 +19,330 @@
  * @{
  */
 
-/**
- * @brief Extract the interface name from the model file
- * 
- * @param fileName model file name from which to extract the interface name
- * @param eventData event data structure, where the interface name will be stored, returned by reference
- * @return bool
- */
-bool extractInterfaceName(const std::string fileName, eventDataStr& eventData)
+
+
+bool extractInterfaceData(const fileDataStr fileData, eventDataStr& eventData)
 {
-    const std::string componentName = eventData.componentName;
     std::string interfaceName;
+    std::string fileName = fileData.modelFileName;
+
+    // open the model file
+    // and check if it exists
+    // add_to_log("opening file: " + fileName + " at line " + std::to_string(__LINE__));
+    // if (doc.LoadFile(fileName.c_str()) != tinyxml2::XML_SUCCESS) {
+    //     std::cerr << "Failed to load '" << fileName << "' file" << std::endl;
+    //     return false;
+    // }
+    // add_to_log("******************************** event DATA ********************************\n");
+    // printEventData(eventData);
+    // add_to_log("******************************** event DATA END ********************************\n");
+
+    // open the input file and check if it exists
+
+    tinyxml2::XMLElement* element;
+    findInterfaceType(fileData, eventData, element);
+    add_to_log("******************************** event DATA AFTER ********************************\n");
+    printEventData(eventData);
+    add_to_log("******************************** event DATA AFTER END ********************************\n");
+
+    // find the interface name in the high level tag
+    // if (!is_ros_service_server) {
+    //     std::cerr << "No rosServiceServer found for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
+    //     return false;
+    // }
+    return true;
+    
+}
+
+
+bool findInterfaceType(const fileDataStr fileData, eventDataStr& eventData, tinyxml2::XMLElement*& element) 
+{
     tinyxml2::XMLDocument doc;
-    if (doc.LoadFile(fileName.c_str()) != tinyxml2::XML_SUCCESS) {
-        std::cerr << "Failed to load '" << fileName << "' file" << std::endl;
+
+    add_to_log("opening file: " + fileData.inputFileName + " at line" + std::to_string(__LINE__));
+    if (doc.LoadFile(fileData.inputFileName.c_str()) != tinyxml2::XML_SUCCESS) {
+        std::cerr << "Failed to load '" << fileData.inputFileName << "' file" << std::endl;
         return false;
     }
- 
+
     tinyxml2::XMLElement* root = doc.RootElement();
     if (!root) {
-        std::cerr << "No root element found" << std::endl;
+        std::cerr << "No root element found in file: " << fileData.inputFileName << std::endl;
+        return false;
+    }
+    std::cout << std::string("/" + eventData.componentName + "/" + eventData.functionName) << std::endl;
+
+    // ROS SERVICE SERVER
+    bool is_ros_service_server = findElementByTagAndAttValue(root, std::string("ros_service_server"), std::string("service_name"), std::string("/" + eventData.componentName + "/" + eventData.functionName), element);
+    add_to_log("is_ros_service_server: " + std::to_string(is_ros_service_server) + " at line " + std::to_string(__LINE__));
+    if (is_ros_service_server) {
+        if (!getElementAttValue(element, std::string("type"), eventData.messageInterfaceType))
+        {
+            std::cerr << "No type attribute found in ros_service_server element for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
+            return false;
+        }
+        
+        eventData.interfaceName = eventData.messageInterfaceType.substr(0, eventData.messageInterfaceType.find_last_of("/"));
+        add_to_log("interfaceName: " + eventData.interfaceName + " at line " + std::to_string(__LINE__));
+        eventData.interfaceType = "async-service";
+        eventData.rosInterfaceType = "service-server"; // type of the interface in ROS
+        // eventData.serverName = "/" + eventData.componentName + "/" + eventData.functionName;
+        // eventData.clientName = "/" + eventData.componentName + "/" + eventData.functionName;
+
+
+        // handle request fields
+        tinyxml2::XMLElement* fieldParent;
+        findElementByTagAndAttValue(root, std::string("ros_service_handle_request"), std::string("name"), std::string(eventData.serverName), fieldParent);
+        if (!fieldParent) {
+            std::cerr << "No ros_service_handle_request element found for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
+            // return false;
+        }
+        if (!getInterfaceFieldsFromAssignTag(fieldParent, eventData.interfaceRequestFields)) {
+            std::cerr << "Failed to get interface ros_service_handle_request fields for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
+            // return false;
+        }
+
+
+        // handle response fields
+        tinyxml2::XMLElement* responseParent;
+        findElementByTagAndAttValue(root, std::string("ros_service_send_response"), std::string("name"), std::string(eventData.clientName), responseParent);
+        if (!responseParent) {
+            std::cerr << "No ros_service_send_response element found for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
+            // return false;
+        }  
+        if (!getInterfaceFieldsFromFieldTag(responseParent, eventData.interfaceResponseFields)) {
+            std::cerr << "Failed to get interface ros_service_send_response fields for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
+            // return false;
+        }
+        add_to_log("fieldParent: " + std::string(fieldParent->Name()) + " at line " + std::to_string(__LINE__));
+        return true;
+    } 
+
+
+    // replace all dots in the component name with slash
+    std::string componentName = eventData.componentName;
+    size_t pos = 0;
+    while ((pos = componentName.find('.')) != std::string::npos) {
+        componentName.replace(pos, 1, "/");
+        pos += 1; // Move past the replaced character
+    }
+    eventData.componentName = componentName;
+    // replace all dots in the function name with slash
+    std::string functionName = eventData.functionName;
+    pos = 0;
+    while ((pos = functionName.find('.')) != std::string::npos) {
+        functionName.replace(pos, 1, "/");
+        pos += 1; // Move past the replaced character
+    }
+    eventData.functionName = functionName;
+    // ROS SERVICE CLIENT
+    
+    bool is_ros_service_client = findElementByTagAndAttValue(root, std::string("ros_service_client"), std::string("service_name"), std::string("/" + eventData.componentName + "/" + eventData.functionName), element);
+    add_to_log("is_ros_service_client: " + std::to_string(is_ros_service_client) + " at line " + std::to_string(__LINE__));
+    if (is_ros_service_client) {
+        if (!getElementAttValue(element, std::string("type"), eventData.messageInterfaceType))
+        {
+            std::cerr << "No type attribute found in ros_service_client element for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
+            return false;
+        }
+        eventData.rosInterfaceType = "service-client"; // type of the interface in ROS
+        eventData.interfaceName = eventData.messageInterfaceType.substr(0, eventData.messageInterfaceType.find_last_of("/"));
+        add_to_log("interfaceName: " + eventData.interfaceName + " at line " + std::to_string(__LINE__));
+        eventData.interfaceType = "async-service";
+        // eventData.clientName = "/" + eventData.componentName + "/" + eventData.functionName;
+        // eventData.serverName = "/" + eventData.componentName + "/" + eventData.functionName;        // handle request fields
+        tinyxml2::XMLElement* fieldParent;
+        if (!findElementByTagAndAttValue(root, std::string("ros_service_send_request"), std::string("name"), std::string("/" + eventData.componentName + "/" + eventData.functionName), fieldParent)) 
+        {
+            std::cerr << "No ros_service_send_request element found for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
+            // return false;
+        }
+        add_to_log("fieldParent: " + std::string(fieldParent->Name()) + " at line " + std::to_string(__LINE__));
+        if (!getInterfaceFieldsFromFieldTag(fieldParent, eventData.interfaceRequestFields))
+        {
+            std::cerr << "Failed to get interface ros_service_send_request fields for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
+            // return false;
+        }
+
+
+        // handle response fields
+        tinyxml2::XMLElement* responseParent;
+        if (!findElementByTagAndAttValue(root, std::string("ros_service_handle_response"), std::string("name"), std::string("/" + eventData.componentName + "/" + eventData.functionName), responseParent)) 
+        {
+            std::cerr << "No ros_service_handle_response element found for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
+            // return false;
+        }
+        add_to_log("responseParent: " + std::string(responseParent->Name()) + " at line " + std::to_string(__LINE__));
+        if (!getInterfaceFieldsFromAssignTag(responseParent, eventData.interfaceResponseFields))
+        {
+            std::cerr << "Failed to get interface ros_service_handle_response fields for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
+            // return false;
+        }
+
+        return true;
+    }
+
+
+
+    // ROS TOPIC PUBLISHER
+    bool is_topic_publisher = findElementByTagAndAttValue(root, std::string("ros_topic_publisher"), std::string("topic"), std::string("/" + eventData.componentName + "/" + eventData.functionName), element);
+    add_to_log("is_topic_publisher: " + std::to_string(is_topic_publisher) + " at line " + std::to_string(__LINE__));
+    if (is_topic_publisher) {
+
+        if (!getElementAttValue(element, std::string("type"), eventData.messageInterfaceType))
+        {
+            std::cerr << "No type attribute found in ros_topic_publisher element for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
+            return false;
+        }
+        
+        eventData.interfaceName = eventData.messageInterfaceType.substr(0, eventData.messageInterfaceType.find_last_of("/"));
+
+        add_to_log("interfaceName: " + eventData.interfaceName + " at line " + std::to_string(__LINE__));
+        
+        eventData.interfaceType = "topic";
+        eventData.rosInterfaceType = "topic-publisher"; // type of the interface in ROS
+        getElementAttValue(element, std::string("name"), eventData.scxmlInterfaceName);
+        getElementAttValue(element, std::string("topic"), eventData.topicName);
+        tinyxml2::XMLElement* fieldParent;
+
+        //get the fields from the ros_topic_publish element
+        findElementByTagAndAttValue(root, std::string("ros_topic_publish"), std::string("name"), std::string(eventData.scxmlInterfaceName), fieldParent);
+        if (!fieldParent) {
+            std::cerr << "No ros_topic_publish element found for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
+            return false;
+        }
+        eventData.interfaceName = eventData.messageInterfaceType.substr(0, eventData.messageInterfaceType.find_last_of("/"));
+        add_to_log("interfaceName: " + eventData.interfaceName + " at line " + std::to_string(__LINE__));
+
+        if (!getInterfaceFieldsFromFieldTag(fieldParent, eventData.interfaceTopicFields)) {
+            std::cerr << "Failed to get interface topic fields for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
+            return false;
+        }
+        return true;
+    }
+
+
+
+    // ROS TOPIC SUBSCRIBER
+    bool is_topic_subscriber = findElementByTagAndAttValue(root, std::string("ros_topic_subscriber"), std::string("topic"), std::string("/" + eventData.componentName + "/" + eventData.functionName), element);
+    add_to_log("is_topic_subscriber: " + std::to_string(is_topic_subscriber) + " at line " + std::to_string(__LINE__));
+    if (is_topic_subscriber) {
+        eventData.interfaceType = "topic";
+        eventData.rosInterfaceType = "topic-subscriber"; // type of the interface in ROS
+        getElementAttValue(element, std::string("type"), eventData.messageInterfaceType);
+        getElementAttValue(element, std::string("topic"), eventData.topicName);
+        getElementAttValue(element, std::string("name"), eventData.scxmlInterfaceName);
+        tinyxml2::XMLElement* fieldParent;
+
+        eventData.interfaceName = eventData.messageInterfaceType.substr(0, eventData.messageInterfaceType.find_last_of("/"));
+        add_to_log("interfaceName: " + eventData.interfaceName + " at line " + std::to_string(__LINE__));
+
+        //get the fields from the ros_topic_subscribe element
+        if (!findElementByTagAndAttValue(root, std::string("ros_topic_callback"), std::string("name"), std::string(eventData.topicName), fieldParent)){
+            std::cerr << "No ros_topic_callback element found for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
+            return false;
+        }
+        if(!getInterfaceFieldsFromAssignTag(fieldParent, eventData.interfaceTopicFields)) {
+            std::cerr << "Failed to get interface topic fields for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
+            return false;
+        }
+
+
+        return true;
+    }
+
+
+
+
+    bool is_action_server = findElementByTagAndAttValue(root, std::string("ros_action_server"), std::string("action_name"), std::string("/" + eventData.componentName + "/" + eventData.functionName), element);
+    add_to_log("is_action_server: " + std::to_string(is_action_server) + " at line " + std::to_string(__LINE__));
+    if (is_action_server) {
+        getElementAttValue(element, std::string("type"), eventData.messageInterfaceType);
+        eventData.rosInterfaceType = "action-server"; // type of the interface in ROS
+        eventData.interfaceName = eventData.messageInterfaceType.substr(0, eventData.messageInterfaceType.find_last_of("/"));
+        
+        add_to_log("interfaceName: " + eventData.interfaceName + " at line " + std::to_string(__LINE__));
+        eventData.interfaceType = "action";
+        // eventData.serverName = "/" + eventData.componentName + "/" + eventData.functionName;
+        return true;
+    }
+
+
+
+
+    bool is_action_client = findElementByTagAndAttValue(root, std::string("ros_action_client"), std::string("action_name"), std::string("/" + eventData.componentName + "/" + eventData.functionName), element);
+    add_to_log("is_action_client: " + std::to_string(is_action_client) + " at line " + std::to_string(__LINE__));
+    if (is_action_client) {
+        getElementAttValue(element, std::string("type"), eventData.messageInterfaceType);
+        eventData.rosInterfaceType = "action-client"; // type of the interface in ROS
+        eventData.interfaceName = eventData.messageInterfaceType.substr(0, eventData.messageInterfaceType.find_last_of("/"));
+        add_to_log("interfaceName: " + eventData.interfaceName + " at line " + std::to_string(__LINE__));
+        eventData.interfaceType = "action";
+        eventData.clientName = "/" + eventData.componentName + "/" + eventData.functionName;
+        return true;
+    }
+
+    return false; // if no interface type is found, return false
+}
+
+
+bool getInterfaceFieldsFromAssignTag(tinyxml2::XMLElement* element, std::vector<std::string>& interfaceFields)
+{
+    if (!element) {
+        std::cerr << "Element is null" << std::endl;
         return false;
     }
     
-    tinyxml2::XMLElement* element;
-    if(!findElementByTagAndAttValue(root, std::string("componentDeclaration"), std::string("id"), componentName, element)){
-        std::cerr << "\nNo component '" << componentName << "'found in file '" << fileName << "'."<< std::endl;
+    tinyxml2::XMLElement* fieldElement = element->FirstChildElement("assign");
+    if (!fieldElement) {
+        std::cerr << "No assign element found in the provided element" << std::endl;
         return false;
     }
-    if (!getElementAttValue(element, std::string("interface"), interfaceName)){
-        std::cerr << "\nNo interface found for component '" << componentName << "'."<< std::endl;
-        return false;
-    }
-    eventData.interfaceName = interfaceName;
-
-    return true;  
-}
-/**
- * @brief Extract the interface data from the interface file
- * 
- * @param fileName interface file name from which to extract the interface data
- * @param eventData event data structure, where the interface data will be stored, returned by reference
- * @return true 
- * @return false 
- */
-bool extractInterfaceType(const std::string fileName, eventDataStr& eventData)
-{
-    const std::string interfaceName = eventData.interfaceName;
-    const std::string functionName = eventData.functionName;
-    std::string interfaceType, interfaceDataType, interfaceDataField;
-    tinyxml2::XMLDocument doc;
-    if (doc.LoadFile(fileName.c_str()) != tinyxml2::XML_SUCCESS) {
-        std::cerr << "Failed to load '" << fileName << "' file" << std::endl;
-        return false;
-    }
- 
-    tinyxml2::XMLElement* root = doc.RootElement();
-    if (!root) {
-        std::cerr << "No root element found" << std::endl;
-        return false;
-    }
-
-    std::string idValue;
-    tinyxml2::XMLElement* elementInterface, *elementInterfaceType, *elementFunction, *elementDataType, *elementDataField;
-    if (!findElementByTagAndAttValue(root, std::string("interface"), std::string("id"), interfaceName, elementInterface))
-    {
-        std::cerr << "\nNo interface '" << interfaceName << "'found in file '" << fileName << "'."<< std::endl;
-        return false;
-    }
-    if(!findElementByTagAndAttValue(elementInterface, std::string("function"), std::string("id"), functionName, elementFunction))
-    {
-        std::cerr << "No function '" << functionName << "'found in file '" << fileName << "'."<< std::endl;
-        return false;
-    }
-    if(!findElementByTag(elementFunction, std::string("interface"), elementInterfaceType))
-    {
-        return false;
-    }
-    if(!getElementAttValue(elementInterfaceType, std::string("type"), interfaceType))
-    {
-        return false;
-    }
-    eventData.interfaceType = interfaceType;
-    if(!findElementByTag(elementFunction, std::string("dataField"), elementDataField))
-    {   
-        // std::cerr << "No tag <dataField> for function '" << functionName << "'."<< std::endl;
-        add_to_log("No tag <dataField> for function '" + functionName + "'.");
-        return true;
-    } 
-    if(!getElementText(elementDataField, interfaceDataField))
-    {
-        // std::cerr << "No value in tag <dataField> for function '" << functionName << "'."<< std::endl;
-        add_to_log("No value in tag <dataField> for function '" + functionName + "'.");
-        return true;
-    }
-    if(!findElementByTag(elementFunction, std::string("dataType"), elementDataType))
-    {   
-        // std::cerr << "No tag <dataType> for function '" << functionName << "'."<< std::endl;
-        add_to_log("No tag <dataType> for function '" + functionName + "'.");
-        //Not every interface has a defined DataType TODO
-        return true;
-    } 
-    if(!getElementText(elementDataType, interfaceDataType))
-    {
-        // std::cerr << "No value in tag <dataType> for function '" << functionName << "'."<< std::endl;
-        add_to_log("No value in tag <dataType> for function '" + functionName + "'.");
-        return true;
-    }
-    std::vector<tinyxml2::XMLElement*> elementsReturnValue;
-    findElementVectorByTag(elementFunction, "returnValue", elementsReturnValue);
-    for (const auto& element : elementsReturnValue) {
-        tinyxml2::XMLElement* elementData;
-        findElementByTag(element, std::string("dataField"), elementData);
-        getElementText(elementData, interfaceDataField);
-        findElementByTag(element, std::string("dataType"), elementData);
-        getElementText(elementData, interfaceDataType);    
-        eventData.interfaceData[interfaceDataField] = interfaceDataType;
+    while (fieldElement) {
+        const char* fieldName = fieldElement->Attribute("expr");
+        add_to_log("fieldName: " + std::string(fieldName) + " at line " + std::to_string(__LINE__));
+        if (fieldName) {
+            std::cerr << "Found field: " << fieldName << std::endl;
+            // find . in the string
+            std::string fieldNameStr(fieldName);
+            size_t dotPos = fieldNameStr.find('.');
+            if (dotPos != std::string::npos) {
+                // if . is found, take the part after it
+                fieldNameStr = fieldNameStr.substr(dotPos + 1);
+                interfaceFields.push_back(fieldNameStr);
+            }
+        }
+        fieldElement = fieldElement->NextSiblingElement("assign");
     }
     return true;
 }
+
+
+bool getInterfaceFieldsFromFieldTag(tinyxml2::XMLElement* element, std::vector<std::string>& interfaceFields)
+{
+    if (element == nullptr) {
+        std::cerr << "Element is null" << std::endl;
+        return false;
+    }
+    
+    // get the first child element
+    tinyxml2::XMLElement* fieldElement = element->FirstChildElement("field");
+    if (!fieldElement) {
+        std::cerr << "No field element found in the provided element" << std::endl;
+        return false;
+    }
+    while (fieldElement) {
+        const char* fieldName = fieldElement->Attribute("name");
+        add_to_log("fieldName: " + std::string(fieldName) + " at line " + std::to_string(__LINE__));
+        if (fieldName) {
+            std::cerr << "Found field: " << fieldName << std::endl;
+            interfaceFields.push_back(fieldName);
+        }
+        fieldElement = fieldElement->NextSiblingElement("expr");
+    }
+    return true;
+}
+
 
 /**
  * @brief Extract data from SCXML file (rootname, transition and send event elements)
@@ -152,6 +357,7 @@ bool extractInterfaceType(const std::string fileName, eventDataStr& eventData)
  */
 bool extractFromSCXML(tinyxml2::XMLDocument& doc, const std::string fileName, std::string& rootName, std::vector<tinyxml2::XMLElement*>& elementsTransition, std::vector<tinyxml2::XMLElement*>& elementsSend) 
 {
+    add_to_log("opening file: " + fileName + " at line " + std::to_string(__LINE__));
     if (doc.LoadFile(fileName.c_str()) != tinyxml2::XML_SUCCESS) {
         std::cerr << "Failed to load '" << fileName << "' file" << std::endl;
         return false;

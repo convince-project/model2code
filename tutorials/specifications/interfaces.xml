@@ -32,6 +32,26 @@
             </protocol>
         </function>
         <function id="Function2">
+            <requestValue>
+                <dataType>std_msgs::msg::Bool</dataType>
+                <dataField>is_active</dataField>
+            </requestValue>
+            <returnValue>
+                <dataType>std_msgs::msg::Bool</dataType>
+                <dataField type="bool" name="is_active"></dataField>
+            </returnValue>
+        </function>
+    </interface>
+
+    <interface id="template_interfaces2">
+        <function id="Function3">
+            <protocol>
+                <ROS2data>
+                    <interface type="sync-service" />
+                </ROS2data>
+            </protocol>
+        </function>
+        <function id="Function4">
             <protocol>
                 <ROS2data>
                     <interface type="topic" />

@@ -3,6 +3,7 @@
 
 cmake_minimum_required(VERSION 3.16)
 project(model2code)
+set (CMAKE_CXX_STANDARD 20)
 
 find_package(tinyxml2 CONFIG REQUIRED)
 

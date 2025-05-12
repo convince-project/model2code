@@ -19,8 +19,10 @@ std::string log_str;
  */
 void getDataFromEvent(eventDataStr& eventData) 
 {
+
     std::string firstWord, secondWord, thirdWord;
     std::string event = eventData.event;
+    std::cout << "Event: " << event << std::endl;
     if (event == ""){
         std::cerr << "Event has no value" << std::endl;
         return;
@@ -34,7 +36,7 @@ void getDataFromEvent(eventDataStr& eventData)
             thirdWord = event.substr(secondDotPos + 1);
         }
         else{
-            std::cerr << "Error in name format for event: "<< event << std::endl;
+            std::cerr << "only 2 words found, : "<< event << std::endl;
         }
     }
     else{
@@ -68,6 +70,8 @@ bool getDataFromRootName(const std::string attributeName, skillDataStr& skillDat
                 std::cerr << "Skill type not found" << std::endl;
                 return false;
             }
+            std::cerr << "Skill type: " << skillData.skillType << std::endl;
+            // convert skillType to lowercase
             skillData.skillTypeLC = skillData.skillType; 
             for (char &c : skillData.skillTypeLC) 
             { 
@@ -106,14 +110,99 @@ bool getDataFromRootName(const std::string attributeName, skillDataStr& skillDat
  */
 void printEventData(eventDataStr eventData)
 {
-    add_to_log("\tcomponent=" + eventData.componentName + ", service=" + eventData.functionName + ", eventName=" + eventData.eventName);
-    add_to_log("\tinterface=" + eventData.interfaceName + ", type=" + eventData.interfaceType);
-    for(auto it =  eventData.interfaceData.begin(); it != eventData.interfaceData.end(); ++it)
-    {
-        add_to_log("\n\t dataField=" + it->first + ", dataType=" + it->second);
+
+    add_to_log("-----------");
+    add_to_log("Event data:");
+    add_to_log("\tevent=" + eventData.event + ", target=" + eventData.target);
+    add_to_log("\teventName=" + eventData.eventName + ", eventType=" + eventData.eventType);
+    add_to_log("\tparamMap:");
+    // print the paramMap
+    for (const auto& param : eventData.paramMap) {
+        add_to_log("\t\t" + param.first + ": " + param.second);
     }
-    std::cout << std::endl;
+    add_to_log("\tcomponentName=" + eventData.componentName);
+    add_to_log("\tfunctionName=" + eventData.functionName);
+    add_to_log("\tfunctionNameSnakeCase=" + eventData.functionNameSnakeCase);
+    add_to_log("\tnodeName=" + eventData.nodeName);
+    add_to_log("\tserverName=" + eventData.serverName);
+    add_to_log("\tclientName=" + eventData.clientName);
+    add_to_log("\ttopicName=" + eventData.topicName);
+    add_to_log("\tinterfaceName=" + eventData.interfaceName);
+    add_to_log("\tinterfaceType=" + eventData.interfaceType);
+    add_to_log("\tscxmlInterfaceName=" + eventData.scxmlInterfaceName);
+    add_to_log("\tvirtualInterface=" + std::to_string(eventData.virtualInterface));
+    add_to_log("\tinterfaceTopicFields:");
+    // print the interface topic fields
+    for (const auto& field : eventData.interfaceTopicFields) {
+        add_to_log("\t\t" + field);
+    }
+    add_to_log("\tinterfaceRequestFields:");
+    // print the interface request fields
+    for (const auto& field : eventData.interfaceRequestFields) {
+        add_to_log("\t\t" + field);
+    }
+    add_to_log("\tinterfaceResponseFields:");
+    // print the interface response fields
+    for (const auto& field : eventData.interfaceResponseFields) {
+        add_to_log("\t\t" + field);
+    }
+    add_to_log("\tinterfaceData:");
+    // print the interface data
+    for (const auto& data : eventData.interfaceData) {
+        add_to_log("\t\t" + data.second + " " + data.first);
+    }
+    add_to_log("\tMessage Interface Type: " + eventData.messageInterfaceType);
+    add_to_log("\tROS Interface Type: " + eventData.rosInterfaceType);
+    add_to_log("-----------");
+
+
     
+}
+
+// equal to printEventData but prints to cerr
+void printEventDataToCerr(const eventDataStr eventData)
+{
+    std::cerr << "-----------" << std::endl;
+    std::cerr << "Event data: " << std::endl;
+    std::cerr << "\tevent=" << eventData.event << ", target=" << eventData.target << std::endl;
+    std::cerr << "\teventName=" << eventData.eventName << ", eventType=" << eventData.eventType << std::endl;   
+    std::cerr << "\tparamMap:" << std::endl;
+    // print the paramMap
+    for (const auto& param : eventData.paramMap) {
+        std::cerr << "\t\t" << param.first << ": " << param.second << std::endl;
+    }
+    std::cerr << "\tcomponentName=" << eventData.componentName << std::endl;
+    std::cerr << "\tfunctionName=" << eventData.functionName << std::endl;
+    std::cerr << "\tfunctionNameSnakeCase=" << eventData.functionNameSnakeCase << std::endl;
+    std::cerr << "\tnodeName=" << eventData.nodeName << std::endl;
+    std::cerr << "\tserverName=" << eventData.serverName << std::endl;
+    std::cerr << "\tclientName=" << eventData.clientName    << std::endl;   
+    std::cerr << "\ttopicName=" << eventData.topicName << std::endl;
+    std::cerr << "\tinterfaceName=" << eventData.interfaceName << std::endl;
+    std::cerr << "\tinterfaceType=" << eventData.interfaceType << std::endl;
+    std::cerr << "\tscxmlInterfaceName=" << eventData.scxmlInterfaceName << std::endl;
+    std::cerr << "\tvirtualInterface=" << std::boolalpha << eventData.virtualInterface << std::endl;
+    std::cerr << "\tinterfaceTopicFields:" << std::endl;
+    // print the interface topic fields
+    for (const auto& field : eventData.interfaceTopicFields) {
+        std::cerr << "\t\t" << field << std::endl;
+    }
+    std::cerr << "\tinterfaceRequestFields:" << std::endl;
+    // print the interface request fields
+    for (const auto& field : eventData.interfaceRequestFields) {
+        std::cerr << "\t\t" << field << std::endl;
+    }
+    std::cerr << "\tinterfaceResponseFields:" << std::endl;
+    // print the interface response fields
+    for (const auto& field : eventData.interfaceResponseFields) {
+        std::cerr << "\t\t" << field << std::endl;
+    }
+    std::cerr << "\tinterfaceData:" << std::endl;
+    // print the interface data
+    for (const auto& data : eventData.interfaceData) {
+        std::cerr << "\t\t" << data.second << " " << data.first << std::endl;
+    }
+    std::cerr << "-----------" << std::endl;
 }
 
 /**
