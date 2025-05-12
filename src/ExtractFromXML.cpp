@@ -81,15 +81,28 @@ bool extractInterfaceType(const std::string fileName, eventDataStr& eventData)
     }
 
     std::string idValue;
-    tinyxml2::XMLElement* elementInterface, *elementInterfaceType, *elementFunction, *elementDataType, *elementDataField;
+    tinyxml2::XMLElement *elementInterface;
+    tinyxml2::XMLElement *elementInterfaceType;
+    tinyxml2::XMLElement *elementFunction;
+    tinyxml2::XMLElement *elementDataType;
+    tinyxml2::XMLElement *elementDataField;
     if (!findElementByTagAndAttValue(root, std::string("interface"), std::string("id"), interfaceName, elementInterface))
     {
         std::cerr << "\nNo interface '" << interfaceName << "'found in file '" << fileName << "'."<< std::endl;
         return false;
     }
+    eventData.virtualInterface = false;
+    const char* virtual_attribute = elementInterface->Attribute("virtual");
+    if (virtual_attribute != nullptr) {
+        if (strcmp(virtual_attribute, "true") == 0) {
+            eventData.virtualInterface = true;
+        }
+    }
+
     if(!findElementByTagAndAttValue(elementInterface, std::string("function"), std::string("id"), functionName, elementFunction))
     {
         std::cerr << "No function '" << functionName << "'found in file '" << fileName << "'."<< std::endl;
+        std::cerr << "Element interface: " << elementInterface->Name() << std::endl;
         return false;
     }
     if(!findElementByTag(elementFunction, std::string("interface"), elementInterfaceType))
