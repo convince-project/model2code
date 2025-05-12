@@ -249,9 +249,10 @@ void $className$::halt( [[maybe_unused]] const std::shared_ptr<bt_interfaces_dum
 void $className$::topic_callback_$eventData.functionName$(const $eventData.interfaceData[interfaceDataType]$::SharedPtr msg) {
   std::cout << "callback" << std::endl;
   QVariantMap data;
-  // data.insert("$eventData.interfaceData[interfaceDataField]$", msg);//TODO CORRECT
-  /*TOPIC_PARAM_LIST*//*TOPIC_PARAM*/
 
+  /*TOPIC_PARAM_LIST*//*TOPIC_PARAM*/
+  data.insert("$eventData.interfaceData[interfaceDataField]$", msg->data);
+  /*END_TOPIC_PARAM*/
   m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.Sub", data);
   RCLCPP_INFO(m_node->get_logger(), "$eventData.componentName$.$eventData.functionName$.Sub");
 }
