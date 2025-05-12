@@ -65,6 +65,7 @@ struct eventDataStr{
     std::string clientName;
     std::string interfaceName;
     std::string interfaceType;
+    bool virtualInterface;
     std::map<std::string, std::string> interfaceData; //field and type
 };
 
@@ -115,6 +116,7 @@ struct savedCodeStr{
     std::string topicSubscriptionH;
     std::string topicCallbackH; 
     std::string topicInterfaceH; 
+    std::string topicParamList;
     std::string actionC;
     std::string actionH;
     std::string actionInterfaceH;
