@@ -102,6 +102,7 @@ bool extractInterfaceType(const std::string fileName, eventDataStr& eventData)
     if(!findElementByTagAndAttValue(elementInterface, std::string("function"), std::string("id"), functionName, elementFunction))
     {
         std::cerr << "No function '" << functionName << "'found in file '" << fileName << "'."<< std::endl;
+        std::cerr << "Element interface: " << elementInterface->Name() << std::endl;
         return false;
     }
     if(!findElementByTag(elementFunction, std::string("interface"), elementInterfaceType))

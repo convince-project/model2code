@@ -359,7 +359,7 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
 
             //CMakeLists.txt
             // printEventData(eventData);
-            if (eventData.virtualInterface)
+            // if (eventData.virtualInterface)
             {
                 for(auto it =  eventData.interfaceData.begin(); it != eventData.interfaceData.end(); ++it)
                 {
