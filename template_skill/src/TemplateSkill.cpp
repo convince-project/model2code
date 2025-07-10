@@ -68,13 +68,13 @@ bool $className$::start(int argc, char*argv[])
 	std::cout << "DEBUG: $className$::start" << std::endl;
 
   /*TICK*/
-	m_tickService = m_node->create_service<bt_interfaces_dummy::srv::Tick$skillType$>(m_name + "Skill/tick",
+	m_tickService = m_node->create_service<bt_interfaces::srv::Tick$skillType$>(m_name + "Skill/tick",
                                                                            	std::bind(&$className$::tick,
                                                                            	this,
                                                                            	std::placeholders::_1,
                                                                            	std::placeholders::_2));/*END_TICK*/
   /*HALT*/
-	m_haltService = m_node->create_service<bt_interfaces_dummy::srv::Halt$skillType$>(m_name + "Skill/halt",
+	m_haltService = m_node->create_service<bt_interfaces::srv::Halt$skillType$>(m_name + "Skill/halt",
                                                                             	std::bind(&$className$::halt,
                                                                             	this,
                                                                             	std::placeholders::_1,
@@ -201,8 +201,8 @@ bool $className$::start(int argc, char*argv[])
 	return true;
 }
 /*TICK_CMD*/
-void $className$::tick( [[maybe_unused]] const std::shared_ptr<bt_interfaces_dummy::srv::Tick$skillType$::Request> request,
-                                std::shared_ptr<bt_interfaces_dummy::srv::Tick$skillType$::Response>      response)
+void $className$::tick( [[maybe_unused]] const std::shared_ptr<bt_interfaces::srv::Tick$skillType$::Request> request,
+                                std::shared_ptr<bt_interfaces::srv::Tick$skillType$::Response>      response)
 {
   std::lock_guard<std::mutex> lock(m_requestMutex);
   RCLCPP_INFO(m_node->get_logger(), "$className$::tick");
@@ -231,8 +231,8 @@ void $className$::tick( [[maybe_unused]] const std::shared_ptr<bt_interfaces_dum
   response->is_ok = true;
 }/*END_TICK_CMD*/
 /*HALT_CMD*/
-void $className$::halt( [[maybe_unused]] const std::shared_ptr<bt_interfaces_dummy::srv::Halt$skillType$::Request> request,
-    [[maybe_unused]] std::shared_ptr<bt_interfaces_dummy::srv::Halt$skillType$::Response> response)
+void $className$::halt( [[maybe_unused]] const std::shared_ptr<bt_interfaces::srv::Halt$skillType$::Request> request,
+    [[maybe_unused]] std::shared_ptr<bt_interfaces::srv::Halt$skillType$::Response> response)
 {
   std::lock_guard<std::mutex> lock(m_requestMutex);
   RCLCPP_INFO(m_node->get_logger(), "$className$::halt");
