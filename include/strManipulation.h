@@ -22,6 +22,15 @@
  */
 void turnToSnakeCase(const std::string input, std::string& output);
 
+
+/**
+ * @brief Convert string to snake case
+ * 
+ * @param input input string to be converted (e.g. "BatteryState")
+ * @return std::string output string converted to snake case (e.g. "battery_state")
+ */
+std::string turnToSnakeCase(const std::string input);
+
 /**
  * @brief Get data type path from data type name (e.g. from "sensor_msgs::msg::BatteryState" to "sensor_msgs/msg/battery_state")
  * 

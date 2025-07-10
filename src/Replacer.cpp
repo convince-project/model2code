@@ -9,6 +9,7 @@
  * 
  */
 #include "Replacer.h"
+#include "Data.h"
 #include <filesystem>
 
 
@@ -24,6 +25,7 @@ bool getEventData(fileDataStr fileData, eventDataStr& eventData)
         add_to_log("Event already processed: " + eventData.event);
         return true;
     } 
+    add_to_log("Processing event: " + eventData.event);
     eventsMap[eventData.event];
 
     if(eventData.event != cmdTick && eventData.event != cmdHalt && eventData.event != rspTick && eventData.event != rspHalt)
@@ -35,18 +37,28 @@ bool getEventData(fileDataStr fileData, eventDataStr& eventData)
         turnToSnakeCase(eventData.functionName,eventData.functionNameSnakeCase);
         eventData.serverName = "\"/"+ eventData.componentName +"/" + eventData.functionName + "\"";
 
-        if(extractInterfaceName(fileData.modelFileName, eventData))
+
+        // need to extract the interface name and type from the model file
+        if(!extractInterfaceData(fileData, eventData))
         {
-            if(!extractInterfaceType(fileData.interfaceFileName, eventData))
-            {
-                return false;
-            }
-            printEventData(eventData);
-        }
-        else
-        {
+            std::cerr << "Error extracting interface data for event: " << eventData.event << std::endl;
             return false;
-        }        
+        } 
+
+        // printEventData(eventData);
+        // printEventData(eventData);
+        // if(extractInterfaceName(fileData.modelFileName, eventData))
+        // {
+        //     if(!extractInterfaceType(fileData.interfaceFileName, eventData))
+        //     {
+        //         return false;
+        //     }
+        //     printEventData(eventData);
+        // }
+        // else
+        // {
+        //     return false;
+        // }        
     }
     eventsMap[eventData.event] = eventData;
     return true;
@@ -220,6 +232,7 @@ void replaceCommonEventPlaceholders(std::string& code, const eventDataStr& event
  */
 void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCode, std::string& str)
 {
+    printEventData(eventData);
     if(eventData.eventType == "send"){
         std::string interfaceCodeH = savedCode.interfaceH;
         std::string actionInterfaceH = savedCode.actionInterfaceH;
@@ -237,17 +250,29 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
                 replaceAll(paramCode, "$IT->FIRST$", itParam->first);
                 writeAfterCommand(eventCodeC, "/*PARAM_LIST*/", paramCode);
             }
-            for (auto itParam =  eventData.interfaceData.begin(); itParam != eventData.interfaceData.end(); ++itParam) 
+
+            for (auto itParam = eventData.interfaceResponseFields.begin(); itParam != eventData.interfaceResponseFields.end(); ++itParam) 
             {
                 std::string paramCode = savedCode.returnParam;
-                replaceAll(paramCode, "$eventData.interfaceDataField$", itParam->first);
-                if(itParam->first == "status" ){
-                    keepSection(paramCode, "/*STATUS*/", "/*END_STATUS*/");
-                }else{
-                    deleteSection(paramCode, "/*STATUS*/", "/*END_STATUS*/");
-                }
+
+                replaceAll(paramCode, "$eventData.interfaceDataField$", *itParam);
                 writeAfterCommand(eventCodeC, "/*RETURN_PARAM_LIST*/", paramCode);
             }
+            // if(eventData.rosInterfaceType == "service-server")
+            // {
+
+            // } else if (eventData.rosInterfaceType == "service-client")
+            // {
+            
+            for (auto itParam = eventData.interfaceRequestFields.begin(); itParam != eventData.interfaceRequestFields.end(); ++itParam) 
+            {
+                std::string paramCode = savedCode.returnParam;
+                replaceAll(paramCode, "$eventData.interfaceDataField$", *itParam);
+                writeAfterCommand(eventCodeC, "/*SEND_PARAM_LIST*/", paramCode);
+            }
+            // }
+
+
             writeAfterCommand(str, "/*SEND_EVENT_LIST*/", eventCodeC);
             
             //H
@@ -270,6 +295,7 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             if(!checkIfStrPresent(str, interfaceCodeXML)){
                 writeAfterCommand(str, "<!--INTERFACE_LIST-->", interfaceCodeXML);
             }
+
         }
         else if(eventData.interfaceType == "action")
         {
@@ -325,6 +351,10 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
     }
     else if(eventData.eventType == "transition")
     {
+        if(eventData.interfaceType == "sync-service" || eventData.interfaceType == "async-service")
+        {
+            // in this case I have a service response
+        }
         if(eventData.interfaceType == "topic")
         {
             std::string topicCallbackC = savedCode.topicCallbackC;
@@ -337,9 +367,15 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             std::string packageCodeCMake = savedCode.packageCMake;
             std::string interfaceCodeXML = savedCode.interfaceXML;
             //CPP
-            replaceAll(topicCallbackC, "$eventData.interfaceData[interfaceDataType]$", eventData.interfaceData.begin()->second);
-            replaceAll(topicCallbackC, "$eventData.interfaceData[interfaceDataField]$", eventData.interfaceData.begin()->first);
-            replaceAll(topicSubscriptionC, "$eventData.interfaceData[interfaceDataType]$", eventData.interfaceData.begin()->second);
+            // replaceAll(topicCallbackC, "$eventData.interfaceData[interfaceDataField]$", eventData.interfaceData.begin()->first);
+            for(auto it = eventData.interfaceTopicFields.begin(); it != eventData.interfaceTopicFields.end(); ++it)
+            {
+                std::string topicFieldCode = savedCode.topicParamList;
+                replaceAll(topicFieldCode, "$eventData.interfaceDataField$", *it);
+                writeAfterCommand(topicCallbackC, "/*TOPIC_PARAM*/", topicFieldCode);
+            }
+            replaceAll(topicSubscriptionC, "$eventData.interfaceName$", eventData.interfaceName);
+            replaceAll(topicSubscriptionC, "$eventData.messageNameSnakeCase$", eventData.messageInterfaceType.substr(eventData.messageInterfaceType.find_last_of("/") + 1));
             replaceAll(topicCallbackC, "$eventData.functionName$", eventData.functionName);
             replaceAll(topicSubscriptionC, "$eventData.functionName$", eventData.functionName);
             replaceAll(topicCallbackC, "$eventData.componentName$", eventData.componentName);
@@ -347,10 +383,13 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             writeAfterCommand(str, "/*TOPIC_CALLBACK_LIST*/", topicCallbackC);
             //H
             std::string interface;
-            getDataTypePath(eventData.interfaceData.begin()->second, interface);
-            replaceAll(topicInterfaceH, "$eventData.interfaceData[interfaceDataType]$", interface);
-            replaceAll(topicCallbackH, "$eventData.interfaceData[interfaceDataType]$", eventData.interfaceData.begin()->second);
-            replaceAll(topicSubscriptionH, "$eventData.interfaceData[interfaceDataType]$", eventData.interfaceData.begin()->second);
+            getDataTypePath(eventData.interfaceName, interface);
+            replaceAll(topicInterfaceH, "$eventData.interfaceName$", eventData.interfaceName);
+            replaceAll(topicInterfaceH, "$eventData.messageNameSnakeCase$", turnToSnakeCase(eventData.messageInterfaceType.substr(eventData.messageInterfaceType.find_last_of("/") + 1)));
+            replaceAll(topicCallbackH, "$eventData.interfaceName$", eventData.interfaceName);
+            replaceAll(topicCallbackH, "$eventData.messageNameSnakeCase$", eventData.messageInterfaceType.substr(eventData.messageInterfaceType.find_last_of("/") + 1));
+            replaceAll(topicSubscriptionH, "$eventData.interfaceName$", eventData.interfaceName);
+            replaceAll(topicSubscriptionH, "$eventData.messageNameSnakeCase$", eventData.messageInterfaceType.substr(eventData.messageInterfaceType.find_last_of("/") + 1));
             replaceAll(topicCallbackH, "$eventData.functionName$", eventData.functionName);
             replaceAll(topicSubscriptionH, "$eventData.functionName$", eventData.functionName);
             writeAfterCommand(str, "/*INTERFACES_LIST*/", topicInterfaceH);
@@ -359,26 +398,43 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
 
             //CMakeLists.txt
             // printEventData(eventData);
-            if (eventData.virtualInterface)
-            {
-                for(auto it =  eventData.interfaceData.begin(); it != eventData.interfaceData.end(); ++it)
-                {
-                    if (it->second.find("msg") != std::string::npos) 
-                    {
-                        std::string ros_package = it->second.substr(0, it->second.find("::msg::"));
-                        add_to_log("ROS package: " + ros_package);
-                        replaceAll(interfaceCodeCMake, "$interfaceName$", ros_package);
-                        if(!checkIfStrPresent(str, interfaceCodeCMake)){
-                            writeAfterCommand(str, "#INTERFACE_LIST#", interfaceCodeCMake);
-                        }
-                        replaceAll(packageCodeCMake, "$interfaceName$", ros_package);
-                        if(!checkIfStrPresent(str, packageCodeCMake)){
-                            writeAfterCommand(str, "#PACKAGE_LIST#", packageCodeCMake);
-                        }
-                    }
-                }
+            // if (eventData.virtualInterface)
+            // {
+
+                // for(auto it =  eventData.interfaceData.begin(); it != eventData.interfaceData.end(); ++it)
+                // {
+                //     if (it->second.find("msg") != std::string::npos) 
+                //     {
+                //         std::string ros_package = it->second.substr(0, it->second.find("::msg::"));
+                //         add_to_log("ROS package: " + ros_package);
+                //         replaceAll(interfaceCodeCMake, "$interfaceName$", ros_package);
+                //         if(!checkIfStrPresent(str, interfaceCodeCMake)){
+                //             writeAfterCommand(str, "#INTERFACE_LIST#", interfaceCodeCMake);
+                //         }
+                //         replaceAll(packageCodeCMake, "$interfaceName$", ros_package);
+                //         if(!checkIfStrPresent(str, packageCodeCMake)){
+                //             writeAfterCommand(str, "#PACKAGE_LIST#", packageCodeCMake);
+                //         }
+                //     }
+                // }
+            // }
+            
+            //CMakeLists.txt
+            replaceAll(interfaceCodeCMake, "$interfaceName$", eventData.interfaceName);
+            if(!checkIfStrPresent(str, interfaceCodeCMake)){
+                writeAfterCommand(str, "#INTERFACE_LIST#", interfaceCodeCMake);
             }
 
+            replaceAll(packageCodeCMake, "$interfaceName$", eventData.interfaceName);
+            if(!checkIfStrPresent(str, packageCodeCMake)){
+                writeAfterCommand(str, "#PACKAGE_LIST#", packageCodeCMake);
+            }
+
+            //package.xml
+            replaceAll(interfaceCodeXML, "$interfaceName$", eventData.interfaceName);
+            if(!checkIfStrPresent(str, interfaceCodeXML)){
+                writeAfterCommand(str, "<!--INTERFACE_LIST-->", interfaceCodeXML);
+            }
             // replaceAll(interfaceCodeCMake, "$interfaceName$", eventData.interfaceName);
             // if(!checkIfStrPresent(str, interfaceCodeCMake)){
             //     writeAfterCommand(str, "#INTERFACE_LIST#", interfaceCodeCMake);
@@ -467,6 +523,8 @@ void saveCode(savedCodeStr& savedCode, std::string& code)
     deleteSection(code, "/*PARAM*/", "/*END_PARAM*/");
     saveSection(code, "/*RETURN_PARAM*/", "/*END_RETURN_PARAM*/", savedCode.returnParam);
     deleteSection(code, "/*RETURN_PARAM*/", "/*END_RETURN_PARAM*/");
+    saveSection(code, "/*TOPIC_PARAM*/", "/*END_TOPIC_PARAM*/", savedCode.topicParamList);
+    deleteSection(code, "/*TOPIC_PARAM*/", "/*END_TOPIC_PARAM*/");
     saveSection(code, "/*SEND_EVENT_SRV*/", "/*END_SEND_EVENT_SRV*/", savedCode.eventC);
     deleteSection(code, "/*SEND_EVENT_SRV*/", "/*END_SEND_EVENT_SRV*/");
     saveSection(code, "/*TOPIC_CALLBACK*/", "/*END_TOPIC_CALLBACK*/", savedCode.topicCallbackC);
@@ -526,7 +584,7 @@ void saveCode(savedCodeStr& savedCode, std::string& code)
  * 
  * @param codeMap code map where the code is stored
  */
-void replaceEventCode(std::map <std::string, std::string>& codeMap){
+void replaceEventCode(std::map <std::string, std::string>& codeMap, fileDataStr fileData){
     savedCodeStr savedCode;
     for (auto it = codeMap.begin(); it != codeMap.end(); it++) {
         handleCmdTickEvent(it->second, eventsMap.find(cmdTick) != eventsMap.end());
@@ -624,6 +682,8 @@ bool createDirectory(const std::string& path) {
 }
 
 
+
+
 /**
  * @brief main function to get the code from template files and replace the placeholders with the data from the input file
  * 
@@ -658,10 +718,11 @@ bool Replacer(fileDataStr& fileData, templateFileDataStr& templateFileData)
         replaceAll(it->second, "$projectName$", skillData.classNameSnakeCase);
         replaceAll(it->second, "$SMName$", skillData.SMName);
         replaceAll(it->second, "$skillName$", skillData.skillName);
+        std::cout << "=================================skillType: " << skillData.skillType << std::endl;
         replaceAll(it->second, "$skillTypeLC$", skillData.skillTypeLC);
         replaceAll(it->second, "$skillType$", skillData.skillType);
 
-        if(skillData.skillType == "Action"){
+        if(fileData.is_action_skill){
             keepSection(it->second, "/*ACTION*/", "/*END_ACTION*/");
         }else{
             deleteSection(it->second, "/*ACTION*/", "/*END_ACTION*/");
@@ -680,7 +741,7 @@ bool Replacer(fileDataStr& fileData, templateFileDataStr& templateFileData)
     {
         return false;
     }
-    replaceEventCode(codeMap);
+    replaceEventCode(codeMap, fileData);
 
     add_to_log("-----------");
     if(fileData.datamodel_mode)
