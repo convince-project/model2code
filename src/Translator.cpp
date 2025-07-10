@@ -82,7 +82,7 @@ bool deleteElementFromVector(std::vector<tinyxml2::XMLElement*>& elements)
 {
     // Check if the vector itself is empty
     if (elements.empty()) {
-        std::cerr << "The vector is empty." << std::endl;
+        std::cerr << "The vector is empty In function deleteElementFromVector." << std::endl;
         return false;
     }
 
@@ -599,6 +599,12 @@ bool translateRosActionHandleGoalResponseTag(tinyxml2::XMLElement* root, std::ma
 {
     std::vector<tinyxml2::XMLElement*> actionHandleGoalRspVector;
     findElementVectorByTag(root, std::string("ros_action_handle_goal_response"), actionHandleGoalRspVector);
+
+    if (actionHandleGoalRspVector.empty()) {
+        std::cerr << "The vector is empty in function translateRosActionHandleGoalResponseTag." << std::endl;
+        return false; // <-- AGGIUNGI QUESTO
+    }
+
     replaceAttributeNameFromVector(actionHandleGoalRspVector, "name", "event");
     for(auto& element : actionHandleGoalRspVector){
         const char* eventValue = element->Attribute("event");
@@ -648,7 +654,7 @@ bool translateRosActionHandleGoalResponseTag(tinyxml2::XMLElement* root, std::ma
             add_to_log("Attributi mancanti: event, accept o reject.");
         }
     }
-    
+    return true; // <-- AGGIUNGI QUESTO ALLA FINE DELLA FUNZIONE
 }
 
 /**
