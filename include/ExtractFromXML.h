@@ -11,6 +11,36 @@
 #include "Data.h"
 #include "ExtractFromElement.h"
 
+
+/**
+ * @brief  
+ * 
+ * @param fileData 
+ * @param eventData 
+ * @return true 
+ * @return false 
+ */
+bool extractInterfaceData(const fileDataStr fileData, eventDataStr& eventData);
+
+
+/**
+ * @brief 
+ * 
+ * @param fileData 
+ * @param eventData 
+ * @param element 
+ * @param rosInterfaceType 
+ * @return true 
+ * @return false 
+ */
+bool findInterfaceType(const fileDataStr fileData, eventDataStr& eventData, tinyxml2::XMLElement*& element);
+
+bool getInterfaceFieldsFromName(tinyxml2::XMLElement* element, std::vector<std::string>& interfaceFields);
+
+bool getInterfaceFieldsFromExpr(tinyxml2::XMLElement* element, std::vector<std::string>& interfaceFields);
+bool getInterfaceFieldsFromExpr(tinyxml2::XMLElement* element, std::vector<std::string>& interfaceFields);
+
+
 /**
  * @brief Extract the interface name from the model file
  * 
@@ -29,6 +59,19 @@ bool extractInterfaceName(const std::string fileName, eventDataStr& eventData);
  * @return false 
  */
 bool extractInterfaceType(const std::string fileName, eventDataStr& eventData);
+
+/**
+ * @brief Get the Event Data Fields object  
+ * 
+ * @param elementFunction 
+ * @param eventData 
+ * @param interfaceDataField
+ * @param interfaceDataType
+ * @return true 
+ * @return false 
+ */
+bool getEventDataFields(tinyxml2::XMLElement * elementFunction, eventDataStr& eventData, std::string interfaceDataField, std::string interfaceDataType);
+
 
 /**
  * @brief Extract data from SCXML file (rootname, transition and send event elements)

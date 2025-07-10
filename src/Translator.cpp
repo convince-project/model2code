@@ -576,6 +576,7 @@ bool getDataFromRootNameHighLevel(const std::string attributeName, skillDataStr&
  */
 bool readHLXMLFile(tinyxml2::XMLDocument& doc, std::string& fileContent, const std::string fileName){
     add_to_log("readFile");
+    add_to_log("opening file: " + fileName + " at line " + std::to_string(__LINE__));
     if (doc.LoadFile(fileName.c_str()) != tinyxml2::XML_SUCCESS) {
         std::cerr << "Failed to load '" << fileName << "' file" << std::endl;
         return false;

@@ -83,10 +83,13 @@ bool getElementText(tinyxml2::XMLElement* element, std::string& textValue)
  */
 bool findElementByTagAndAttValue(tinyxml2::XMLElement* root, const std::string tag, const std::string attributeName, const std::string attributeValue, tinyxml2::XMLElement*& element)
 {
+
     for (tinyxml2::XMLElement* child = root->FirstChildElement(); child; child = child->NextSiblingElement()) {
         if (strcmp(child->Value(), tag.c_str()) == 0) {
             const char* id = child->Attribute(attributeName.c_str());
             if (id && std::string(id) == attributeValue){
+                std::cerr << "Found element with tag '" << tag << "' and attribute '" << attributeName << "' with value '" << attributeValue << "'" << std::endl;
+                //std::cout << "Found element with tag '" << tag << "' and attribute '"
                 element = child;
                 return true;
             }
