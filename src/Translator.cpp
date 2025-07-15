@@ -602,7 +602,7 @@ bool translateRosActionHandleGoalResponseTag(tinyxml2::XMLElement* root, std::ma
 
     if (actionHandleGoalRspVector.empty()) {
         std::cerr << "The vector is empty in function translateRosActionHandleGoalResponseTag." << std::endl;
-        return false; // <-- AGGIUNGI QUESTO
+        return false; 
     }
 
     replaceAttributeNameFromVector(actionHandleGoalRspVector, "name", "event");
@@ -654,7 +654,7 @@ bool translateRosActionHandleGoalResponseTag(tinyxml2::XMLElement* root, std::ma
             add_to_log("Attributi mancanti: event, accept o reject.");
         }
     }
-    return true; // <-- AGGIUNGI QUESTO ALLA FINE DELLA FUNZIONE
+    return true; 
 }
 
 /**
