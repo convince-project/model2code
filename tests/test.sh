@@ -15,7 +15,7 @@ CORRECT_SKILLS_DIR="./correct_skills"
 # set the path to the hl_scxml directory
 HL_SCXML_DIR="./hl_scxml"   
 # set the path to the output directory
-OUTPUT_DIR="./output"
+OUTPUT_DIR="./test_compilation/output"
 # create the output directory if it does not exist
 mkdir -p $OUTPUT_DIR
 # loop through each file in the correct_skills directory
