@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml version="1.0" xmlns="http://www.w3.org/2005/07/scxml" datamodel="ecmascript" name="AlarmBatteryLowSkillAction" initial="idle">
+    <!-- AlarmSkill is a server for tick from the ROS2Action plugin-->
+    <!-- AlarmSkill is a server for halt from the ROS2Action plugin-->
+    <!-- AlarmSkill is a client for StartAlarm from the NotifyUserComponent -->
+    <!-- AlarmSkill is a client for StopAlarm from the NotifyUserComponent -->
+    <datamodel>
+        <data id="SKILL_SUCCESS" expr="0"/>
+        <data id="SKILL_FAILURE" expr="1"/>
+        <data id="SKILL_RUNNING" expr="2"/>
+    </datamodel>
+    <state id="idle">
+        <transition target="startAlarm" event="CMD_TICK">
+            <send event="NotifyUserComponent.StartAlarm.Call"/>
+        </transition>
+        <transition target="stopAlarm" event="CMD_HALT">
+            <send event="NotifyUserComponent.StopAlarm.Call"/>
+        </transition>
+    </state>
+    <state id="startAlarm">
+        <transition cond="_event.data.is_ok" target="idle" event="NotifyUserComponent.StartAlarm.Return">
+            <send event="TICK_RESPONSE">
+                <param name="status" expr="SKILL_SUCCESS"/>
+                <param name="is_ok" expr="true"/>
+            </send>
+        </transition>
+        <!-- <ros_service_handle_response name="/NotifyUserComponent/StartAlarm" cond="!(_res.is_ok)" target="idle"> -->
+        <transition cond="(_event.data.is_ok) == false" target="idle" event="NotifyUserComponent.StartAlarm.Return">
+            <send event="TICK_RESPONSE">
+                <param name="status" expr="SKILL_FAILURE"/>
+                <param name="is_ok" expr="true"/>
+            </send>
+        </transition>
+        <transition target="stopAlarm" event="CMD_HALT">
+            <send event="NotifyUserComponent.StopAlarm.Call"/>
+        </transition>
+        <transition target="startAlarm" event="CMD_TICK">
+            <send event="TICK_RESPONSE">
+                <param name="status" expr="SKILL_RUNNING"/>
+                <param name="is_ok" expr="true"/>
+            </send>
+        </transition>
+    </state>
+    <state id="stopAlarm">
+        <transition target="idle" event="NotifyUserComponent.StopAlarm.Return">
+            <send event="HALT_RESPONSE">
+                <param name="is_ok" expr="true"/>
+            </send>
+        </transition>
+        <transition target="stopAlarm" event="CMD_HALT"/>
+    </state>
+</scxml>
