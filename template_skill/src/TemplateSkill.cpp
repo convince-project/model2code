@@ -58,13 +58,13 @@ bool $className$::start(int argc, char*argv[])
 	std::cout << "$className$::start";
 
   /*TICK*/
-	m_tickService = m_node->create_service<bt_interfaces::srv::Tick$skillType$>(m_name + "Skill/tick",
+	m_tickService = m_node->create_service<bt_interfaces_dummy::srv::Tick$skillType$>(m_name + "Skill/tick",
                                                                            	std::bind(&$className$::tick,
                                                                            	this,
                                                                            	std::placeholders::_1,
                                                                            	std::placeholders::_2));/*END_TICK*/
   /*HALT*/
-	m_haltService = m_node->create_service<bt_interfaces::srv::Halt$skillType$>(m_name + "Skill/halt",
+	m_haltService = m_node->create_service<bt_interfaces_dummy::srv::Halt$skillType$>(m_name + "Skill/halt",
                                                                             	std::bind(&$className$::halt,
                                                                             	this,
                                                                             	std::placeholders::_1,
@@ -76,7 +76,7 @@ bool $className$::start(int argc, char*argv[])
   m_send_goal_options.result_callback =  std::bind(&$className$::result_callback, this, std::placeholders::_1);
   /*END_ACTION_C*/
   /*TOPIC_SUBSCRIPTIONS_LIST*//*TOPIC_SUBSCRIPTION*/
-  m_subscription_$eventData.functionName$ = m_node->create_subscription<$eventData.interfaceData[interfaceDataType]$>(
+  m_subscription_$eventData.functionName$ = m_node->create_subscription<$eventData.interfaceName$::msg::$eventData.messageNameSnakeCase$>(
   "/$eventData.functionName$", 10, std::bind(&$className$::topic_callback_$eventData.functionName$, this, std::placeholders::_1));
   /*END_TOPIC_SUBSCRIPTION*/
   /*SEND_EVENT_LIST*//*SEND_EVENT_SRV*/
@@ -110,9 +110,8 @@ bool $className$::start(int argc, char*argv[])
           {
               auto response = result.get();
               if( response->is_ok == true) {
-                  QVariantMap data;
-                  data.insert("is_ok", true);/*RETURN_PARAM_LIST*//*RETURN_PARAM*/
-                  data.insert("$eventData.interfaceDataField$", response->$eventData.interfaceDataField$/*STATUS*/.status/*END_STATUS*/);/*END_RETURN_PARAM*/
+                  QVariantMap data;/*RETURN_PARAM_LIST*//*RETURN_PARAM*/
+                  data.insert("$eventData.interfaceDataField$", response->$eventData.interfaceDataField$);/*END_RETURN_PARAM*/
                   m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.Return", data);
                   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.Return");
                   return;
@@ -192,8 +191,8 @@ bool $className$::start(int argc, char*argv[])
 	return true;
 }
 /*TICK_CMD*/
-void $className$::tick( [[maybe_unused]] const std::shared_ptr<bt_interfaces::srv::Tick$skillType$::Request> request,
-                                std::shared_ptr<bt_interfaces::srv::Tick$skillType$::Response>      response)
+void $className$::tick( [[maybe_unused]] const std::shared_ptr<bt_interfaces_dummy::srv::Tick$skillType$::Request> request,
+                                std::shared_ptr<bt_interfaces_dummy::srv::Tick$skillType$::Response>      response)
 {
   std::lock_guard<std::mutex> lock(m_requestMutex);
   RCLCPP_INFO(m_node->get_logger(), "$className$::tick");
@@ -213,14 +212,17 @@ void $className$::tick( [[maybe_unused]] const std::shared_ptr<bt_interfaces::sr
           break;
       case Status::success:
           response->status = SKILL_SUCCESS;
-          break;            
+          break;
+      case Status::undefined:
+          response->status = SKILL_FAILURE;
+          break;
   }
   RCLCPP_INFO(m_node->get_logger(), "$className$::tickDone");
   response->is_ok = true;
 }/*END_TICK_CMD*/
 /*HALT_CMD*/
-void $className$::halt( [[maybe_unused]] const std::shared_ptr<bt_interfaces::srv::Halt$skillType$::Request> request,
-    [[maybe_unused]] std::shared_ptr<bt_interfaces::srv::Halt$skillType$::Response> response)
+void $className$::halt( [[maybe_unused]] const std::shared_ptr<bt_interfaces_dummy::srv::Halt$skillType$::Request> request,
+    [[maybe_unused]] std::shared_ptr<bt_interfaces_dummy::srv::Halt$skillType$::Response> response)
 {
   std::lock_guard<std::mutex> lock(m_requestMutex);
   RCLCPP_INFO(m_node->get_logger(), "$className$::halt");
@@ -236,7 +238,7 @@ void $className$::halt( [[maybe_unused]] const std::shared_ptr<bt_interfaces::sr
 
 
 /*TOPIC_CALLBACK_LIST*//*TOPIC_CALLBACK*/
-void $className$::topic_callback_$eventData.functionName$(const $eventData.interfaceData[interfaceDataType]$::SharedPtr msg) {
+void $className$::topic_callback_$eventData.functionName$(const $eventData.interfaceName$::msg::$eventData.messageNameSnakeCase$::SharedPtr msg) {
   std::cout << "callback" << std::endl;
   QVariantMap data;
 

@@ -8,7 +8,7 @@
   <license>License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <!--TICK--><depend>bt_interfaces</depend><!--END_TICK-->
+  <!--TICK--><depend>bt_interfaces_dummy</depend><!--END_TICK-->
   <!--INTERFACE_LIST--><!--INTERFACE-->
   <depend>$interfaceName$</depend><!--END_INTERFACE-->
   <depend>std_msgs</depend>
