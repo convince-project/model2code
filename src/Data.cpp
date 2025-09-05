@@ -151,7 +151,10 @@ void printEventData(eventDataStr eventData)
     for (const auto& data : eventData.interfaceData) {
         add_to_log("\t\t" + data.second + " " + data.first);
     }
+    add_to_log("\tMessage Interface Type: " + eventData.messageInterfaceType);
+    add_to_log("\tROS Interface Type: " + eventData.rosInterfaceType);
     add_to_log("-----------");
+
 
     
 }

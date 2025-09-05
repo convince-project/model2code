@@ -36,7 +36,6 @@ bool getEventData(fileDataStr fileData, eventDataStr& eventData)
         eventData.clientName = "client"+ eventData.functionName;
         turnToSnakeCase(eventData.functionName,eventData.functionNameSnakeCase);
         eventData.serverName = "\"/"+ eventData.componentName +"/" + eventData.functionName + "\"";
-        std::cerr << "filedata.modelFileName: " << fileData.modelFileName << std::endl;
 
 
         // need to extract the interface name and type from the model file
@@ -45,6 +44,9 @@ bool getEventData(fileDataStr fileData, eventDataStr& eventData)
             std::cerr << "Error extracting interface data for event: " << eventData.event << std::endl;
             return false;
         } 
+
+        // printEventData(eventData);
+        // printEventData(eventData);
         // if(extractInterfaceName(fileData.modelFileName, eventData))
         // {
         //     if(!extractInterfaceType(fileData.interfaceFileName, eventData))
@@ -230,14 +232,14 @@ void replaceCommonEventPlaceholders(std::string& code, const eventDataStr& event
  */
 void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCode, std::string& str)
 {
-    printEventDataToCerr(eventData);
+    printEventData(eventData);
     if(eventData.eventType == "send"){
         std::string interfaceCodeH = savedCode.interfaceH;
         std::string actionInterfaceH = savedCode.actionInterfaceH;
         std::string interfaceCodeCMake = savedCode.interfaceCMake;
         std::string packageCodeCMake = savedCode.packageCMake;
         std::string interfaceCodeXML = savedCode.interfaceXML;
-        if(eventData.rosInterfaceType == "async-service" || eventData.rosInterfaceType == "sync-service")
+        if(eventData.interfaceType == "async-service" || eventData.interfaceType == "sync-service")
         {
             std::string eventCodeC = savedCode.eventC;
             //CPP
@@ -252,12 +254,8 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             for (auto itParam = eventData.interfaceResponseFields.begin(); itParam != eventData.interfaceResponseFields.end(); ++itParam) 
             {
                 std::string paramCode = savedCode.returnParam;
-                replaceAll(paramCode, "$eventData.interfaceDataField$", itParam->first);
-                // if(itParam->first == "status" ){
-                //     keepSection(paramCode, "/*STATUS*/", "/*END_STATUS*/");
-                // }else{
-                //     deleteSection(paramCode, "/*STATUS*/", "/*END_STATUS*/");
-                // }
+
+                replaceAll(paramCode, "$eventData.interfaceDataField$", *itParam);
                 writeAfterCommand(eventCodeC, "/*RETURN_PARAM_LIST*/", paramCode);
             }
             // if(eventData.rosInterfaceType == "service-server")
@@ -369,9 +367,15 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             std::string packageCodeCMake = savedCode.packageCMake;
             std::string interfaceCodeXML = savedCode.interfaceXML;
             //CPP
-            // replaceAll(topicCallbackC, "$eventData.interfaceData[interfaceDataType]$", eventData.interfaceName);
-            replaceAll(topicCallbackC, "$eventData.interfaceData[interfaceDataField]$", eventData.interfaceData.begin()->first);
-            replaceAll(topicSubscriptionC, "$eventData.interfaceData[interfaceDataType]$", eventData.interfaceData.begin()->second);
+            // replaceAll(topicCallbackC, "$eventData.interfaceData[interfaceDataField]$", eventData.interfaceData.begin()->first);
+            for(auto it = eventData.interfaceTopicFields.begin(); it != eventData.interfaceTopicFields.end(); ++it)
+            {
+                std::string topicFieldCode = savedCode.topicParamList;
+                replaceAll(topicFieldCode, "$eventData.interfaceDataField$", *it);
+                writeAfterCommand(topicCallbackC, "/*TOPIC_PARAM*/", topicFieldCode);
+            }
+            replaceAll(topicSubscriptionC, "$eventData.interfaceName$", eventData.interfaceName);
+            replaceAll(topicSubscriptionC, "$eventData.messageNameSnakeCase$", eventData.messageInterfaceType.substr(eventData.messageInterfaceType.find_last_of("/") + 1));
             replaceAll(topicCallbackC, "$eventData.functionName$", eventData.functionName);
             replaceAll(topicSubscriptionC, "$eventData.functionName$", eventData.functionName);
             replaceAll(topicCallbackC, "$eventData.componentName$", eventData.componentName);
