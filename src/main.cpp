@@ -73,14 +73,14 @@ bool handleInputs(int argc, char* argv[], fileDataStr& fileData, templateFileDat
             fileData.outputPath = argv[i + 1];
             i++;
         }
-        else if (arg == "--model_filename" && i+1 < argc && argv[i+1][0] != '-') {
-            fileData.modelFileName = argv[i + 1];
-            i++;
-        }
-        else if (arg == "--interface_filename" && i+1 < argc && argv[i+1][0] != '-') {
-            fileData.interfaceFileName = argv[i + 1];
-            i++;
-        }
+        // else if (arg == "--model_filename" && i+1 < argc && argv[i+1][0] != '-') {
+        //     fileData.modelFileName = argv[i + 1];
+        //     i++;
+        // }
+        // else if (arg == "--interface_filename" && i+1 < argc && argv[i+1][0] != '-') {
+        //     fileData.interfaceFileName = argv[i + 1];
+        //     i++;
+        // }
         else if (arg == "--template_path" && i+1 < argc && argv[i+1][0] != '-') {
             templateFileData.templatePath = argv[i+1];
             i++;
@@ -98,6 +98,7 @@ bool handleInputs(int argc, char* argv[], fileDataStr& fileData, templateFileDat
             fileData.verbose_mode = true;
         }
     }
+    add_to_log("Args" + fileData.datamodel_mode ? " with datamodel mode" : " without datamodel mode" + fileData.translate_mode ? " with translation mode" : " without translation mode" + fileData.generate_mode ? " with generation mode" : " without generation mode");
     
     if(fileData.inputFileName == "")
     {
@@ -106,7 +107,6 @@ bool handleInputs(int argc, char* argv[], fileDataStr& fileData, templateFileDat
         std::cerr << "Run 'model2code --help' for instructions" << std::endl;
         return RETURN_CODE_ERROR;
     }
-
     if(fileData.outputPath == "")
     {
         add_to_log("-----------");

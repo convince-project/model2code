@@ -19,8 +19,10 @@ std::string log_str;
  */
 void getDataFromEvent(eventDataStr& eventData) 
 {
+
     std::string firstWord, secondWord, thirdWord;
     std::string event = eventData.event;
+    std::cout << "Event: " << event << std::endl;
     if (event == ""){
         std::cerr << "Event has no value" << std::endl;
         return;
@@ -34,7 +36,7 @@ void getDataFromEvent(eventDataStr& eventData)
             thirdWord = event.substr(secondDotPos + 1);
         }
         else{
-            std::cerr << "Error in name format for event: "<< event << std::endl;
+            std::cerr << "only 2 words found, : "<< event << std::endl;
         }
     }
     else{
@@ -68,6 +70,8 @@ bool getDataFromRootName(const std::string attributeName, skillDataStr& skillDat
                 std::cerr << "Skill type not found" << std::endl;
                 return false;
             }
+            std::cerr << "Skill type: " << skillData.skillType << std::endl;
+            // convert skillType to lowercase
             skillData.skillTypeLC = skillData.skillType; 
             for (char &c : skillData.skillTypeLC) 
             { 
@@ -147,7 +151,10 @@ void printEventData(eventDataStr eventData)
     for (const auto& data : eventData.interfaceData) {
         add_to_log("\t\t" + data.second + " " + data.first);
     }
+    add_to_log("\tMessage Interface Type: " + eventData.messageInterfaceType);
+    add_to_log("\tROS Interface Type: " + eventData.rosInterfaceType);
     add_to_log("-----------");
+
 
     
 }
