@@ -33,44 +33,6 @@ bool extractInterfaceData(const fileDataStr fileData, eventDataStr& eventData);
  * @return true 
  * @return false 
  */
-bool findInterfaceType(const fileDataStr fileData, eventDataStr& eventData, tinyxml2::XMLElement*& element);
-
-bool getInterfaceFieldsFromName(tinyxml2::XMLElement* element, std::vector<std::string>& interfaceFields);
-
-bool getInterfaceFieldsFromExpr(tinyxml2::XMLElement* element, std::vector<std::string>& interfaceFields);
-bool getInterfaceFieldsFromExpr(tinyxml2::XMLElement* element, std::vector<std::string>& interfaceFields);
-
-
-/**
- * @brief Extract the interface name from the model file
- * 
- * @param fileName model file name from which to extract the interface name
- * @param eventData event data structure, where the interface name will be stored, returned by reference
- * @return bool
- */
-bool extractInterfaceName(const std::string fileName, eventDataStr& eventData);
-
-/**
- * @brief  
- * 
- * @param fileData 
- * @param eventData 
- * @return true 
- * @return false 
- */
-bool extractInterfaceData(const fileDataStr fileData, eventDataStr& eventData);
-
-
-/**
- * @brief 
- * 
- * @param fileData 
- * @param eventData 
- * @param element 
- * @param rosInterfaceType 
- * @return true 
- * @return false 
- */
  bool findInterfaceType(const fileDataStr fileData, eventDataStr& eventData, tinyxml2::XMLElement*& element);
 
 /**
@@ -112,19 +74,6 @@ bool getInterfaceFieldsFromFieldTag(tinyxml2::XMLElement* element, std::vector<s
 //  * @return false 
 //  */
 // bool extractInterfaceType(const std::string fileName, eventDataStr& eventData);
-
-/**
- * @brief Get the Event Data Fields object  
- * 
- * @param elementFunction 
- * @param eventData 
- * @param interfaceDataField
- * @param interfaceDataType
- * @return true 
- * @return false 
- */
-bool getEventDataFields(tinyxml2::XMLElement * elementFunction, eventDataStr& eventData, std::string interfaceDataField, std::string interfaceDataType);
-
 
 /**
  * @brief Get the Event Data Fields object  
