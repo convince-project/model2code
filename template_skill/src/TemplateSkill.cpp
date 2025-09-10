@@ -87,7 +87,7 @@ bool $className$::start(int argc, char*argv[])
   /*END_ACTION_C*/
   /*TOPIC_SUBSCRIPTIONS_LIST*//*TOPIC_SUBSCRIPTION*/
   m_subscription_$eventData.functionName$ = m_node->create_subscription<$eventData.interfaceName$::msg::$eventData.messageNameSnakeCase$>(
-  "/$eventData.functionName$", 10, std::bind(&$className$::topic_callback_$eventData.functionName$, this, std::placeholders::_1));
+  "$eventData.topicName$", 10, std::bind(&$className$::topic_callback_$eventData.functionName$, this, std::placeholders::_1));
   /*END_TOPIC_SUBSCRIPTION*/
   /*SEND_EVENT_LIST*//*SEND_EVENT_SRV*/
   m_stateMachine.connectToEvent("$eventData.event$", [this]([[maybe_unused]]const QScxmlEvent & event){

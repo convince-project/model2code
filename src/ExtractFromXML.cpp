@@ -224,8 +224,19 @@ bool findInterfaceType(const fileDataStr fileData, eventDataStr& eventData, tiny
 
 
     // ROS TOPIC SUBSCRIBER
-    bool is_topic_subscriber = findElementByTagAndAttValue(root, std::string("ros_topic_subscriber"), std::string("topic"), std::string("/" + eventData.componentName + "/" + eventData.functionName), element);
-    add_to_log("is_topic_subscriber: " + std::to_string(is_topic_subscriber) + " at line " + std::to_string(__LINE__));
+    // For topic subscribers, we need to reconstruct the full topic name from the event
+    // Event format: componentName.functionName.topicPart.Sub
+    // We need to extract the topicPart and reconstruct: /componentName/functionName/topicPart
+    std::string fullTopicName = "/" + eventData.componentName + "/" + eventData.functionName;
+    if (eventData.eventName.find(".Sub") != std::string::npos) {
+        std::string topicPart = eventData.eventName.substr(0, eventData.eventName.find(".Sub"));
+        if (!topicPart.empty()) {
+            fullTopicName += "/" + topicPart;
+        }
+    }
+    
+    bool is_topic_subscriber = findElementByTagAndAttValue(root, std::string("ros_topic_subscriber"), std::string("topic"), fullTopicName, element);
+    add_to_log("is_topic_subscriber: " + std::to_string(is_topic_subscriber) + " for topic: " + fullTopicName + " at line " + std::to_string(__LINE__));
     if (is_topic_subscriber) {
         eventData.interfaceType = "topic";
         eventData.rosInterfaceType = "topic-subscriber"; // type of the interface in ROS
@@ -233,6 +244,25 @@ bool findInterfaceType(const fileDataStr fileData, eventDataStr& eventData, tiny
         getElementAttValue(element, std::string("topic"), eventData.topicName);
         getElementAttValue(element, std::string("name"), eventData.scxmlInterfaceName);
         tinyxml2::XMLElement* fieldParent;
+
+        // For topic subscribers, derive a better function name from the topic name
+        // Extract the last part of the topic path as the function identifier
+        std::string topicFunctionName = eventData.topicName;
+        if (!topicFunctionName.empty() && topicFunctionName[0] == '/') {
+            topicFunctionName = topicFunctionName.substr(1); // Remove leading slash
+        }
+        size_t lastSlash = topicFunctionName.find_last_of("/");
+        if (lastSlash != std::string::npos) {
+            topicFunctionName = topicFunctionName.substr(lastSlash + 1);
+        }
+        // Update functionName to use the derived topic function name for better naming
+        if (!topicFunctionName.empty()) {
+            eventData.functionName = topicFunctionName;
+            turnToSnakeCase(eventData.functionName, eventData.functionNameSnakeCase);
+            // Update other derived fields that depend on functionName
+            eventData.nodeName = "node" + eventData.functionName;
+            eventData.clientName = "client" + eventData.functionName;
+        }
 
         eventData.interfaceName = eventData.messageInterfaceType.substr(0, eventData.messageInterfaceType.find_last_of("/"));
         add_to_log("interfaceName: " + eventData.interfaceName + " at line " + std::to_string(__LINE__));
