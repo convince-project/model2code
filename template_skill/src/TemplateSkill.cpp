@@ -2,6 +2,8 @@
 #include <future>
 #include <QTimer>
 #include <QDebug>
+#include <QCoreApplication>
+
 #include <QTime>
 #include <iostream>
 #include <QStateMachine>
@@ -40,10 +42,18 @@ $className$::$className$(std::string name ) :
     /*DATAMODEL*/m_stateMachine.setDataModel(&m_dataModel);/*END_DATAMODEL*/
 }
 
+$className$::~$className$()
+{
+    //std::cout << "DEBUG: Invoked destructor of $className$" << std::endl;
+    m_threadSpin->join();
+}
+
 void $className$::spin(std::shared_ptr<rclcpp::Node> node)
 {
-	rclcpp::spin(node);
-	rclcpp::shutdown();
+    rclcpp::spin(node);
+    rclcpp::shutdown();
+    QCoreApplication::quit();
+    //std::cout << "DEBUG: $className$::spin successfully ended" << std::endl;
 }
 
 bool $className$::start(int argc, char*argv[])
@@ -55,7 +65,7 @@ bool $className$::start(int argc, char*argv[])
 
 	m_node = rclcpp::Node::make_shared(m_name + "Skill");
 	RCLCPP_DEBUG_STREAM(m_node->get_logger(), "$className$::start");
-	std::cout << "$className$::start";
+	std::cout << "DEBUG: $className$::start" << std::endl;
 
   /*TICK*/
 	m_tickService = m_node->create_service<bt_interfaces_dummy::srv::Tick$skillType$>(m_name + "Skill/tick",
@@ -187,7 +197,7 @@ bool $className$::start(int argc, char*argv[])
 
 	m_stateMachine.start();
 	m_threadSpin = std::make_shared<std::thread>(spin, m_node);
-
+       
 	return true;
 }
 /*TICK_CMD*/
