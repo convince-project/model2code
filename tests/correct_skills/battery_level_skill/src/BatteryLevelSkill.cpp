@@ -67,7 +67,7 @@ bool BatteryLevelSkill::start(int argc, char*argv[])
   
   
   m_subscription_battery_level = m_node->create_subscription<sensor_msgs::msg::BatteryState>(
-  "/battery_status", 10, std::bind(&BatteryLevelSkill::topic_callback_battery_level, this, std::placeholders::_1));
+  "/battery_status/battery/battery_level", 10, std::bind(&BatteryLevelSkill::topic_callback_battery_level, this, std::placeholders::_1));
   
   
   
@@ -115,7 +115,10 @@ void BatteryLevelSkill::tick( [[maybe_unused]] const std::shared_ptr<bt_interfac
           break;
       case Status::success:
           response->status = SKILL_SUCCESS;
-          break;            
+          break;
+      case Status::undefined:
+          response->status = SKILL_FAILURE;
+          break;
   }
   RCLCPP_INFO(m_node->get_logger(), "BatteryLevelSkill::tickDone");
   response->is_ok = true;
