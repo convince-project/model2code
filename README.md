@@ -27,6 +27,21 @@ cmake ..
 make install
 ```
 
+### Portable build
+If you want to build a portable binary (avoid microarchitecture-specific
+instructions) use the `PORTABLE_BUILD` CMake option or the included script:
+
+```bash
+cmake -S . -B build -DPORTABLE_BUILD=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build build --target model2code -j $(nproc)
+```
+
+Alternatively use the helper script:
+
+```bash
+./scripts/build_portable.sh
+```
+
 ## Execution
 To run the `model2code` tool, you will need the following:
 - An SCXML file with the state machine of the model;

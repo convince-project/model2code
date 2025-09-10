@@ -1,0 +1,32 @@
+<scxml initial="idle" version="1.0" name="SecondTutorialSkillCondition" datamodel="ecmascript" xmlns="http://www.w3.org/2005/07/scxml">
+    <datamodel>
+        <data id="m_data" expr="true"/>
+        <data id="SKILL_SUCCESS" expr="0"/>
+        <data id="SKILL_FAILURE" expr="1"/>
+        <data id="SKILL_RUNNING" expr="2"/>
+    </datamodel>
+    <!-- SecondTutorialSkill is a server for tick from the ROS2Action plugin-->
+    <!-- SecondTutorialSkill is a subscriber for the /Function2 topic from the TemplateComponent-->
+    <state id="idle">
+        <transition target="start" event="CMD_TICK"/>
+        <transition target="idle" event="TemplateComponent.Function2.Sub">
+            <assign location="m_data" expr="_event.data.m_data"/>
+        </transition>
+    </state>
+    <state id="start">
+        <onentry>
+            <if cond="m_data">
+                <send event="TICK_RESPONSE">
+                    <param name="status" expr="SKILL_SUCCESS"/>
+                    <param name="is_ok" expr="true"/>
+                </send>
+                <else/>
+                <send event="TICK_RESPONSE">
+                    <param name="status" expr="SKILL_FAILURE"/>
+                    <param name="is_ok" expr="true"/>
+                </send>
+            </if>
+        </onentry>
+        <transition target="idle"/>
+    </state>
+</scxml>

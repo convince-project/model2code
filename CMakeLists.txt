@@ -4,6 +4,20 @@
 cmake_minimum_required(VERSION 3.16)
 project(model2code)
 
+# Option to request a portable CPU-compatible build. When ON the build adds
+# conservative CPU flags (for example -march=x86-64) to avoid generating
+# microarchitecture-specific instructions that could cause SIGILL on some
+# systems when running prebuilt binaries.
+option(PORTABLE_BUILD "Enable portable CPU flags for builds (adds -march=x86-64)" ON)
+
+if(PORTABLE_BUILD)
+  set(PORTABLE_CXX_FLAGS "-march=x86-64")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PORTABLE_CXX_FLAGS}")
+  message(STATUS "PORTABLE_BUILD is ON: adding '${PORTABLE_CXX_FLAGS}' to CMAKE_CXX_FLAGS")
+else()
+  message(STATUS "PORTABLE_BUILD is OFF")
+endif()
+
 find_package(tinyxml2 CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} src/main.cpp)
