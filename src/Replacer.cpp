@@ -220,6 +220,7 @@ void replaceCommonEventPlaceholders(std::string& code, const eventDataStr& event
     replaceAll(code, "$eventData.serverName$", eventData.serverName);
     replaceAll(code, "$eventData.clientName$", eventData.clientName);
     replaceAll(code, "$eventData.interfaceName$", eventData.interfaceName);
+    replaceAll(code, "$eventData.topicName$", eventData.topicName);
 }
 
 
@@ -377,7 +378,8 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             replaceAll(topicSubscriptionC, "$eventData.interfaceName$", eventData.interfaceName);
             replaceAll(topicSubscriptionC, "$eventData.messageNameSnakeCase$", eventData.messageInterfaceType.substr(eventData.messageInterfaceType.find_last_of("/") + 1));
             replaceAll(topicCallbackC, "$eventData.functionName$", eventData.functionName);
-            replaceAll(topicSubscriptionC, "$eventData.functionName$", eventData.functionName);
+            // replaceAll(topicSubscriptionC, "$eventData.functionName$", eventData.functionName);
+            replaceAll(topicSubscriptionC, "$eventData.topicName$", eventData.topicName);
             replaceAll(topicCallbackC, "$eventData.componentName$", eventData.componentName);
             writeAfterCommand(str, "/*TOPIC_SUBSCRIPTIONS_LIST*/", topicSubscriptionC);
             writeAfterCommand(str, "/*TOPIC_CALLBACK_LIST*/", topicCallbackC);
