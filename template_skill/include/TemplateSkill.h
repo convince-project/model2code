@@ -33,6 +33,8 @@ class $className$
 {
 public:
 	$className$(std::string name );
+    ~$className$();
+
 	bool start(int argc, char * argv[]);
 	static void spin(std::shared_ptr<rclcpp::Node> node);
 	/*TICK_CMD*/
