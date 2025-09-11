@@ -130,8 +130,9 @@ void BatteryLevelSkill::tick( [[maybe_unused]] const std::shared_ptr<bt_interfac
 void BatteryLevelSkill::topic_callback_battery_level(const sensor_msgs::msg::BatteryState::SharedPtr msg) {
   std::cout << "callback" << std::endl;
   QVariantMap data;
+  
   data.insert("percentage", msg->percentage);
-
+  
   m_stateMachine.submitEvent("BatteryComponent.battery_level.Sub", data);
   RCLCPP_INFO(m_node->get_logger(), "BatteryComponent.battery_level.Sub");
 }
