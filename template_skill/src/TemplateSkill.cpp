@@ -120,7 +120,8 @@ bool $className$::start(int argc, char*argv[])
           {
               auto response = result.get();
               if( response->is_ok == true) {
-                  QVariantMap data;/*RETURN_PARAM_LIST*//*RETURN_PARAM*/
+                  QVariantMap data;
+                  data.insert("is_ok", true);/*RETURN_PARAM_LIST*//*RETURN_PARAM*/
                   data.insert("$eventData.interfaceDataField$", response->$eventData.interfaceDataField$);/*END_RETURN_PARAM*/
                   m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.Return", data);
                   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.Return");
