@@ -238,11 +238,36 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
                 writeAfterCommand(eventCodeC, "/*PARAM_LIST*/", paramCode);
             }
 
-            for (auto itParam = eventData.interfaceResponseFields.begin(); itParam != eventData.interfaceResponseFields.end(); ++itParam) 
+            // Use interfaceData instead of interfaceResponseFields to get type information
+            for (auto itParam = eventData.interfaceData.begin(); itParam != eventData.interfaceData.end(); ++itParam) 
             {
+                // Only process fields that are actually in the response (to maintain compatibility)
+                bool fieldInResponse = std::find(eventData.interfaceResponseFields.begin(), 
+                                                eventData.interfaceResponseFields.end(), 
+                                                itParam->first) != eventData.interfaceResponseFields.end();
+                if (!fieldInResponse) {
+                    continue;
+                }
+                
                 std::string paramCode = savedCode.returnParam;
-
-                replaceAll(paramCode, "$eventData.interfaceDataField$", *itParam);
+                
+                // Replace field name (first occurrence - in quotes)
+                std::string fieldName = itParam->first;
+                std::string fieldType = itParam->second;
+                
+                // Create the appropriate field access expression based on type
+                std::string fieldAccess;
+                if (fieldType == "string") {
+                    fieldAccess = "response->" + fieldName + ".c_str()";
+                } else {
+                    fieldAccess = "response->" + fieldName;
+                }
+                
+                // Replace both placeholders - first the field access, then the field name
+                // We need to replace in a specific order to avoid conflicts
+                replaceAll(paramCode, "response->$eventData.interfaceDataField$", fieldAccess);
+                replaceAll(paramCode, "$eventData.interfaceDataField$", fieldName);
+                
                 writeAfterCommand(eventCodeC, "/*RETURN_PARAM_LIST*/", paramCode);
             }
 

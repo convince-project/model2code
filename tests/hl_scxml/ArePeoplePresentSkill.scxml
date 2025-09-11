@@ -29,7 +29,6 @@
 
   <state id="getStatus">
     <ros_service_handle_response name="/TurnBackManagerComponent/IsAllowedToContinue" target="decide">
-      <assign location="m_is_ok"     expr="_res.is_ok"/>
       <assign location="m_is_allowed" expr="_res.is_allowed"/>
     </ros_service_handle_response>
   </state>

@@ -30,6 +30,10 @@ bool extractInterfaceData(const fileDataStr fileData, eventDataStr& eventData)
 
     tinyxml2::XMLElement* element;
     findInterfaceType(fileData, eventData, element);
+    
+    // Parse interface file to populate interfaceData with field types
+    parseInterfaceFile(eventData);
+    
     add_to_log("******************************** event DATA AFTER ********************************\n");
     printEventData(eventData);
     add_to_log("******************************** event DATA AFTER END ********************************\n");
@@ -354,6 +358,84 @@ bool getInterfaceFieldsFromFieldTag(tinyxml2::XMLElement* element, std::vector<s
         }
         fieldElement = fieldElement->NextSiblingElement("expr");
     }
+    return true;
+}
+
+bool parseInterfaceFile(eventDataStr& eventData)
+{
+    // Construct the path to the .srv or .msg file based on messageInterfaceType
+    // messageInterfaceType format: "scheduler_interfaces/GetCurrentPoi"
+    
+    if (eventData.messageInterfaceType.empty()) {
+        std::cerr << "messageInterfaceType is empty" << std::endl;
+        return false;
+    }
+    
+    // Find the last slash to separate package from interface name
+    size_t lastSlash = eventData.messageInterfaceType.find_last_of("/");
+    if (lastSlash == std::string::npos) {
+        std::cerr << "Invalid messageInterfaceType format: " << eventData.messageInterfaceType << std::endl;
+        return false;
+    }
+    
+    std::string packageName = eventData.messageInterfaceType.substr(0, lastSlash);
+    std::string interfaceName = eventData.messageInterfaceType.substr(lastSlash + 1);
+    
+    // Determine interface file type and construct path
+    std::string srvFilePath;
+    if (eventData.interfaceType == "async-service" || eventData.interfaceType == "sync-service") {
+        srvFilePath = "./test_compilation/interfaces/" + packageName + "/srv/" + interfaceName + ".srv";
+    } else if (eventData.interfaceType == "topic") {
+        srvFilePath = "./test_compilation/interfaces/" + packageName + "/msg/" + interfaceName + ".msg";
+    } else {
+        std::cerr << "Unknown interface type: " << eventData.interfaceType << std::endl;
+        return false;
+    }
+    
+    // Open and parse the interface file
+    std::ifstream file(srvFilePath);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open interface file: " << srvFilePath << std::endl;
+        return false;
+    }
+    
+    std::string line;
+    bool inResponseSection = false;
+    
+    // For .srv files, we want the response section (after "---")
+    // For .msg files, we want all fields
+    bool isServiceFile = (eventData.interfaceType == "async-service" || eventData.interfaceType == "sync-service");
+    
+    while (std::getline(file, line)) {
+        // Trim whitespace
+        line.erase(0, line.find_first_not_of(" \t"));
+        line.erase(line.find_last_not_of(" \t") + 1);
+        
+        // Skip empty lines and comments
+        if (line.empty() || line[0] == '#' || line.substr(0, 2) == "//") {
+            continue;
+        }
+        
+        // For .srv files, look for the response separator
+        if (isServiceFile && line == "---") {
+            inResponseSection = true;
+            continue;
+        }
+        
+        // Parse field lines (for .msg files, parse all; for .srv files, parse only response section)
+        if (!isServiceFile || inResponseSection) {
+            // Expected format: "type field_name"
+            std::istringstream iss(line);
+            std::string fieldType, fieldName;
+            
+            if (iss >> fieldType >> fieldName) {
+                eventData.interfaceData[fieldName] = fieldType;
+                add_to_log("Parsed field: " + fieldName + " -> " + fieldType + " at line " + std::to_string(__LINE__));
+            }
+        }
+    }
+    
+    file.close();
     return true;
 }
 

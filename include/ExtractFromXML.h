@@ -10,6 +10,7 @@
  */
 #include "Data.h"
 #include "ExtractFromElement.h"
+#include <sstream>
 
 
 /**
@@ -55,6 +56,13 @@ bool getInterfaceFieldsFromAssignTag(tinyxml2::XMLElement* element, std::vector<
  */
 bool getInterfaceFieldsFromFieldTag(tinyxml2::XMLElement* element, std::vector<std::string>& interfaceFields);
 
+/**
+ * @brief Parse service/message interface file to extract field types
+ * 
+ * @param eventData event data structure containing messageInterfaceType
+ * @return true if successful, false otherwise
+ */
+bool parseInterfaceFile(eventDataStr& eventData);
 
 /**
  * @brief Get the Event Data Fields object  
