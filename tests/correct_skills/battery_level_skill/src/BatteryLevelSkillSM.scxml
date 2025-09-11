@@ -14,8 +14,7 @@
         </transition>
     </state>
     <state id="checkLevel">
-	    <onentry>
-		   <log expr="percentage" label="percentage"/>
+        <onentry>
             <if cond="percentage &gt; 30">
                 <send event="TICK_RESPONSE">
                     <param name="status" expr="SKILL_SUCCESS"/>
