@@ -373,12 +373,14 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             {
                 std::string topicFieldCode = savedCode.topicParamList;
                 replaceAll(topicFieldCode, "$eventData.interfaceDataField$", *it);
-                writeAfterCommand(topicCallbackC, "/*TOPIC_PARAM*/", topicFieldCode);
+                writeAfterCommand(topicCallbackC, "/*TOPIC_PARAM_LIST*/", topicFieldCode);
             }
             replaceAll(topicSubscriptionC, "$eventData.interfaceName$", eventData.interfaceName);
             replaceAll(topicSubscriptionC, "$eventData.messageNameSnakeCase$", eventData.messageInterfaceType.substr(eventData.messageInterfaceType.find_last_of("/") + 1));
+            replaceAll(topicCallbackC, "$eventData.interfaceName$", eventData.interfaceName);
+            replaceAll(topicCallbackC, "$eventData.messageNameSnakeCase$", eventData.messageInterfaceType.substr(eventData.messageInterfaceType.find_last_of("/") + 1));
             replaceAll(topicCallbackC, "$eventData.functionName$", eventData.functionName);
-            // replaceAll(topicSubscriptionC, "$eventData.functionName$", eventData.functionName);
+            replaceAll(topicSubscriptionC, "$eventData.functionName$", eventData.functionName);
             replaceAll(topicSubscriptionC, "$eventData.topicName$", eventData.topicName);
             replaceAll(topicCallbackC, "$eventData.componentName$", eventData.componentName);
             writeAfterCommand(str, "/*TOPIC_SUBSCRIPTIONS_LIST*/", topicSubscriptionC);
@@ -611,6 +613,7 @@ void replaceEventCode(std::map <std::string, std::string>& codeMap, fileDataStr 
         deleteCommand(it->second, "/*RETURN_PARAM_LIST*/");
         deleteCommand(it->second, "/*TOPIC_SUBSCRIPTIONS_LIST*/");
         deleteCommand(it->second, "/*TOPIC_CALLBACK_LIST*/"); 
+        deleteCommand(it->second, "/*TOPIC_PARAM_LIST*/");
         deleteCommand(it->second, "/*ACTION_LIST_C*/"); 
         deleteCommand(it->second, "/*SEND_PARAM_LIST*/");
         deleteCommand(it->second, "/*FEEDBACK_PARAM_LIST*/");
