@@ -1,7 +1,8 @@
-<scxml version="1.0" xmlns="..." datamodel="ecmascript" name="GoToPoiActionSkill" initial="idle"> 
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml version="1.0" xmlns="http://www.w3.org/2005/07/scxml" datamodel="ecmascript" name="GoToPoiActionSkill" initial="idle"> 
 
     <datamodel>
-        <data id="poi_number" type="int32" expr="0"/>
+        <data id="m_poi_name"   type="string" expr="''"/>
         <data id="status" type="int32" expr="0"/>
         <data id="result" type="bool" expr="true"/>
         <data id="SKILL_SUCCESS" type="int8" expr="0" />
