@@ -33,8 +33,7 @@
     <!-- Receive response and proceed to decision making -->
     <ros_service_handle_response name="/HardwareMonitorComponent/HasFaults" target="decide">
         <assign location="m_has_fault" expr="_res.has_fault"/>
-        <!-- Debug logging -->
-        <log expr="'Hardware fault status: ' + m_has_fault"/>
+
     </ros_service_handle_response>
     <!-- Handle service errors (e.g., component not available) -->
     <ros_service_handle_error name="/HardwareMonitorComponent/HasFaults" target="service_error"/>
@@ -86,9 +85,7 @@
       </ros_service_send_response>
     </onentry>
     <transition target="idle"/>
+  </state>
 
-
-
-</scxml>  </state>  </state>
 
 </scxml>
