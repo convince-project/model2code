@@ -71,6 +71,8 @@ struct eventDataStr{
     std::string interfaceType; // type of the interface (e.g. "sync-service", "async-service", "action", "topic")
     
     std::string messageInterfaceType; // type of the interface (e.g. std_msgs::srv::AddTwoInts, blackboard_interfaces::BlackboardInterface, std_msgs::msg::String)
+    std::string serviceTypeName; // extracted service type name from messageInterfaceType (e.g. GetIntBlackboard from blackboard_interfaces/GetIntBlackboard)
+    std::string serviceTypeNameSnakeCase; // snake case version of serviceTypeName
     std::string rosInterfaceType; //type of the interface in ROS (e.g. "sync-service", "async-service", "action", "topic")
     std::string scxmlInterfaceName; //name of the interface in the scxml file
     bool virtualInterface;
