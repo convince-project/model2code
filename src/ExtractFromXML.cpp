@@ -152,6 +152,15 @@ bool findInterfaceType(const fileDataStr fileData, eventDataStr& eventData, tiny
         eventData.rosInterfaceType = "service-client"; // type of the interface in ROS
         eventData.interfaceName = eventData.messageInterfaceType.substr(0, eventData.messageInterfaceType.find_last_of("/"));
         add_to_log("interfaceName: " + eventData.interfaceName + " at line " + std::to_string(__LINE__));
+        
+        // Extract the service type name from messageInterfaceType for correct template generation
+        size_t lastSlash = eventData.messageInterfaceType.find_last_of("/");
+        if (lastSlash != std::string::npos) {
+            eventData.serviceTypeName = eventData.messageInterfaceType.substr(lastSlash + 1);
+            turnToSnakeCase(eventData.serviceTypeName, eventData.serviceTypeNameSnakeCase);
+            add_to_log("serviceTypeName: " + eventData.serviceTypeName + " (snake_case: " + eventData.serviceTypeNameSnakeCase + ") at line " + std::to_string(__LINE__));
+        }
+        
         eventData.interfaceType = "async-service";
         // eventData.clientName = "/" + eventData.componentName + "/" + eventData.functionName;
         // eventData.serverName = "/" + eventData.componentName + "/" + eventData.functionName;        // handle request fields

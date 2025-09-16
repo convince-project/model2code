@@ -216,6 +216,8 @@ void replaceCommonEventPlaceholders(std::string& code, const eventDataStr& event
     replaceAll(code, "$eventData.event$", eventData.event);
     replaceAll(code, "$eventData.componentName$", eventData.componentName);
     replaceAll(code, "$eventData.functionName$", eventData.functionName);
+    replaceAll(code, "$eventData.serviceTypeName$", eventData.serviceTypeName);
+    replaceAll(code, "$eventData.serviceTypeNameSnakeCase$", eventData.serviceTypeNameSnakeCase);
     replaceAll(code, "$eventData.nodeName$", eventData.nodeName);
     replaceAll(code, "$eventData.serverName$", eventData.serverName);
     replaceAll(code, "$eventData.clientName$", eventData.clientName);
