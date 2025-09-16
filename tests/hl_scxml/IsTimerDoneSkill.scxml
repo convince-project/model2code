@@ -2,7 +2,7 @@
 <scxml
   xmlns="http://www.w3.org/2005/07/scxml"
   version="1.0"
-  name="IsPoiDone2Skill"
+  name="isTimerDoneSkill"
   datamodel="ecmascript"
   initial="idle">
 
@@ -15,11 +15,11 @@
     <data id="SKILL_FAILURE"  type="int8"   expr="1"/>
   </datamodel>
 
-  <ros_service_server service_name="/IsPoiDone2Skill/tick" type="bt_interfaces_dummy/TickCondition"/>
+  <ros_service_server service_name="/isTimerDoneSkill/tick" type="bt_interfaces_dummy/TickCondition"/>
   <ros_service_client service_name="/BlackboardComponent/GetInt" type="blackboard_interfaces/GetIntBlackboard"/>
 
   <state id="idle">
-    <ros_service_handle_request name="/IsPoiDone2Skill/tick" target="checkInt">
+    <ros_service_handle_request name="/isTimerDoneSkill/tick" target="checkInt">
       <ros_service_send_request name="/BlackboardComponent/GetInt">
         <field name="field_name" expr="key"/>
       </ros_service_send_request>
