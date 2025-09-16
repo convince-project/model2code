@@ -154,7 +154,9 @@ bool findInterfaceType(const fileDataStr fileData, eventDataStr& eventData, tiny
             std::cerr << "No ros_service_send_request element found for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
             // return false;
         }
-        add_to_log("fieldParent: " + std::string(fieldParent->Name()) + " at line " + std::to_string(__LINE__));
+        if (fieldParent) {
+            add_to_log("fieldParent: " + std::string(fieldParent->Name()) + " at line " + std::to_string(__LINE__));
+        }
         if (!getInterfaceFieldsFromFieldTag(fieldParent, eventData.interfaceRequestFields))
         {
             std::cerr << "Failed to get interface ros_service_send_request fields for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
@@ -169,7 +171,10 @@ bool findInterfaceType(const fileDataStr fileData, eventDataStr& eventData, tiny
             std::cerr << "No ros_service_handle_response element found for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
             // return false;
         }
-        add_to_log("responseParent: " + std::string(responseParent->Name()) + " at line " + std::to_string(__LINE__));
+        if(responseParent) 
+        {
+            add_to_log("responseParent: " + std::string(responseParent->Name()) + " at line " + std::to_string(__LINE__));
+        }
         if (!getInterfaceFieldsFromAssignTag(responseParent, eventData.interfaceResponseFields))
         {
             std::cerr << "Failed to get interface ros_service_handle_response fields for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
