@@ -92,8 +92,8 @@ bool $className$::start(int argc, char*argv[])
   /*SEND_EVENT_LIST*//*SEND_EVENT_SRV*/
   m_stateMachine.connectToEvent("$eventData.event$", [this]([[maybe_unused]]const QScxmlEvent & event){
       std::shared_ptr<rclcpp::Node> $eventData.nodeName$ = rclcpp::Node::make_shared(m_name + "SkillNode$eventData.functionName$");
-      std::shared_ptr<rclcpp::Client<$eventData.interfaceName$::srv::$eventData.functionName$>> $eventData.clientName$ = $eventData.nodeName$->create_client<$eventData.interfaceName$::srv::$eventData.functionName$>($eventData.serverName$);
-      auto request = std::make_shared<$eventData.interfaceName$::srv::$eventData.functionName$::Request>();
+      std::shared_ptr<rclcpp::Client<$eventData.interfaceName$::srv::$eventData.serviceTypeName$>> $eventData.clientName$ = $eventData.nodeName$->create_client<$eventData.interfaceName$::srv::$eventData.serviceTypeName$>($eventData.serverName$);
+      auto request = std::make_shared<$eventData.interfaceName$::srv::$eventData.serviceTypeName$::Request>();
       auto eventParams = event.data().toMap();
       /*PARAM_LIST*//*PARAM*/
       request->$IT->FIRST$ = convert<decltype(request->$IT->FIRST$)>(eventParams["$IT->FIRST$"].toString().toStdString());/*END_PARAM*/
