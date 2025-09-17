@@ -8,9 +8,12 @@
  * @date 2024-05-20
  * 
  */
+#include <iostream>
+#include <string>
+#include <map>
+#include "tinyxml2.h"
 #include "Data.h"
 #include "ExtractFromElement.h"
-#include <sstream>
 
 
 /**
@@ -56,13 +59,6 @@ bool getInterfaceFieldsFromAssignTag(tinyxml2::XMLElement* element, std::vector<
  */
 bool getInterfaceFieldsFromFieldTag(tinyxml2::XMLElement* element, std::vector<std::string>& interfaceFields);
 
-/**
- * @brief Parse service/message interface file to extract field types
- * 
- * @param eventData event data structure containing messageInterfaceType
- * @return true if successful, false otherwise
- */
-bool parseInterfaceFile(eventDataStr& eventData);
 
 /**
  * @brief Get the Event Data Fields object  
@@ -88,4 +84,6 @@ bool getEventDataFields(tinyxml2::XMLElement * elementFunction, eventDataStr& ev
  * @return true 
  * @return false 
  */
+bool extractSCXMLData(const fileDataStr fileData, eventDataStr &eventData);
+bool parseInterfaceTypesFromSCXML(const fileDataStr fileData, eventDataStr& eventData);
 bool extractFromSCXML(tinyxml2::XMLDocument& doc, const std::string fileName, std::string& rootName, std::vector<tinyxml2::XMLElement*>& elementsTransition, std::vector<tinyxml2::XMLElement*>& elementsSend); 
