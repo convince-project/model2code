@@ -56,25 +56,6 @@ bool getInterfaceFieldsFromAssignTag(tinyxml2::XMLElement* element, std::vector<
 bool getInterfaceFieldsFromFieldTag(tinyxml2::XMLElement* element, std::vector<std::string>& interfaceFields);
 
 
-// /**
-//  * @brief Extract the interface name from the model file
-//  * 
-//  * @param fileName model file name from which to extract the interface name
-//  * @param eventData event data structure, where the interface name will be stored, returned by reference
-//  * @return bool
-//  */
-// bool extractInterfaceName(const std::string fileName, eventDataStr& eventData);
-
-// /**
-//  * @brief Extract the interface data from the interface file
-//  * 
-//  * @param fileName interface file name from which to extract the interface data
-//  * @param eventData event data structure, where the interface data will be stored, returned by reference
-//  * @return true 
-//  * @return false 
-//  */
-// bool extractInterfaceType(const std::string fileName, eventDataStr& eventData);
-
 /**
  * @brief Get the Event Data Fields object  
  * 

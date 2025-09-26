@@ -45,20 +45,6 @@ bool getEventData(fileDataStr fileData, eventDataStr& eventData)
             return false;
         } 
 
-        // printEventData(eventData);
-        // printEventData(eventData);
-        // if(extractInterfaceName(fileData.modelFileName, eventData))
-        // {
-        //     if(!extractInterfaceType(fileData.interfaceFileName, eventData))
-        //     {
-        //         return false;
-        //     }
-        //     printEventData(eventData);
-        // }
-        // else
-        // {
-        //     return false;
-        // }        
     }
     eventsMap[eventData.event] = eventData;
     return true;
@@ -258,28 +244,21 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
                 replaceAll(paramCode, "$eventData.interfaceDataField$", *itParam);
                 writeAfterCommand(eventCodeC, "/*RETURN_PARAM_LIST*/", paramCode);
             }
-            // if(eventData.rosInterfaceType == "service-server")
-            // {
 
-            // } else if (eventData.rosInterfaceType == "service-client")
-            // {
-            
             for (auto itParam = eventData.interfaceRequestFields.begin(); itParam != eventData.interfaceRequestFields.end(); ++itParam) 
             {
                 std::string paramCode = savedCode.returnParam;
                 replaceAll(paramCode, "$eventData.interfaceDataField$", *itParam);
                 writeAfterCommand(eventCodeC, "/*SEND_PARAM_LIST*/", paramCode);
             }
-            // }
-
 
             writeAfterCommand(str, "/*SEND_EVENT_LIST*/", eventCodeC);
-            
+
             //H
             replaceAll(interfaceCodeH, "$eventData.interfaceName$", eventData.interfaceName);
             replaceAll(interfaceCodeH, "$eventData.functionNameSnakeCase$", eventData.functionNameSnakeCase);
             writeAfterCommand(str, "/*INTERFACES_LIST*/", interfaceCodeH);
-            
+
             //CMakeLists.txt
             replaceAll(interfaceCodeCMake, "$interfaceName$", eventData.interfaceName);
             if(!checkIfStrPresent(str, interfaceCodeCMake)){
@@ -397,29 +376,6 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             writeAfterCommand(str, "/*TOPIC_CALLBACK_LIST_H*/", topicCallbackH);
 
             //CMakeLists.txt
-            // printEventData(eventData);
-            // if (eventData.virtualInterface)
-            // {
-
-                // for(auto it =  eventData.interfaceData.begin(); it != eventData.interfaceData.end(); ++it)
-                // {
-                //     if (it->second.find("msg") != std::string::npos) 
-                //     {
-                //         std::string ros_package = it->second.substr(0, it->second.find("::msg::"));
-                //         add_to_log("ROS package: " + ros_package);
-                //         replaceAll(interfaceCodeCMake, "$interfaceName$", ros_package);
-                //         if(!checkIfStrPresent(str, interfaceCodeCMake)){
-                //             writeAfterCommand(str, "#INTERFACE_LIST#", interfaceCodeCMake);
-                //         }
-                //         replaceAll(packageCodeCMake, "$interfaceName$", ros_package);
-                //         if(!checkIfStrPresent(str, packageCodeCMake)){
-                //             writeAfterCommand(str, "#PACKAGE_LIST#", packageCodeCMake);
-                //         }
-                //     }
-                // }
-            // }
-            
-            //CMakeLists.txt
             replaceAll(interfaceCodeCMake, "$interfaceName$", eventData.interfaceName);
             if(!checkIfStrPresent(str, interfaceCodeCMake)){
                 writeAfterCommand(str, "#INTERFACE_LIST#", interfaceCodeCMake);
@@ -435,20 +391,6 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             if(!checkIfStrPresent(str, interfaceCodeXML)){
                 writeAfterCommand(str, "<!--INTERFACE_LIST-->", interfaceCodeXML);
             }
-            // replaceAll(interfaceCodeCMake, "$interfaceName$", eventData.interfaceName);
-            // if(!checkIfStrPresent(str, interfaceCodeCMake)){
-            //     writeAfterCommand(str, "#INTERFACE_LIST#", interfaceCodeCMake);
-            // }
-            // replaceAll(packageCodeCMake, "$interfaceName$", eventData.interfaceName);
-            // if(!checkIfStrPresent(str, packageCodeCMake)){
-            //     writeAfterCommand(str, "#PACKAGE_LIST#", packageCodeCMake);
-            // }
-
-            //package.xml
-            // replaceAll(interfaceCodeXML, "$interfaceName$", eventData.interfaceName);
-            // if(!checkIfStrPresent(str, interfaceCodeXML)){
-            //     writeAfterCommand(str, "<!--INTERFACE_LIST-->", interfaceCodeXML);
-            // }
         }
         else if(eventData.interfaceType == "action")
         {

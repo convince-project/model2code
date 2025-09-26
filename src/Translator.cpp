@@ -533,20 +533,6 @@ void replaceEventValueFromVectorFromSlashToPoint(std::vector<tinyxml2::XMLElemen
             temp.replace(pos, 1, ".");
             pos += 1; // Move past the replaced character
         }
-        
-        // else{
-        //     if((pos = temp.find("/", pos)) != std::string::npos)
-        //     {
-        //         temp.replace(pos, 1, "");
-        //         pos += 1;
-        //     }
-        //     if((pos = temp.find("/", pos)) != std::string::npos)
-        //     {
-        //         temp.replace(pos, 1, ".");
-        //         pos += 1;
-        //     }
-        // }
-        std::cout << "Event after replacement: " << temp << std::endl;
         replaceAttributeValue(element, "event", temp);
     }
 }

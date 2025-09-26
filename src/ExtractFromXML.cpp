@@ -26,17 +26,6 @@ bool extractInterfaceData(const fileDataStr fileData, eventDataStr& eventData)
     std::string interfaceName;
     std::string fileName = fileData.modelFileName;
 
-    // open the model file
-    // and check if it exists
-    // add_to_log("opening file: " + fileName + " at line " + std::to_string(__LINE__));
-    // if (doc.LoadFile(fileName.c_str()) != tinyxml2::XML_SUCCESS) {
-    //     std::cerr << "Failed to load '" << fileName << "' file" << std::endl;
-    //     return false;
-    // }
-    // add_to_log("******************************** event DATA ********************************\n");
-    // printEventData(eventData);
-    // add_to_log("******************************** event DATA END ********************************\n");
-
     // open the input file and check if it exists
 
     tinyxml2::XMLElement* element;
@@ -45,11 +34,6 @@ bool extractInterfaceData(const fileDataStr fileData, eventDataStr& eventData)
     printEventData(eventData);
     add_to_log("******************************** event DATA AFTER END ********************************\n");
 
-    // find the interface name in the high level tag
-    // if (!is_ros_service_server) {
-    //     std::cerr << "No rosServiceServer found for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
-    //     return false;
-    // }
     return true;
     
 }

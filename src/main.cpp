@@ -26,9 +26,6 @@ void print_help()
     std::cout << "--template_path \"path/to/template_skill/directory\" ";
     std::cout << "--output_path \"path/to/output/directory\"\n";
     std::cout << "--verbose_mode [to show log]\n";
-    // std::cout << "--datamodel_mode \n";
-    // std::cout << "--translate_mode \n";
-    // std::cout << "--generate_mode \n";
 }
 
 /**
@@ -73,14 +70,6 @@ bool handleInputs(int argc, char* argv[], fileDataStr& fileData, templateFileDat
             fileData.outputPath = argv[i + 1];
             i++;
         }
-        // else if (arg == "--model_filename" && i+1 < argc && argv[i+1][0] != '-') {
-        //     fileData.modelFileName = argv[i + 1];
-        //     i++;
-        // }
-        // else if (arg == "--interface_filename" && i+1 < argc && argv[i+1][0] != '-') {
-        //     fileData.interfaceFileName = argv[i + 1];
-        //     i++;
-        // }
         else if (arg == "--template_path" && i+1 < argc && argv[i+1][0] != '-') {
             templateFileData.templatePath = argv[i+1];
             i++;
