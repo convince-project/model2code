@@ -254,31 +254,35 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
                 writeAfterCommand(eventCodeC, "/*PARAM_LIST*/", paramCode);
             }
 
-            // Use interfaceData instead of interfaceResponseFields to get type information
-            for (auto itParam = eventData.interfaceData.begin(); itParam != eventData.interfaceData.end(); ++itParam) 
+            // Process response fields directly from interfaceResponseFields
+            for (auto responseField : eventData.interfaceResponseFields) 
             {
-                // Only process fields that are actually in the response (to maintain compatibility)
-                bool fieldInResponse = std::find(eventData.interfaceResponseFields.begin(), 
-                                                eventData.interfaceResponseFields.end(), 
-                                                itParam->first) != eventData.interfaceResponseFields.end();
-                if (!fieldInResponse) {
-                    continue;
-                }
-                
                 std::string paramCode = savedCode.returnParam;
                 
-                // Replace field name (first occurrence - in quotes)
-                std::string fieldName = itParam->first;
-                std::string fieldType = itParam->second;
+                // Use the response field name directly
+                std::string fieldName = responseField;
+
+                // Access the private member from interface data
+                std::string fieldType = "string";
+
+                auto pos = eventData.interfaceData.find("m_" + fieldName);
+
+                if (pos == eventData.interfaceData.end()) {
+                    std::cerr << "Warning: Field 'm_" << fieldName << "' not found in interface data fields. No type info is available. Using default string" << std::endl;
+                }
+                else {
+                    fieldType = pos->second;
+                }
                 
-                // Create the appropriate field access expression based on type
+                // Create the field access expression (assume non-string type unless we know otherwise)
+                
                 std::string fieldAccess;
                 if (fieldType == "string") {
                     fieldAccess = "response->" + fieldName + ".c_str()";
                 } else {
                     fieldAccess = "response->" + fieldName;
                 }
-                
+
                 // Replace both placeholders - first the field access, then the field name
                 // We need to replace in a specific order to avoid conflicts
                 replaceAll(paramCode, "response->$eventData.interfaceDataField$", fieldAccess);
