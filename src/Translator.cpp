@@ -672,11 +672,7 @@ bool translateRosActionHandleGoalResponseTag(tinyxml2::XMLElement* root, std::ma
             add_to_log("Attributi mancanti: event, accept o reject.");
         }
     }
-<<<<<<< HEAD
-    return true; 
-=======
     return true;
->>>>>>> 821a368 (updated model2code files)
 }
 
 /**
