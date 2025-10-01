@@ -11,7 +11,7 @@
 /*ACTION_INTERFACE*/
 #include <$eventData.interfaceName$/action/$eventData.functionNameSnakeCase$.hpp> /*END_ACTION_INTERFACE*/
 /*TOPIC_INTERFACE*/
-#include <$eventData.interfaceData[interfaceDataType]$.hpp> /*END_TOPIC_INTERFACE*/
+#include <$eventData.interfaceName$/msg/$eventData.messageNameSnakeCase$.hpp> /*END_TOPIC_INTERFACE*/
 /*TICK*/#include <bt_interfaces_dummy/srv/tick_$skillTypeLC$.hpp>/*END_TICK*/
 /*HALT*/#include <bt_interfaces_dummy/srv/halt_$skillTypeLC$.hpp>/*END_HALT*/
 /*DATAMODEL*/
@@ -44,7 +44,7 @@ public:
 	void halt( [[maybe_unused]] const std::shared_ptr<bt_interfaces_dummy::srv::HaltAction::Request> request,
 			   [[maybe_unused]] std::shared_ptr<bt_interfaces_dummy::srv::HaltAction::Response> response);/*END_HALT_CMD*/
 	/*TOPIC_CALLBACK_LIST_H*/
-	/*TOPIC_CALLBACK_H*/void topic_callback_$eventData.functionName$(const $eventData.interfaceData[interfaceDataType]$::SharedPtr msg);/*END_TOPIC_CALLBACK_H*/
+	/*TOPIC_CALLBACK_H*/void topic_callback_$eventData.functionName$(const $eventData.interfaceName$::msg::$eventData.messageNameSnakeCase$::SharedPtr msg);/*END_TOPIC_CALLBACK_H*/
 
 private:
 	std::shared_ptr<std::thread> m_threadSpin;
@@ -59,7 +59,7 @@ private:
 	/*DATAMODEL*/$skillName$SkillDataModel m_dataModel; /*END_DATAMODEL*/
 	/*TOPIC_SUBSCRIPTIONS_LIST_H*/
 	/*TOPIC_SUBSCRIPTION_H*/
-	rclcpp::Subscription<$eventData.interfaceData[interfaceDataType]$>::SharedPtr m_subscription_$eventData.functionName$;/*END_TOPIC_SUBSCRIPTION_H*/
+	rclcpp::Subscription<$eventData.interfaceName$::msg::$eventData.messageNameSnakeCase$>::SharedPtr m_subscription_$eventData.functionName$;/*END_TOPIC_SUBSCRIPTION_H*/
 	/*ACTION_LIST_H*//*ACTION_H*/
 	std::shared_ptr<rclcpp::Node> m_node_action;
 	std::mutex m_actionMutex;

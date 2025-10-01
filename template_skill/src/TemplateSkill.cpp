@@ -86,7 +86,7 @@ bool $className$::start(int argc, char*argv[])
   m_send_goal_options.result_callback =  std::bind(&$className$::result_callback, this, std::placeholders::_1);
   /*END_ACTION_C*/
   /*TOPIC_SUBSCRIPTIONS_LIST*//*TOPIC_SUBSCRIPTION*/
-  m_subscription_$eventData.functionName$ = m_node->create_subscription<$eventData.interfaceData[interfaceDataType]$>(
+  m_subscription_$eventData.functionName$ = m_node->create_subscription<$eventData.interfaceName$::msg::$eventData.messageNameSnakeCase$>(
   "/$eventData.functionName$", 10, std::bind(&$className$::topic_callback_$eventData.functionName$, this, std::placeholders::_1));
   /*END_TOPIC_SUBSCRIPTION*/
   /*SEND_EVENT_LIST*//*SEND_EVENT_SRV*/
@@ -120,9 +120,8 @@ bool $className$::start(int argc, char*argv[])
           {
               auto response = result.get();
               if( response->is_ok == true) {
-                  QVariantMap data;
-                  data.insert("is_ok", true);/*RETURN_PARAM_LIST*//*RETURN_PARAM*/
-                  data.insert("$eventData.interfaceDataField$", response->$eventData.interfaceDataField$/*STATUS*/.status/*END_STATUS*/);/*END_RETURN_PARAM*/
+                  QVariantMap data;/*RETURN_PARAM_LIST*//*RETURN_PARAM*/
+                  data.insert("$eventData.interfaceDataField$", response->$eventData.interfaceDataField$);/*END_RETURN_PARAM*/
                   m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.Return", data);
                   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.Return");
                   return;
@@ -223,7 +222,10 @@ void $className$::tick( [[maybe_unused]] const std::shared_ptr<bt_interfaces_dum
           break;
       case Status::success:
           response->status = SKILL_SUCCESS;
-          break;            
+          break;
+      case Status::undefined:
+          response->status = SKILL_FAILURE;
+          break;
   }
   RCLCPP_INFO(m_node->get_logger(), "$className$::tickDone");
   response->is_ok = true;
@@ -246,11 +248,11 @@ void $className$::halt( [[maybe_unused]] const std::shared_ptr<bt_interfaces_dum
 
 
 /*TOPIC_CALLBACK_LIST*//*TOPIC_CALLBACK*/
-void $className$::topic_callback_$eventData.functionName$(const $eventData.interfaceData[interfaceDataType]$::SharedPtr msg) {
+void $className$::topic_callback_$eventData.functionName$(const $eventData.interfaceName$::msg::$eventData.messageNameSnakeCase$::SharedPtr msg) {
   std::cout << "callback" << std::endl;
   QVariantMap data;
-  data.insert("$eventData.interfaceData[interfaceDataField]$", msg->data);
 
+  /*TOPIC_PARAM_LIST*//*TOPIC_PARAM*/
   m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.Sub", data);
   RCLCPP_INFO(m_node->get_logger(), "$eventData.componentName$.$eventData.functionName$.Sub");
 }

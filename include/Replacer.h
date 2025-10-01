@@ -83,7 +83,7 @@ void saveCode(savedCodeStr& savedCode, std::string& code);
  * 
  * @param codeMap code map where the code is stored
  */
-void replaceEventCode(std::map <std::string, std::string>& codeMap);
+void replaceEventCode(std::map <std::string, std::string>& codeMap, fileDataStr fileData);
 
 /**
  * @brief function to read the template files and store the code in the code map
