@@ -254,7 +254,7 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
                 writeAfterCommand(eventCodeC, "/*PARAM_LIST*/", paramCode);
             }
 
-            // Process response fields directly from interfaceResponseFields
+            // Process response fields using the mapping to datamodel variables
             for (auto responseField : eventData.interfaceResponseFields) 
             {
                 std::string paramCode = savedCode.returnParam;
@@ -262,20 +262,29 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
                 // Use the response field name directly
                 std::string fieldName = responseField;
 
-                // Access the private member from interface data
-                std::string fieldType = "string";
+                // Look up the datamodel variable for this response field
+                std::string datamodelVar;
+                auto mappingIt = eventData.responseFieldToDatamodelMap.find(responseField);
+                if (mappingIt != eventData.responseFieldToDatamodelMap.end()) {
+                    datamodelVar = mappingIt->second;
+                } else {
+                    // Fallback to the old logic if mapping is not found
+                    datamodelVar = "m_" + fieldName;
+                    std::cerr << "Warning: No mapping found for response field '" << responseField << "', using fallback '" << datamodelVar << "'" << std::endl;
+                }
 
-                auto pos = eventData.interfaceData.find("m_" + fieldName);
+                // Get the type from interfaceData using the datamodel variable name
+                std::string fieldType = "string";
+                auto pos = eventData.interfaceData.find(datamodelVar);
 
                 if (pos == eventData.interfaceData.end()) {
-                    std::cerr << "Warning: Field 'm_" << fieldName << "' not found in interface data fields. No type info is available. Using default string" << std::endl;
+                    std::cerr << "Warning: Datamodel variable '" << datamodelVar << "' not found in interface data fields. No type info is available. Using default string" << std::endl;
                 }
                 else {
                     fieldType = pos->second;
                 }
                 
-                // Create the field access expression (assume non-string type unless we know otherwise)
-                
+                // Create the field access expression
                 std::string fieldAccess;
                 if (fieldType == "string") {
                     fieldAccess = "response->" + fieldName + ".c_str()";

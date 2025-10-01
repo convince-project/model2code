@@ -50,6 +50,17 @@ bool extractInterfaceData(const fileDataStr fileData, eventDataStr& eventData);
 bool getInterfaceFieldsFromAssignTag(tinyxml2::XMLElement* element, std::vector<std::string>& interfaceFields);
 
 /**
+ * @brief Get the Interface Fields From Assign Tag with mapping to datamodel variables
+ * 
+ * @param element 
+ * @param interfaceFields 
+ * @param responseFieldToDatamodelMap mapping from response fields to datamodel variables
+ * @return true 
+ * @return false 
+ */
+bool getInterfaceFieldsFromAssignTag(tinyxml2::XMLElement* element, std::vector<std::string>& interfaceFields, std::map<std::string, std::string>& responseFieldToDatamodelMap);
+
+/**
  * @brief Get the Interface Fields From Expr object
  * 
  * @param element 
