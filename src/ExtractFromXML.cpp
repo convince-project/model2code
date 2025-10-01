@@ -193,7 +193,7 @@ bool findInterfaceType(const fileDataStr fileData, eventDataStr& eventData, tiny
         {
             add_to_log("responseParent: " + std::string(responseParent->Name()) + " at line " + std::to_string(__LINE__));
         }
-        if (!getInterfaceFieldsFromAssignTag(responseParent, eventData.interfaceResponseFields))
+        if (!getInterfaceFieldsFromAssignTag(responseParent, eventData.interfaceResponseFields, eventData.responseFieldToDatamodelMap))
         {
             std::cerr << "Failed to get interface ros_service_handle_response fields for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
             // return false;
@@ -360,6 +360,45 @@ bool getInterfaceFieldsFromAssignTag(tinyxml2::XMLElement* element, std::vector<
                 // if . is found, take the part after it
                 fieldNameStr = fieldNameStr.substr(dotPos + 1);
                 interfaceFields.push_back(fieldNameStr);
+            }
+        }
+        fieldElement = fieldElement->NextSiblingElement("assign");
+    }
+    return true;
+}
+
+bool getInterfaceFieldsFromAssignTag(tinyxml2::XMLElement* element, std::vector<std::string>& interfaceFields, std::map<std::string, std::string>& responseFieldToDatamodelMap)
+{
+    if (!element) {
+        std::cerr << "Element is null" << std::endl;
+        return false;
+    }
+    
+    tinyxml2::XMLElement* fieldElement = element->FirstChildElement("assign");
+    if (!fieldElement) {
+        std::cerr << "No assign element found in the provided element" << std::endl;
+        return false;
+    }
+    while (fieldElement) {
+        const char* expr = fieldElement->Attribute("expr");
+        const char* location = fieldElement->Attribute("location");
+        add_to_log("expr: " + std::string(expr ? expr : "null") + ", location: " + std::string(location ? location : "null") + " at line " + std::to_string(__LINE__));
+        
+        if (expr && location) {
+            std::cerr << "Found assignment: " << location << " = " << expr << std::endl;
+            
+            // Extract response field name from expr (e.g., "_res.param" -> "param")
+            std::string exprStr(expr);
+            size_t dotPos = exprStr.find('.');
+            if (dotPos != std::string::npos) {
+                std::string responseField = exprStr.substr(dotPos + 1);
+                std::string datamodelVar(location);
+                
+                // Store the mapping from response field to datamodel variable
+                responseFieldToDatamodelMap[responseField] = datamodelVar;
+                interfaceFields.push_back(responseField);
+                
+                add_to_log("Mapped response field '" + responseField + "' to datamodel variable '" + datamodelVar + "'");
             }
         }
         fieldElement = fieldElement->NextSiblingElement("assign");

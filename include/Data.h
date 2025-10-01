@@ -81,6 +81,7 @@ struct eventDataStr{
     std::vector<std::string> interfaceResponseFields; //list of interfaces used in the event
     std::vector<std::string> interfaceTopicFields; //list of interfaces used in the event
     std::map<std::string, std::string> interfaceData; //field and type
+    std::map<std::string, std::string> responseFieldToDatamodelMap; //mapping from response fields to datamodel variables (e.g., "param" -> "m_param")
 };
 
 struct fileDataStr{
