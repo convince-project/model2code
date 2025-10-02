@@ -87,13 +87,13 @@ bool $className$::start(int argc, char*argv[])
   /*END_ACTION_C*/
   /*TOPIC_SUBSCRIPTIONS_LIST*//*TOPIC_SUBSCRIPTION*/
   m_subscription_$eventData.functionName$ = m_node->create_subscription<$eventData.interfaceName$::msg::$eventData.messageNameSnakeCase$>(
-  "/$eventData.functionName$", 10, std::bind(&$className$::topic_callback_$eventData.functionName$, this, std::placeholders::_1));
+  "$eventData.topicName$", 10, std::bind(&$className$::topic_callback_$eventData.functionName$, this, std::placeholders::_1));
   /*END_TOPIC_SUBSCRIPTION*/
   /*SEND_EVENT_LIST*//*SEND_EVENT_SRV*/
   m_stateMachine.connectToEvent("$eventData.event$", [this]([[maybe_unused]]const QScxmlEvent & event){
       std::shared_ptr<rclcpp::Node> $eventData.nodeName$ = rclcpp::Node::make_shared(m_name + "SkillNode$eventData.functionName$");
-      std::shared_ptr<rclcpp::Client<$eventData.interfaceName$::srv::$eventData.functionName$>> $eventData.clientName$ = $eventData.nodeName$->create_client<$eventData.interfaceName$::srv::$eventData.functionName$>($eventData.serverName$);
-      auto request = std::make_shared<$eventData.interfaceName$::srv::$eventData.functionName$::Request>();
+      std::shared_ptr<rclcpp::Client<$eventData.interfaceName$::srv::$eventData.serviceTypeName$>> $eventData.clientName$ = $eventData.nodeName$->create_client<$eventData.interfaceName$::srv::$eventData.serviceTypeName$>($eventData.serverName$);
+      auto request = std::make_shared<$eventData.interfaceName$::srv::$eventData.serviceTypeName$::Request>();
       auto eventParams = event.data().toMap();
       /*PARAM_LIST*//*PARAM*/
       request->$IT->FIRST$ = convert<decltype(request->$IT->FIRST$)>(eventParams["$IT->FIRST$"].toString().toStdString());/*END_PARAM*/
@@ -120,7 +120,8 @@ bool $className$::start(int argc, char*argv[])
           {
               auto response = result.get();
               if( response->is_ok == true) {
-                  QVariantMap data;/*RETURN_PARAM_LIST*//*RETURN_PARAM*/
+                  QVariantMap data;
+                  data.insert("is_ok", true);/*RETURN_PARAM_LIST*//*RETURN_PARAM*/
                   data.insert("$eventData.interfaceDataField$", response->$eventData.interfaceDataField$);/*END_RETURN_PARAM*/
                   m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.Return", data);
                   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.Return");
@@ -251,8 +252,9 @@ void $className$::halt( [[maybe_unused]] const std::shared_ptr<bt_interfaces_dum
 void $className$::topic_callback_$eventData.functionName$(const $eventData.interfaceName$::msg::$eventData.messageNameSnakeCase$::SharedPtr msg) {
   std::cout << "callback" << std::endl;
   QVariantMap data;
-
   /*TOPIC_PARAM_LIST*//*TOPIC_PARAM*/
+  data.insert("$eventData.interfaceDataField$", msg->$eventData.interfaceDataField$);
+  /*END_TOPIC_PARAM*/
   m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.Sub", data);
   RCLCPP_INFO(m_node->get_logger(), "$eventData.componentName$.$eventData.functionName$.Sub");
 }

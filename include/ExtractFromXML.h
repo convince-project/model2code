@@ -8,6 +8,10 @@
  * @date 2024-05-20
  * 
  */
+#include <iostream>
+#include <string>
+#include <map>
+#include "tinyxml2.h"
 #include "Data.h"
 #include "ExtractFromElement.h"
 
@@ -44,6 +48,17 @@ bool extractInterfaceData(const fileDataStr fileData, eventDataStr& eventData);
  * @return false 
  */
 bool getInterfaceFieldsFromAssignTag(tinyxml2::XMLElement* element, std::vector<std::string>& interfaceFields);
+
+/**
+ * @brief Get the Interface Fields From Assign Tag with mapping to datamodel variables
+ * 
+ * @param element 
+ * @param interfaceFields 
+ * @param responseFieldToDatamodelMap mapping from response fields to datamodel variables
+ * @return true 
+ * @return false 
+ */
+bool getInterfaceFieldsFromAssignTag(tinyxml2::XMLElement* element, std::vector<std::string>& interfaceFields, std::map<std::string, std::string>& responseFieldToDatamodelMap);
 
 /**
  * @brief Get the Interface Fields From Expr object
@@ -99,4 +114,6 @@ bool getEventDataFields(tinyxml2::XMLElement * elementFunction, eventDataStr& ev
  * @return true 
  * @return false 
  */
+bool extractSCXMLData(const fileDataStr fileData, eventDataStr &eventData);
+bool parseInterfaceTypesFromSCXML(const fileDataStr fileData, eventDataStr& eventData);
 bool extractFromSCXML(tinyxml2::XMLDocument& doc, const std::string fileName, std::string& rootName, std::vector<tinyxml2::XMLElement*>& elementsTransition, std::vector<tinyxml2::XMLElement*>& elementsSend); 

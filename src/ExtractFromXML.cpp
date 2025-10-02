@@ -41,6 +41,12 @@ bool extractInterfaceData(const fileDataStr fileData, eventDataStr& eventData)
 
     tinyxml2::XMLElement* element;
     findInterfaceType(fileData, eventData, element);
+    
+    // Only populate interfaceData if we have interface fields that need type information
+    if (!eventData.interfaceRequestFields.empty() || !eventData.interfaceResponseFields.empty() || !eventData.interfaceTopicFields.empty()) {
+        parseInterfaceTypesFromSCXML(fileData, eventData);
+    }
+    
     add_to_log("******************************** event DATA AFTER ********************************\n");
     printEventData(eventData);
     add_to_log("******************************** event DATA AFTER END ********************************\n");
@@ -148,6 +154,15 @@ bool findInterfaceType(const fileDataStr fileData, eventDataStr& eventData, tiny
         eventData.rosInterfaceType = "service-client"; // type of the interface in ROS
         eventData.interfaceName = eventData.messageInterfaceType.substr(0, eventData.messageInterfaceType.find_last_of("/"));
         add_to_log("interfaceName: " + eventData.interfaceName + " at line " + std::to_string(__LINE__));
+        
+        // Extract the service type name from messageInterfaceType for correct template generation
+        size_t lastSlash = eventData.messageInterfaceType.find_last_of("/");
+        if (lastSlash != std::string::npos) {
+            eventData.serviceTypeName = eventData.messageInterfaceType.substr(lastSlash + 1);
+            turnToSnakeCase(eventData.serviceTypeName, eventData.serviceTypeNameSnakeCase);
+            add_to_log("serviceTypeName: " + eventData.serviceTypeName + " (snake_case: " + eventData.serviceTypeNameSnakeCase + ") at line " + std::to_string(__LINE__));
+        }
+        
         eventData.interfaceType = "async-service";
         // eventData.clientName = "/" + eventData.componentName + "/" + eventData.functionName;
         // eventData.serverName = "/" + eventData.componentName + "/" + eventData.functionName;        // handle request fields
@@ -157,7 +172,9 @@ bool findInterfaceType(const fileDataStr fileData, eventDataStr& eventData, tiny
             std::cerr << "No ros_service_send_request element found for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
             // return false;
         }
-        add_to_log("fieldParent: " + std::string(fieldParent->Name()) + " at line " + std::to_string(__LINE__));
+        if (fieldParent) {
+            add_to_log("fieldParent: " + std::string(fieldParent->Name()) + " at line " + std::to_string(__LINE__));
+        }
         if (!getInterfaceFieldsFromFieldTag(fieldParent, eventData.interfaceRequestFields))
         {
             std::cerr << "Failed to get interface ros_service_send_request fields for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
@@ -172,8 +189,11 @@ bool findInterfaceType(const fileDataStr fileData, eventDataStr& eventData, tiny
             std::cerr << "No ros_service_handle_response element found for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
             // return false;
         }
-        add_to_log("responseParent: " + std::string(responseParent->Name()) + " at line " + std::to_string(__LINE__));
-        if (!getInterfaceFieldsFromAssignTag(responseParent, eventData.interfaceResponseFields))
+        if(responseParent) 
+        {
+            add_to_log("responseParent: " + std::string(responseParent->Name()) + " at line " + std::to_string(__LINE__));
+        }
+        if (!getInterfaceFieldsFromAssignTag(responseParent, eventData.interfaceResponseFields, eventData.responseFieldToDatamodelMap))
         {
             std::cerr << "Failed to get interface ros_service_handle_response fields for component '" << eventData.componentName << "' and function '" << eventData.functionName << "' in file '" << fileData.inputFileName << "'."<< std::endl;
             // return false;
@@ -224,8 +244,19 @@ bool findInterfaceType(const fileDataStr fileData, eventDataStr& eventData, tiny
 
 
     // ROS TOPIC SUBSCRIBER
-    bool is_topic_subscriber = findElementByTagAndAttValue(root, std::string("ros_topic_subscriber"), std::string("topic"), std::string("/" + eventData.componentName + "/" + eventData.functionName), element);
-    add_to_log("is_topic_subscriber: " + std::to_string(is_topic_subscriber) + " at line " + std::to_string(__LINE__));
+    // For topic subscribers, we need to reconstruct the full topic name from the event
+    // Event format: componentName.functionName.topicPart.Sub
+    // We need to extract the topicPart and reconstruct: /componentName/functionName/topicPart
+    std::string fullTopicName = "/" + eventData.componentName + "/" + eventData.functionName;
+    if (eventData.eventName.find(".Sub") != std::string::npos) {
+        std::string topicPart = eventData.eventName.substr(0, eventData.eventName.find(".Sub"));
+        if (!topicPart.empty()) {
+            fullTopicName += "/" + topicPart;
+        }
+    }
+    
+    bool is_topic_subscriber = findElementByTagAndAttValue(root, std::string("ros_topic_subscriber"), std::string("topic"), fullTopicName, element);
+    add_to_log("is_topic_subscriber: " + std::to_string(is_topic_subscriber) + " for topic: " + fullTopicName + " at line " + std::to_string(__LINE__));
     if (is_topic_subscriber) {
         eventData.interfaceType = "topic";
         eventData.rosInterfaceType = "topic-subscriber"; // type of the interface in ROS
@@ -233,6 +264,25 @@ bool findInterfaceType(const fileDataStr fileData, eventDataStr& eventData, tiny
         getElementAttValue(element, std::string("topic"), eventData.topicName);
         getElementAttValue(element, std::string("name"), eventData.scxmlInterfaceName);
         tinyxml2::XMLElement* fieldParent;
+
+        // For topic subscribers, derive a better function name from the topic name
+        // Extract the last part of the topic path as the function identifier
+        std::string topicFunctionName = eventData.topicName;
+        if (!topicFunctionName.empty() && topicFunctionName[0] == '/') {
+            topicFunctionName = topicFunctionName.substr(1); // Remove leading slash
+        }
+        size_t lastSlash = topicFunctionName.find_last_of("/");
+        if (lastSlash != std::string::npos) {
+            topicFunctionName = topicFunctionName.substr(lastSlash + 1);
+        }
+        // Update functionName to use the derived topic function name for better naming
+        if (!topicFunctionName.empty()) {
+            eventData.functionName = topicFunctionName;
+            turnToSnakeCase(eventData.functionName, eventData.functionNameSnakeCase);
+            // Update other derived fields that depend on functionName
+            eventData.nodeName = "node" + eventData.functionName;
+            eventData.clientName = "client" + eventData.functionName;
+        }
 
         eventData.interfaceName = eventData.messageInterfaceType.substr(0, eventData.messageInterfaceType.find_last_of("/"));
         add_to_log("interfaceName: " + eventData.interfaceName + " at line " + std::to_string(__LINE__));
@@ -317,6 +367,45 @@ bool getInterfaceFieldsFromAssignTag(tinyxml2::XMLElement* element, std::vector<
     return true;
 }
 
+bool getInterfaceFieldsFromAssignTag(tinyxml2::XMLElement* element, std::vector<std::string>& interfaceFields, std::map<std::string, std::string>& responseFieldToDatamodelMap)
+{
+    if (!element) {
+        std::cerr << "Element is null" << std::endl;
+        return false;
+    }
+    
+    tinyxml2::XMLElement* fieldElement = element->FirstChildElement("assign");
+    if (!fieldElement) {
+        std::cerr << "No assign element found in the provided element" << std::endl;
+        return false;
+    }
+    while (fieldElement) {
+        const char* expr = fieldElement->Attribute("expr");
+        const char* location = fieldElement->Attribute("location");
+        add_to_log("expr: " + std::string(expr ? expr : "null") + ", location: " + std::string(location ? location : "null") + " at line " + std::to_string(__LINE__));
+        
+        if (expr && location) {
+            std::cerr << "Found assignment: " << location << " = " << expr << std::endl;
+            
+            // Extract response field name from expr (e.g., "_res.param" -> "param")
+            std::string exprStr(expr);
+            size_t dotPos = exprStr.find('.');
+            if (dotPos != std::string::npos) {
+                std::string responseField = exprStr.substr(dotPos + 1);
+                std::string datamodelVar(location);
+                
+                // Store the mapping from response field to datamodel variable
+                responseFieldToDatamodelMap[responseField] = datamodelVar;
+                interfaceFields.push_back(responseField);
+                
+                add_to_log("Mapped response field '" + responseField + "' to datamodel variable '" + datamodelVar + "'");
+            }
+        }
+        fieldElement = fieldElement->NextSiblingElement("assign");
+    }
+    return true;
+}
+
 
 bool getInterfaceFieldsFromFieldTag(tinyxml2::XMLElement* element, std::vector<std::string>& interfaceFields)
 {
@@ -340,6 +429,45 @@ bool getInterfaceFieldsFromFieldTag(tinyxml2::XMLElement* element, std::vector<s
         }
         fieldElement = fieldElement->NextSiblingElement("expr");
     }
+    return true;
+}
+
+bool parseInterfaceTypesFromSCXML(const fileDataStr fileData, eventDataStr& eventData)
+{
+    // Parse the SCXML file to extract types directly from the datamodel
+    tinyxml2::XMLDocument doc;
+    
+    if (doc.LoadFile(fileData.inputFileName.c_str()) != tinyxml2::XML_SUCCESS) {
+        std::cerr << "Failed to load SCXML file: " << fileData.inputFileName << std::endl;
+        return false;
+    }
+    
+    tinyxml2::XMLElement* root = doc.RootElement();
+    if (!root) {
+        std::cerr << "No root element found in SCXML file: " << fileData.inputFileName << std::endl;
+        return false;
+    }
+    
+    // Parse datamodel to get variable types directly
+    tinyxml2::XMLElement* datamodel = root->FirstChildElement("datamodel");
+    if (datamodel) {
+        tinyxml2::XMLElement* dataElement = datamodel->FirstChildElement("data");
+        while (dataElement) {
+            const char* id = dataElement->Attribute("id");
+            const char* type = dataElement->Attribute("type");
+            
+            if (id && type) {
+                std::string varName(id);
+                std::string varType(type);
+                
+                // Store the type mapping for this variable
+                eventData.interfaceData[varName] = varType;
+                add_to_log("Found datamodel variable: " + varName + " -> " + varType + " at line " + std::to_string(__LINE__));
+            }
+            dataElement = dataElement->NextSiblingElement("data");
+        }
+    }
+    
     return true;
 }
 

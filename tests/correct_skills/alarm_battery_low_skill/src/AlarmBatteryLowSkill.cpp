@@ -102,6 +102,7 @@ bool AlarmBatteryLowSkill::start(int argc, char*argv[])
               auto response = result.get();
               if( response->is_ok == true) {
                   QVariantMap data;
+                  data.insert("is_ok", true);
                   m_stateMachine.submitEvent("NotifyUserComponent.StopAlarm.Return", data);
                   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "NotifyUserComponent.StopAlarm.Return");
                   return;
@@ -146,6 +147,7 @@ bool AlarmBatteryLowSkill::start(int argc, char*argv[])
               auto response = result.get();
               if( response->is_ok == true) {
                   QVariantMap data;
+                  data.insert("is_ok", true);
                   m_stateMachine.submitEvent("NotifyUserComponent.StartAlarm.Return", data);
                   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "NotifyUserComponent.StartAlarm.Return");
                   return;
@@ -237,6 +239,11 @@ void AlarmBatteryLowSkill::halt( [[maybe_unused]] const std::shared_ptr<bt_inter
   RCLCPP_INFO(m_node->get_logger(), "AlarmBatteryLowSkill::haltDone");
   response->is_ok = true;
 }
+
+
+
+
+
 
 
 

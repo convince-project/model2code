@@ -15,7 +15,6 @@
     </state>
     <state id="getStatus">
         <transition target="decide" event="TurnBackManagerComponent.IsAllowedToContinue.Return">
-            <assign location="m_is_ok" expr="_event.data.is_ok"/>
             <assign location="m_is_allowed" expr="_event.data.is_allowed"/>
         </transition>
     </state>

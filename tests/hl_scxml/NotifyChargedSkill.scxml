@@ -21,6 +21,9 @@
   <ros_service_client service_name="/NotifyUserComponent/NotifyUserCharged" type="notify_user_interfaces/NotifyUserCharged"/>
 
   <state id="idle">
+    <onentry>
+        <log expr="'[IDLE] m_result: ' + m_result"/>
+    </onentry>
     <ros_service_handle_request name="/NotifyChargedSkill/tick" target="startNotify">
       <ros_service_send_request name="/NotifyUserComponent/NotifyUserCharged"/>
     </ros_service_handle_request>

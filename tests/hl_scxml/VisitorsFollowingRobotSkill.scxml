@@ -12,8 +12,9 @@
     </datamodel>
 
     <!-- VisitorsFollowingRobotSkill is a server for tick from the ROS2Condition plugin-->
-    <ros_service_server service_name="/VisitorsFollowingRobotSkill/tick" type ="bt_interfaces_dummy/TickCondition"/>
+    <ros_service_server service_name="/VisitorsFollowingRobotSkill/tick" type ="bt_interfaces_dummy/TickAction"/>
     <!-- VisitorsFollowingRobotSkill is a server for halt from the ROS2Condition plugin-->
+    <ros_service_server service_name="/VisitorsFollowingRobotSkill/halt" type ="bt_interfaces_dummy/HaltAction"/>
     <!-- VisitorsFollowingRobotSkill is a subscriber for the /is_followed topic from the PeopleDetectorFilterComponent-->
     <ros_topic_subscriber topic="/PeopleDetectorFilterComponent/is_followed" type="std_msgs/Bool" />
 
