@@ -119,21 +119,20 @@ bool $className$::start(int argc, char*argv[])
           if (futureResult == rclcpp::FutureReturnCode::SUCCESS) 
           {
               auto response = result.get();
-              if( response->is_ok == true) {
-                  QVariantMap data;
-                  data.insert("is_ok", true);/*RETURN_PARAM_LIST*//*RETURN_PARAM*/
-                  data.insert("$eventData.interfaceDataField$", response->$eventData.interfaceDataField$);/*END_RETURN_PARAM*/
-                  m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.Return", data);
-                  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.Return");
-                  return;
-              }
+              QVariantMap data;
+              data.insert("call_succeeded", true);/*RETURN_PARAM_LIST*//*RETURN_PARAM*/
+              data.insert("$eventData.interfaceDataField$", response->$eventData.interfaceDataField$);/*END_RETURN_PARAM*/
+              m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.Return", data);
+              RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.Return");
+              return;
+              
           }
           else if(futureResult == rclcpp::FutureReturnCode::TIMEOUT){
               RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Timed out while future complete for the service '$eventData.functionName$'.");
           }
       }
       QVariantMap data;
-      data.insert("is_ok", false);
+      data.insert("call_succeeded", false);
       m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.Return", data);
       RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.Return");
   });/*END_SEND_EVENT_SRV*/
@@ -279,7 +278,7 @@ void $className$::send_goal($eventData.interfaceName$::action::$eventData.functi
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Timed out while waiting for the service '$eventData.functionName$'.");
       wait_succeded = false;
       QVariantMap data;
-      data.insert("is_ok", false);
+      data.insert("call_succeeded", false);
       m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.GoalResponse", data);
       break;
     }
@@ -288,7 +287,7 @@ void $className$::send_goal($eventData.interfaceName$::action::$eventData.functi
       RCLCPP_INFO(m_node->get_logger(), "Sending goal");
       m_actionClient->async_send_goal(goal_msg, m_send_goal_options);
       QVariantMap data;
-      data.insert("is_ok", true);
+      data.insert("call_succeeded", true);
       m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.GoalResponse", data);
     }
   }
@@ -297,15 +296,15 @@ void $className$::send_goal($eventData.interfaceName$::action::$eventData.functi
 /*ACTION_RESPONSE_CALLBACK_FNC*/
 void $className$::goal_response_callback(const rclcpp_action::ClientGoalHandle<$eventData.interfaceName$::action::$eventData.functionName$>::SharedPtr & goal_handle)
 {
-  std::cout << "Provaa" << std::endl;
+  // std::cout << "Provaa" << std::endl;
   QVariantMap data;
   if (!goal_handle) {
-    data.insert("is_ok", false);
+    data.insert("call_succeeded", false);
     m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.GoalResponse", data);
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.GoalResponse Failure");
     RCLCPP_ERROR(m_node->get_logger(), "Goal was rejected by server");
   } else {
-    data.insert("is_ok", true);
+    data.insert("call_succeeded", true);
     m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.GoalResponse", data);
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.GoalResponse Success");
     RCLCPP_INFO(m_node->get_logger(), "Goal accepted by server, waiting for result");
@@ -341,9 +340,9 @@ void $className$::result_callback(const  rclcpp_action::ClientGoalHandle<$eventD
       break;
   }
   //std::cout << "Result received: " << result.result->is_ok << std::endl;
-  RCLCPP_INFO(m_node->get_logger(), "Result received: %d ", result.result->is_ok);
+  // RCLCPP_INFO(m_node->get_logger(), "Result received: %d ", result.result->is_ok);
   QVariantMap data;
-  data.insert("is_ok", result.result->is_ok);
+  // data.insert("is_ok", result.result->is_ok);
   m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.ResultResponse", data);
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.ResultResponse");
 }/*END_ACTION_RESULT_CALLBACK_FNC*/
