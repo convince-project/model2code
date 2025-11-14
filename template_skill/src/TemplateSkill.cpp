@@ -72,13 +72,15 @@ bool $className$::start(int argc, char*argv[])
                                                                            	std::bind(&$className$::tick,
                                                                            	this,
                                                                            	std::placeholders::_1,
-                                                                           	std::placeholders::_2));/*END_TICK*/
+                                                                           	std::placeholders::_2));
+  m_tickService->configure_introspection(m_node->get_clock(), rclcpp::SystemDefaultsQoS(), RCL_SERVICE_INTROSPECTION_CONTENTS);/*END_TICK*/
   /*HALT*/
 	m_haltService = m_node->create_service<bt_interfaces_dummy::srv::Halt$skillType$>(m_name + "Skill/halt",
                                                                             	std::bind(&$className$::halt,
                                                                             	this,
                                                                             	std::placeholders::_1,
-                                                                            	std::placeholders::_2));/*END_HALT*/
+                                                                            	std::placeholders::_2));
+  m_haltService->configure_introspection(m_node->get_clock(), rclcpp::SystemDefaultsQoS(), RCL_SERVICE_INTROSPECTION_CONTENTS);/*END_HALT*/
   /*ACTION_LIST_C*//*ACTION_C*/
   m_actionClient = rclcpp_action::create_client<$eventData.interfaceName$::action::$eventData.functionName$>(m_node, "/$eventData.componentName$/$eventData.functionName$");
   m_send_goal_options.goal_response_callback = std::bind(&$className$::goal_response_callback, this, std::placeholders::_1);
@@ -94,6 +96,7 @@ bool $className$::start(int argc, char*argv[])
       std::shared_ptr<rclcpp::Node> $eventData.nodeName$ = rclcpp::Node::make_shared(m_name + "SkillNode$eventData.functionName$");
       std::shared_ptr<rclcpp::Client<$eventData.interfaceName$::srv::$eventData.serviceTypeName$>> $eventData.clientName$ = $eventData.nodeName$->create_client<$eventData.interfaceName$::srv::$eventData.serviceTypeName$>($eventData.serverName$);
       auto request = std::make_shared<$eventData.interfaceName$::srv::$eventData.serviceTypeName$::Request>();
+      $eventData.clientName$->configure_introspection($eventData.nodeName$->get_clock(), rclcpp::SystemDefaultsQoS(), RCL_SERVICE_INTROSPECTION_CONTENTS);
       auto eventParams = event.data().toMap();
       /*PARAM_LIST*//*PARAM*/
       request->$IT->FIRST$ = convert<decltype(request->$IT->FIRST$)>(eventParams["$IT->FIRST$"].toString().toStdString());/*END_PARAM*/

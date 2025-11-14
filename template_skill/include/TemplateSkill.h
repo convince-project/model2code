@@ -16,6 +16,7 @@
 /*HALT*/#include <bt_interfaces_dummy/srv/halt_$skillTypeLC$.hpp>/*END_HALT*/
 /*DATAMODEL*/
 #include "$skillName$SkillDataModel.h" /*END_DATAMODEL*/
+#include <rcl/service_introspection.h>
 
 #define SERVICE_TIMEOUT 8
 #define SKILL_SUCCESS 0
