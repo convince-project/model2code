@@ -216,10 +216,13 @@ void replaceCommonEventPlaceholders(std::string& code, const eventDataStr& event
     replaceAll(code, "$eventData.event$", eventData.event);
     replaceAll(code, "$eventData.componentName$", eventData.componentName);
     replaceAll(code, "$eventData.functionName$", eventData.functionName);
+    replaceAll(code, "$eventData.serviceTypeName$", eventData.serviceTypeName);
+    replaceAll(code, "$eventData.serviceTypeNameSnakeCase$", eventData.serviceTypeNameSnakeCase);
     replaceAll(code, "$eventData.nodeName$", eventData.nodeName);
     replaceAll(code, "$eventData.serverName$", eventData.serverName);
     replaceAll(code, "$eventData.clientName$", eventData.clientName);
     replaceAll(code, "$eventData.interfaceName$", eventData.interfaceName);
+    replaceAll(code, "$eventData.topicName$", eventData.topicName);
 }
 
 
@@ -251,11 +254,49 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
                 writeAfterCommand(eventCodeC, "/*PARAM_LIST*/", paramCode);
             }
 
-            for (auto itParam = eventData.interfaceResponseFields.begin(); itParam != eventData.interfaceResponseFields.end(); ++itParam) 
+            // Process response fields using the mapping to datamodel variables
+            for (auto responseField : eventData.interfaceResponseFields) 
             {
                 std::string paramCode = savedCode.returnParam;
+                
+                // Use the response field name directly
+                std::string fieldName = responseField;
 
-                replaceAll(paramCode, "$eventData.interfaceDataField$", *itParam);
+                // Look up the datamodel variable for this response field
+                std::string datamodelVar;
+                auto mappingIt = eventData.responseFieldToDatamodelMap.find(responseField);
+                if (mappingIt != eventData.responseFieldToDatamodelMap.end()) {
+                    datamodelVar = mappingIt->second;
+                } else {
+                    // Fallback to the old logic if mapping is not found
+                    datamodelVar = "m_" + fieldName;
+                    std::cerr << "Warning: No mapping found for response field '" << responseField << "', using fallback '" << datamodelVar << "'" << std::endl;
+                }
+
+                // Get the type from interfaceData using the datamodel variable name
+                std::string fieldType = "string";
+                auto pos = eventData.interfaceData.find(datamodelVar);
+
+                if (pos == eventData.interfaceData.end()) {
+                    std::cerr << "Warning: Datamodel variable '" << datamodelVar << "' not found in interface data fields. No type info is available. Using default string" << std::endl;
+                }
+                else {
+                    fieldType = pos->second;
+                }
+                
+                // Create the field access expression
+                std::string fieldAccess;
+                if (fieldType == "string") {
+                    fieldAccess = "response->" + fieldName + ".c_str()";
+                } else {
+                    fieldAccess = "response->" + fieldName;
+                }
+
+                // Replace both placeholders - first the field access, then the field name
+                // We need to replace in a specific order to avoid conflicts
+                replaceAll(paramCode, "response->$eventData.interfaceDataField$", fieldAccess);
+                replaceAll(paramCode, "$eventData.interfaceDataField$", fieldName);
+                
                 writeAfterCommand(eventCodeC, "/*RETURN_PARAM_LIST*/", paramCode);
             }
             // if(eventData.rosInterfaceType == "service-server")
@@ -372,12 +413,15 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             {
                 std::string topicFieldCode = savedCode.topicParamList;
                 replaceAll(topicFieldCode, "$eventData.interfaceDataField$", *it);
-                writeAfterCommand(topicCallbackC, "/*TOPIC_PARAM*/", topicFieldCode);
+                writeAfterCommand(topicCallbackC, "/*TOPIC_PARAM_LIST*/", topicFieldCode);
             }
             replaceAll(topicSubscriptionC, "$eventData.interfaceName$", eventData.interfaceName);
             replaceAll(topicSubscriptionC, "$eventData.messageNameSnakeCase$", eventData.messageInterfaceType.substr(eventData.messageInterfaceType.find_last_of("/") + 1));
+            replaceAll(topicCallbackC, "$eventData.interfaceName$", eventData.interfaceName);
+            replaceAll(topicCallbackC, "$eventData.messageNameSnakeCase$", eventData.messageInterfaceType.substr(eventData.messageInterfaceType.find_last_of("/") + 1));
             replaceAll(topicCallbackC, "$eventData.functionName$", eventData.functionName);
             replaceAll(topicSubscriptionC, "$eventData.functionName$", eventData.functionName);
+            replaceAll(topicSubscriptionC, "$eventData.topicName$", eventData.topicName);
             replaceAll(topicCallbackC, "$eventData.componentName$", eventData.componentName);
             writeAfterCommand(str, "/*TOPIC_SUBSCRIPTIONS_LIST*/", topicSubscriptionC);
             writeAfterCommand(str, "/*TOPIC_CALLBACK_LIST*/", topicCallbackC);
@@ -609,6 +653,7 @@ void replaceEventCode(std::map <std::string, std::string>& codeMap, fileDataStr 
         deleteCommand(it->second, "/*RETURN_PARAM_LIST*/");
         deleteCommand(it->second, "/*TOPIC_SUBSCRIPTIONS_LIST*/");
         deleteCommand(it->second, "/*TOPIC_CALLBACK_LIST*/"); 
+        deleteCommand(it->second, "/*TOPIC_PARAM_LIST*/");
         deleteCommand(it->second, "/*ACTION_LIST_C*/"); 
         deleteCommand(it->second, "/*SEND_PARAM_LIST*/");
         deleteCommand(it->second, "/*FEEDBACK_PARAM_LIST*/");

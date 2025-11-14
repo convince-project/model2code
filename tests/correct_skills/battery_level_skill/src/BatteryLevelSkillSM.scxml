@@ -10,12 +10,11 @@
     <state id="idle">
         <transition target="checkLevel" event="CMD_TICK"/>
         <transition target="idle" event="BatteryComponent.battery_level.Sub">
-            <assign location="percentage" expr="_event. .percentage"/>
+            <assign location="percentage" expr="_event.data.percentage"/>
         </transition>
     </state>
     <state id="checkLevel">
-	    <onentry>
-		   <log expr="percentage" label="percentage"/>
+        <onentry>
             <if cond="percentage &gt; 30">
                 <send event="TICK_RESPONSE">
                     <param name="status" expr="SKILL_SUCCESS"/>
