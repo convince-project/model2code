@@ -219,9 +219,14 @@ void $className$::tick( [[maybe_unused]] const std::shared_ptr<bt_interfaces_dum
   m_tickResult.store(Status::undefined);
   m_stateMachine.submitEvent("CMD_TICK");
   
+  int load_counter=0;
+  auto start_timer = std::chrono::steady_clock::now();
   while(m_tickResult.load()== Status::undefined) {
-      std::this_thread::sleep_for (std::chrono::milliseconds(1));
+      std::this_thread::sleep_for (std::chrono::milliseconds(5));
+      load_counter++;
   }
+  auto end_timer = std::chrono::steady_clock::now();
+  auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_timer - start_timer).count();
   switch(m_tickResult.load()) 
   {
       /*ACTION*/case Status::running:
@@ -238,6 +243,7 @@ void $className$::tick( [[maybe_unused]] const std::shared_ptr<bt_interfaces_dum
           break;
   }
   RCLCPP_INFO(m_node->get_logger(), "$className$::tickDone");
+  RCLCPP_DEBUG(m_node->get_logger(), "$className$ num_retry: %d tick time: %ld", load_counter, duration_ms);
   response->is_ok = true;
 }/*END_TICK_CMD*/
 /*HALT_CMD*/
