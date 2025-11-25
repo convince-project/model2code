@@ -127,13 +127,12 @@ bool $className$::start(int argc, char*argv[])
       if (futureResult == rclcpp::FutureReturnCode::SUCCESS) 
       {
           auto response = result.get();
-          if( response->is_ok == true) {
-              QVariantMap data;/*RETURN_PARAM_LIST*//*RETURN_PARAM*/
-              data.insert("$eventData.interfaceDataField$", response->$eventData.interfaceDataField$);/*END_RETURN_PARAM*/
-              m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.Return", data);
-              RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.Return");
-              return;
-          }
+           QVariantMap data;
+           data.insert("call_succeeded", true);/*RETURN_PARAM_LIST*//*RETURN_PARAM*/
+           data.insert("$eventData.interfaceDataField$", response->$eventData.interfaceDataField$);/*END_RETURN_PARAM*/
+           m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.Return", data);
+           RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.Return");
+           return;
       }
       else if(futureResult == rclcpp::FutureReturnCode::TIMEOUT){
           RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Timed out while future complete for the service '$eventData.functionName$'.");
