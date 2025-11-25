@@ -316,6 +316,11 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
 
             writeAfterCommand(str, "/*SEND_EVENT_LIST*/", eventCodeC);
             
+            // Service client header code
+            std::string serviceClientH = savedCode.serviceClientH;
+            replaceCommonEventPlaceholders(serviceClientH, eventData);
+            writeAfterCommand(str, "/*SERVICE_CLIENTS_LIST*/", serviceClientH);
+            
             //H
             replaceAll(interfaceCodeH, "$eventData.interfaceName$", eventData.interfaceName);
             replaceAll(interfaceCodeH, "$eventData.functionNameSnakeCase$", eventData.functionNameSnakeCase);
@@ -609,6 +614,8 @@ void saveCode(savedCodeStr& savedCode, std::string& code)
     deleteSection(code, "/*TOPIC_CALLBACK_H*/", "/*END_TOPIC_CALLBACK_H*/");
     saveSection(code, "/*TOPIC_SUBSCRIPTION_H*/", "/*END_TOPIC_SUBSCRIPTION_H*/", savedCode.topicSubscriptionH);
     deleteSection(code, "/*TOPIC_SUBSCRIPTION_H*/", "/*END_TOPIC_SUBSCRIPTION_H*/");
+    saveSection(code, "/*SERVICE_CLIENT*/", "/*END_SERVICE_CLIENT*/", savedCode.serviceClientH);
+    deleteSection(code, "/*SERVICE_CLIENT*/", "/*END_SERVICE_CLIENT*/");
     saveSection(code, "/*ACTION_H*/", "/*END_ACTION_H*/", savedCode.actionH);
     deleteSection(code, "/*ACTION_H*/", "/*END_ACTION_H*/");
     saveSection(code, "/*ACTION_INTERFACE*/", "/*END_ACTION_INTERFACE*/", savedCode.actionInterfaceH);
@@ -663,6 +670,7 @@ void replaceEventCode(std::map <std::string, std::string>& codeMap, fileDataStr 
         deleteCommand(it->second, "/*ACTION_FNC_LIST*/"); 
         //H
         deleteCommand(it->second, "/*INTERFACES_LIST*/");
+        deleteCommand(it->second, "/*SERVICE_CLIENTS_LIST*/");
         deleteCommand(it->second, "/*TOPIC_SUBSCRIPTIONS_LIST_H*/");
         deleteCommand(it->second, "/*TOPIC_CALLBACK_LIST_H*/");
         deleteCommand(it->second, "/*ACTION_LIST_H*/");

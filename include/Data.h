@@ -133,6 +133,7 @@ struct savedCodeStr{
     std::string topicCallbackH; 
     std::string topicInterfaceH; 
     std::string topicParamList;
+    std::string serviceClientH;
     std::string actionC;
     std::string actionH;
     std::string actionInterfaceH;

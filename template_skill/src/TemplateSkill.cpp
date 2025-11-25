@@ -7,7 +7,7 @@
 #include <QTime>
 #include <iostream>
 #include <QStateMachine>
-
+#include <cstdlib>
 #include <type_traits>
 
 template<typename T>
@@ -92,47 +92,53 @@ bool $className$::start(int argc, char*argv[])
   "$eventData.topicName$", 10, std::bind(&$className$::topic_callback_$eventData.functionName$, this, std::placeholders::_1));
   /*END_TOPIC_SUBSCRIPTION*/
   /*SEND_EVENT_LIST*//*SEND_EVENT_SRV*/
+  $eventData.nodeName$ = rclcpp::Node::make_shared(m_name + "SkillNode$eventData.functionName$");
+  $eventData.clientName$ = $eventData.nodeName$->create_client<$eventData.interfaceName$::srv::$eventData.functionName$>($eventData.serverName$);
+  $eventData.clientName$->configure_introspection($eventData.nodeName$->get_clock(), rclcpp::SystemDefaultsQoS(), RCL_SERVICE_INTROSPECTION_CONTENTS);
+  
+  bool wait_succeded{true};
+  int retries = 0;
+  while (!$eventData.clientName$->wait_for_service(std::chrono::seconds(1))) {
+      if (!rclcpp::ok()) {
+          RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service '$eventData.functionName$'. Exiting.");
+          wait_succeded = false;
+          break;
+      } 
+      retries++;
+      if(retries == SERVICE_TIMEOUT) {
+          RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Timed out while waiting for the service '$eventData.functionName$'.");
+          wait_succeded = false;
+          break;
+      }
+  }
+  if (!wait_succeded) {
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Service '$eventData.componentName$/$eventData.functionName$' not available.");
+      std::exit(1);
+  }
+  /*SEND_EVENT_LIST*//*SEND_EVENT_SRV*/
   m_stateMachine.connectToEvent("$eventData.event$", [this]([[maybe_unused]]const QScxmlEvent & event){
-      std::shared_ptr<rclcpp::Node> $eventData.nodeName$ = rclcpp::Node::make_shared(m_name + "SkillNode$eventData.functionName$");
-      std::shared_ptr<rclcpp::Client<$eventData.interfaceName$::srv::$eventData.serviceTypeName$>> $eventData.clientName$ = $eventData.nodeName$->create_client<$eventData.interfaceName$::srv::$eventData.serviceTypeName$>($eventData.serverName$);
-      auto request = std::make_shared<$eventData.interfaceName$::srv::$eventData.serviceTypeName$::Request>();
-      $eventData.clientName$->configure_introspection($eventData.nodeName$->get_clock(), rclcpp::SystemDefaultsQoS(), RCL_SERVICE_INTROSPECTION_CONTENTS);
+      auto request = std::make_shared<$eventData.interfaceName$::srv::$eventData.functionName$::Request>();
       auto eventParams = event.data().toMap();
       /*PARAM_LIST*//*PARAM*/
       request->$IT->FIRST$ = convert<decltype(request->$IT->FIRST$)>(eventParams["$IT->FIRST$"].toString().toStdString());/*END_PARAM*/
-      bool wait_succeded{true};
-      int retries = 0;
-      while (!$eventData.clientName$->wait_for_service(std::chrono::seconds(1))) {
-          if (!rclcpp::ok()) {
-              RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service '$eventData.functionName$'. Exiting.");
-              wait_succeded = false;
-              break;
-          } 
-          retries++;
-          if(retries == SERVICE_TIMEOUT) {
-              RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Timed out while waiting for the service '$eventData.functionName$'.");
-              wait_succeded = false;
-              break;
-          }
+      auto result = $eventData.clientName$->async_send_request(request);
+      const std::chrono::seconds timeout_duration(SERVICE_TIMEOUT);
+      auto futureResult = rclcpp::spin_until_future_complete($eventData.nodeName$, result, timeout_duration);
+      if (futureResult == rclcpp::FutureReturnCode::SUCCESS) 
+      {
+          auto response = result.get();
+           QVariantMap data;
+           data.insert("call_succeeded", true);/*RETURN_PARAM_LIST*//*RETURN_PARAM*/
+           data.insert("$eventData.interfaceDataField$", response->$eventData.interfaceDataField$);/*END_RETURN_PARAM*/
+           m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.Return", data);
+           RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.Return");
+           return;
       }
-      if (wait_succeded) {                                                                   
-          auto result = $eventData.clientName$->async_send_request(request);
-          const std::chrono::seconds timeout_duration(SERVICE_TIMEOUT);
-          auto futureResult = rclcpp::spin_until_future_complete($eventData.nodeName$, result, timeout_duration);
-          if (futureResult == rclcpp::FutureReturnCode::SUCCESS) 
-          {
-              auto response = result.get();
-              QVariantMap data;
-              data.insert("call_succeeded", true);/*RETURN_PARAM_LIST*//*RETURN_PARAM*/
-              data.insert("$eventData.interfaceDataField$", response->$eventData.interfaceDataField$);/*END_RETURN_PARAM*/
-              m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.Return", data);
-              RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.Return");
-              return;
-              
-          }
-          else if(futureResult == rclcpp::FutureReturnCode::TIMEOUT){
-              RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Timed out while future complete for the service '$eventData.functionName$'.");
-          }
+      else if(futureResult == rclcpp::FutureReturnCode::TIMEOUT){
+          RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Timed out while future complete for the service '$eventData.functionName$'.");
+      }
+      else {
+          RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to call service '$eventData.functionName$'.");
       }
       QVariantMap data;
       data.insert("call_succeeded", false);
@@ -212,9 +218,14 @@ void $className$::tick( [[maybe_unused]] const std::shared_ptr<bt_interfaces_dum
   m_tickResult.store(Status::undefined);
   m_stateMachine.submitEvent("CMD_TICK");
   
+  int load_counter=0;
+  auto start_timer = std::chrono::steady_clock::now();
   while(m_tickResult.load()== Status::undefined) {
-      std::this_thread::sleep_for (std::chrono::milliseconds(100));
+      std::this_thread::sleep_for (std::chrono::milliseconds(5));
+      load_counter++;
   }
+  auto end_timer = std::chrono::steady_clock::now();
+  auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_timer - start_timer).count();
   switch(m_tickResult.load()) 
   {
       /*ACTION*/case Status::running:
@@ -231,6 +242,7 @@ void $className$::tick( [[maybe_unused]] const std::shared_ptr<bt_interfaces_dum
           break;
   }
   RCLCPP_INFO(m_node->get_logger(), "$className$::tickDone");
+  RCLCPP_DEBUG(m_node->get_logger(), "$className$ num_retry: %d tick time: %ld", load_counter, duration_ms);
   response->is_ok = true;
 }/*END_TICK_CMD*/
 /*HALT_CMD*/
