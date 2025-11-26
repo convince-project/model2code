@@ -115,7 +115,6 @@ bool $className$::start(int argc, char*argv[])
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Service '$eventData.componentName$/$eventData.functionName$' not available.");
       std::exit(1);
   }
-  /*SEND_EVENT_LIST*//*SEND_EVENT_SRV*/
   m_stateMachine.connectToEvent("$eventData.event$", [this]([[maybe_unused]]const QScxmlEvent & event){
       auto request = std::make_shared<$eventData.interfaceName$::srv::$eventData.functionName$::Request>();
       auto eventParams = event.data().toMap();
