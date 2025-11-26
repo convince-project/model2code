@@ -10,6 +10,8 @@
 */
 
 #include "strManipulation.h"
+#include <chrono>
+#include <iomanip>
 
 /**
  * @brief Convert string to snake case
@@ -239,5 +241,21 @@ void deleteCommand(std::string& str, const std::string& command) {
     while((start_pos = str.find(command, start_pos)) != std::string::npos) {
         str.erase(start_pos, command.length());
     }
+}
+
+/**
+ * @brief Get the current datetime as a formatted string
+ * 
+ * @return std::string formatted datetime string (e.g., "2025-11-26 10:12:41 CET")
+ */
+std::string getCurrentDatetime() {
+    auto now = std::chrono::system_clock::now();
+    auto now_c = std::chrono::system_clock::to_time_t(now);
+    std::tm now_tm;
+    localtime_r(&now_c, &now_tm);
+    
+    std::ostringstream oss;
+    oss << std::put_time(&now_tm, "%Y-%m-%d %H:%M:%S %Z");
+    return oss.str();
 }
 

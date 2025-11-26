@@ -130,3 +130,10 @@ void writeAfterCommand(std::string& str, const std::string& command, const std::
  * @param command command string to be deleted
  */
 void deleteCommand(std::string& str, const std::string& command);
+
+/**
+ * @brief Get the current datetime as a formatted string
+ * 
+ * @return std::string formatted datetime string (e.g., "2025-11-26 10:12:41 CET")
+ */
+std::string getCurrentDatetime();
