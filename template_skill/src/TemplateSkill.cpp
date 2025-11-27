@@ -97,30 +97,32 @@ bool $className$::start(int argc, char*argv[])
   /*END_TOPIC_SUBSCRIPTION*/
   /*SEND_EVENT_LIST*//*SEND_EVENT_SRV*/
   $eventData.nodeName$ = rclcpp::Node::make_shared(m_name + "SkillNode$eventData.functionName$");
-  $eventData.clientName$ = $eventData.nodeName$->create_client<$eventData.interfaceName$::srv::$eventData.functionName$>($eventData.serverName$);
+  $eventData.clientName$ = $eventData.nodeName$->create_client<$eventData.interfaceName$::srv::$eventData.serviceTypeName$>($eventData.serverName$);
   $eventData.clientName$->configure_introspection($eventData.nodeName$->get_clock(), rclcpp::SystemDefaultsQoS(), RCL_SERVICE_INTROSPECTION_CONTENTS);
   
-  bool wait_succeded{true};
-  int retries = 0;
-  while (!$eventData.clientName$->wait_for_service(std::chrono::seconds(1))) {
-      if (!rclcpp::ok()) {
-          RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service '$eventData.functionName$'. Exiting.");
-          wait_succeded = false;
-          break;
-      } 
-      retries++;
-      if(retries == SERVICE_TIMEOUT) {
-          RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Timed out while waiting for the service '$eventData.functionName$'.");
-          wait_succeded = false;
-          break;
-      }
-  }
-  if (!wait_succeded) {
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Service '$eventData.componentName$/$eventData.functionName$' not available.");
-      std::exit(1);
+  {
+    bool wait_succeded{true};
+    int retries = 0;
+    while (!$eventData.clientName$->wait_for_service(std::chrono::seconds(1))) {
+        if (!rclcpp::ok()) {
+            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service '$eventData.functionName$'. Exiting.");
+            wait_succeded = false;
+            break;
+        } 
+        retries++;
+        if(retries == SERVICE_TIMEOUT) {
+            RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Timed out while waiting for the service '$eventData.functionName$'.");
+            wait_succeded = false;
+            break;
+        }
+    }
+    if (!wait_succeded) {
+        RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Service '$eventData.componentName$/$eventData.functionName$' not available.");
+        std::exit(1);
+    }
   }
   m_stateMachine.connectToEvent("$eventData.event$", [this]([[maybe_unused]]const QScxmlEvent & event){
-      auto request = std::make_shared<$eventData.interfaceName$::srv::$eventData.functionName$::Request>();
+      auto request = std::make_shared<$eventData.interfaceName$::srv::$eventData.serviceTypeName$::Request>();
       auto eventParams = event.data().toMap();
       /*PARAM_LIST*//*PARAM*/
       request->$IT->FIRST$ = convert<decltype(request->$IT->FIRST$)>(eventParams["$IT->FIRST$"].toString().toStdString());/*END_PARAM*/
