@@ -67,7 +67,7 @@ private:
 	rclcpp::Subscription<$eventData.interfaceName$::msg::$eventData.messageNameSnakeCase$>::SharedPtr m_subscription_$eventData.functionName$;/*END_TOPIC_SUBSCRIPTION_H*/
 	/*SERVICE_CLIENTS_LIST*//*SERVICE_CLIENT*/
 	std::shared_ptr<rclcpp::Node> $eventData.nodeName$;
-	std::shared_ptr<rclcpp::Client<$eventData.interfaceName$::srv::$eventData.functionName$>> $eventData.clientName$;/*END_SERVICE_CLIENT*/
+	std::shared_ptr<rclcpp::Client<$eventData.interfaceName$::srv::$eventData.serviceTypeName$>> $eventData.clientName$;/*END_SERVICE_CLIENT*/
 	/*ACTION_LIST_H*//*ACTION_H*/
 	std::shared_ptr<rclcpp::Node> m_node_action;
 	std::mutex m_actionMutex;
