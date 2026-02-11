@@ -39,7 +39,7 @@ bool deleteElementAttributeFromVector(std::vector<tinyxml2::XMLElement*>& elemen
 bool readHLXMLFile(tinyxml2::XMLDocument& doc, const std::string fileName);
 
 /**
- * @brief translate the XML file from High-Level SCXML to SCXML
+ * @brief translate the XML file from RoAML to SCXML
  * 
  * @param fileData file data structure passed by reference where the file data is stored
  * @return true if the translation is successful

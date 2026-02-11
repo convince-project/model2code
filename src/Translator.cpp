@@ -1009,7 +1009,13 @@ bool Translator(fileDataStr& fileData){
             outputContent.insert(xmlDeclEnd, "\n" + header);
         }
     }
-    
+    //replace ascxml with scxml in output content 
+    size_t pos = 0;
+    while ((pos = outputContent.find("ascxml", pos)) != std::string::npos) {
+        outputContent.replace(pos, 6, "scxml");
+        pos += 5; // Move past the replaced text
+    }
+
     // add_to_log("-----------");
     createDirectory(fileData.outputPath);
     createDirectory(fileData.outputPathSrc);
