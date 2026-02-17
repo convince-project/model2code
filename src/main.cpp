@@ -20,7 +20,7 @@ void print_help()
 {
     std::cout << "Welcome to model2code tool.\n";
     std::cout << "Usage:\n";
-    std::cout << "model2code --input_filename \"inputFile.scxml\" ";
+    std::cout << "model2code --input_filename \"inputFile.ascxml\" ";
     std::cout << "--model_filename \"projectModel.xml\" ";
     std::cout << "--interface_filename \"interfaceFile.xml\" ";
     std::cout << "--template_path \"path/to/template_skill/directory\" ";
