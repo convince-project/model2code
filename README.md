@@ -1,57 +1,238 @@
-# MODEL2CODE Overview
+# model2code
 
-> Please access the documentation via [convince-project.github.io/model2code](https://convince-project.github.io/model2code/)
+`model2code` is a command-line tool that takes a ROS-flavoured SCXML skill model and generates a ROS 2 package from it.
 
-MODEL2CODE is a tool that generates a ROS package with C++ code from a ROS-flavoured SCXML model.
+This README is intentionally user-focused: it explains how to build the tool, run it, and try the tutorial examples.
 
-## Installation
+## What it does
 
-MODEL2CODE has been tested on Ubuntu 22.04 with Python 3.10.12.
+You give `model2code`:
 
-### Installing Dependencies
+- an SCXML skill file,
+- an output folder,
+- a template folder.
 
-MODEL2CODE requires the following dependencies:
+It generates a ROS 2 package containing the source files and build files for that skill.
 
-* [TinyXML2](https://github.com/leethomason/tinyxml2/) (Tested with v10.0.0) for XML file handling.
+## What you need
 
-To install see [TinyXML2 Installation](https://github.com/leethomason/tinyxml2/tree/master?tab=readme-ov-file#building-tinyxml-2---using-vcpkg)
+To build `model2code` itself you need:
 
-## Compiling
-To compile the code run the following commands:
+- CMake 3.16+
+- a C++20 compiler
+- TinyXML2
+
+To build the generated package later, you will also need the ROS 2 and Qt dependencies required by that package.
+
+For the tutorial packages in this repository, you will typically need:
+
+- ROS 2
+- `colcon`
+- Qt 6 development packages, including SCXML
+
+On Ubuntu/Debian, the missing Qt packages that blocked tutorial execution were fixed with:
+
+```bash
+sudo apt update
+sudo apt install qt6-base-dev qt6-scxml-dev
 ```
-git clone https://github.com/convince-project/model2code.git
-cd model2code
-mkdir build
+
+## Build the tool
+
+From the repository root:
+
+```bash
+mkdir -p build
 cd build
 cmake ..
+make
+cd ..
+```
+
+After this, the executable is available as:
+
+```bash
+./build/model2code
+```
+
+### Optional install
+
+If you want to install it system-wide:
+
+```bash
+cd build
+sudo make install
+```
+
+If you do not want to use `sudo`, install it in your home directory instead:
+
+```bash
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/.local
 make install
 ```
 
-## Execution
-To run the `model2code` tool, you will need the following:
-- An SCXML file with the state machine of the model;
-- An XML file defining the model of your project;
-- An XML file defining the interfaces of your project;
-- A directory containing templates for the files to be generated.
+## Basic usage
 
-To run the `model2code` tool use the following command
-```
-model2code --input_filename "input_model.scxml" --model_filename "project_model_definition.xml" --interface_filename "interface_definition.xml" --output_path "path/to/output/directory" --template_path "path/to/template_skill/directory"
-```
-replace `input_model.scxml`, `project_model_definition.scxml`, `interface_definition.scxml`, `path/to/output/directory` and `path/to/template_skill/directory` with your needs.
+Run `model2code` from the repository root like this:
 
-Add `--verbose_mode` for enabling the logging.
-By default the `path/to/output/directory` is set to the location of `input_model.scxml`, and `path/to/template_skill/directory` is set to the 'template_skill' directory of this repository.
+```bash
+./build/model2code \
+  --input_filename "path/to/YourSkill.scxml" \
+  --output_path "path/to/output_skill" \
+  --template_path "./template_skill"
+```
 
-Example XML files with the required structure for defining the project's model and interfaces are available in the `tutorials/specifications` folder.
+### Main options
 
-## Run examples
-To run an example of MODEL2CODE go to the main directory and run the following commands:
-Example 1:
+- `--input_filename`: path to the SCXML skill file. Required.
+- `--output_path`: folder where the generated package will be written.
+- `--template_path`: template folder to use. In this repository, use `./template_skill`.
+- `--verbose_mode`: prints more information while the tool runs.
+- `--debug_mode`: adds extra log entries in the generated state machine.
+- `--datamodel_mode`: also generates datamodel-related files.
+
+In normal use, the basic three paths are enough:
+
+- input file,
+- output path,
+- template path.
+
+## Typical workflow
+
+1. Build the tool.
+2. Choose an SCXML skill file.
+3. Run `./build/model2code` from the repository root.
+4. Open the generated package in the output folder.
+5. Add that package to your ROS 2 workspace and build it there.
+
+## What gets generated
+
+The output folder typically contains:
+
+- `include/`
+- `src/`
+- `CMakeLists.txt`
+- `package.xml`
+- `src/main.cpp`
+- `<SkillName>.cpp` and `<SkillName>.h`
+- `<SkillName>SM.scxml`
+
+If you use `--datamodel_mode`, extra datamodel files are generated as well.
+
+## Fastest way to try it
+
+This repository already contains tutorial examples. The commands below are meant to be executed from the repository root.
+
+### Example 1: `FirstTutorialSkill`
+
+Input file: [tutorials/skills/first_tutorial_skill/src/FirstTutorialSkill.scxml](/home/bsquitieri-iit.local/model2code/tutorials/skills/first_tutorial_skill/src/FirstTutorialSkill.scxml)
+
+Generate the package:
+
+```bash
+./build/model2code \
+  --input_filename "tutorials/skills/first_tutorial_skill/src/FirstTutorialSkill.scxml" \
+  --output_path "tutorials/skills/first_tutorial_skill" \
+  --template_path "./template_skill"
 ```
-model2code --input_filename "tutorials/skills/first_tutorial_skill/src/FirstTutorialSkill.scxml" --model_filename "tutorials/specifications/full-model.xml" --interface_filename "tutorials/specifications/interfaces.xml" --output_path "tutorials/skills/first_tutorial_skill"
+
+This example is useful for generation, but it is not self-contained for execution. To build and run it you would still need:
+
+- the generated package `first_tutorial_skill`,
+- `bt_interfaces_dummy`,
+- a ROS package called `template_interfaces`,
+- a running node that provides the service `/TemplateComponent/Function1`.
+
+- `template_interfaces` is not included in this repository,
+- the service server for `/TemplateComponent/Function1` is not included in this repository either.
+
+Because of that, `FirstTutorialSkill` should be treated here as a generation example, not as the recommended end-to-end execution example.
+
+If you already have your own `template_interfaces` package and a node exposing `/TemplateComponent/Function1`, you can build it with:
+
+```bash
+mkdir -p tutorial_ws/src
+ln -s "$(pwd)/tutorials/skills/first_tutorial_skill" tutorial_ws/src/
+ln -s "$(pwd)/tests/test_compilation/interfaces/bt_interfaces_dummy" tutorial_ws/src/
+# Add your template_interfaces package to tutorial_ws/src/ as well
+
+cd tutorial_ws
+colcon build --packages-select bt_interfaces_dummy first_tutorial_skill template_interfaces
+source install/setup.bash
+ros2 run first_tutorial_skill first_tutorial_skill
 ```
-Example 2:
+
+Once the skill is running, you can interact with it with:
+
+```bash
+ros2 service call /FirstTutorialSkill/tick bt_interfaces_dummy/srv/TickAction "{}"
+ros2 service call /FirstTutorialSkill/halt bt_interfaces_dummy/srv/HaltAction "{}"
 ```
-model2code --input_filename "tutorials/skills/second_tutorial_skill/src/SecondTutorialSkill.scxml" --model_filename "tutorials/specifications/full-model.xml" --interface_filename "tutorials/specifications/interfaces.xml" --verbose_mode
+
+### Example 2: `SecondTutorialSkill`
+
+Input file: [tutorials/skills/second_tutorial_skill/src/SecondTutorialSkill.scxml](/home/bsquitieri-iit.local/model2code/tutorials/skills/second_tutorial_skill/src/SecondTutorialSkill.scxml)
+
+Generate the package:
+
+```bash
+./build/model2code \
+  --input_filename "tutorials/skills/second_tutorial_skill/src/SecondTutorialSkill.scxml" \
+  --output_path "tutorials/skills/second_tutorial_skill" \
+  --template_path "./template_skill"
 ```
+
+This is the recommended tutorial to run end-to-end because it only needs:
+
+- the generated package `second_tutorial_skill`,
+- `bt_interfaces_dummy`,
+- `std_msgs`.
+
+Build and run it:
+
+```bash
+mkdir -p tutorial_ws/src
+ln -s "$(pwd)/tutorials/skills/second_tutorial_skill" tutorial_ws/src/
+ln -s "$(pwd)/tests/test_compilation/interfaces/bt_interfaces_dummy" tutorial_ws/src/
+
+cd tutorial_ws
+colcon build --packages-select bt_interfaces_dummy second_tutorial_skill
+source install/setup.bash
+ros2 run second_tutorial_skill second_tutorial_skill
+```
+
+In another terminal:
+
+```bash
+cd ~/model2code/tutorial_ws
+source install/setup.bash
+ros2 topic pub --once /TemplateComponent/Function2 std_msgs/msg/Bool "{data: true}"
+ros2 service call /SecondTutorialSkill/tick bt_interfaces_dummy/srv/TickCondition "{}"
+```
+
+## Notes for everyday use
+
+- The examples above assume you are in the repository root.
+- If `./build/model2code` does not exist, build the project first.
+- If `make install` fails with `Permission denied`, use `sudo make install` or run the binary directly from `./build/model2code`.
+- If you just want to try the tool, you do not need to install it.
+- Use `--verbose_mode` only if you want internal debug output from the generator.
+
+## Minimal example
+
+```bash
+./build/model2code \
+  --input_filename "my_skill/src/MySkill.scxml" \
+  --output_path "generated_skills/my_skill" \
+  --template_path "./template_skill"
+```
+
+## Summary
+
+Use `model2code` like this:
+
+1. build it,
+2. run it from the repository root,
+3. pass your SCXML file, output folder, and template folder,
+4. take the generated package and build it in your ROS 2 workspace.
