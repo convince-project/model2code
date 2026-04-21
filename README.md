@@ -2,8 +2,6 @@
 
 `model2code` is a command-line tool that takes a ROS-flavoured SCXML skill model and generates a ROS 2 package from it.
 
-This README is intentionally user-focused: it explains how to build the tool, run it, and try the tutorial examples.
-
 ## What it does
 
 You give `model2code`:
