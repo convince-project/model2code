@@ -23,16 +23,16 @@ Program outputs:
 - A CMakeLists.txt file that incorporates the generated files.
 
 
-Required parameters:
+Required parameter:
 
 - ``--input_filename``: The path to the SCXML file that describes the behavior of the skill.
-- ``--model_filename``: The path to the XML file that describes the full model of the program.
-- ``--interface_filename``: The path to the XML file that describes the interfaces used.
 
 By default, the program generates the code in the same directory as the SCXML file specified by the ``--input_filename`` parameter. However, you can select a different output directory by using the ``--output_path`` parameter.
 
-Additionally, the program uses files from the ``templates`` directory by default to generate the code, but you can specify a different directory with the ``--templates_path`` parameter.
-The ``--verbose_mode`` parameter can be used to enable verbose logging.
+Additionally, the program uses files from the ``template_skill`` directory by default to generate the code, but you can specify a different directory with the ``--template_path`` parameter.
+The executable also supports ``--verbose_mode``, ``--debug_mode``, ``--translate_mode``, ``--generate_mode``, and ``--datamodel_mode``.
+
+At the moment, the system-model and interface XML files are taken from built-in default paths in the executable rather than from command-line flags. The repository reference files are still available under ``tutorials/specifications/``.
 
 The generated skills are based on a behavior tree structure. Skills corresponding to condition nodes will have a ROS2 tick service, while skills corresponding to action nodes will have both tick and halt services.
 

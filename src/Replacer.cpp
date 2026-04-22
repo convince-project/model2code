@@ -217,6 +217,8 @@ void replaceCommonEventPlaceholders(std::string& code, const eventDataStr& event
     replaceAll(code, "$eventData.event$", eventData.event);
     replaceAll(code, "$eventData.componentName$", eventData.componentName);
     replaceAll(code, "$eventData.functionName$", eventData.functionName);
+    replaceAll(code, "$eventData.clientName$", eventData.clientName);
+    replaceAll(code, "$eventData.serverName$", eventData.serverName);
     replaceAll(code, "$eventData.serviceTypeName$", eventData.serviceTypeName);
     replaceAll(code, "$eventData.serviceTypeNameSnakeCase$", eventData.serviceTypeNameSnakeCase);
     replaceAll(code, "$eventData.nodeName$", eventData.nodeName);
@@ -509,6 +511,8 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
             std::string eventFeedbackReturn = "FeedbackReturn";
             std::string eventGoalResponse = "GoalResponse";
             std::string eventResultResponse = "ResultResponse";
+            std::string eventAbortedResultResponse = "AbortedResultResponse";
+            std::string eventCancelResult = "CancelResult";
             if (std::string(eventData.eventName).find(eventFeedbackReturn) != std::string::npos)
             {
                 std::string actionFeedbackCallback = savedCode.actionFeedbackCallback;
@@ -545,15 +549,23 @@ void handleGenericEvent(const eventDataStr eventData, const savedCodeStr savedCo
                 replaceCommonEventPlaceholders(actionGoalResponseFnc, eventData);
                 writeAfterCommand(str, "/*ACTION_FNC_LIST*/", actionGoalResponseFnc);
             }
-            else if(std::string(eventData.eventName).find(eventResultResponse) != std::string::npos)
+            else if(std::string(eventData.eventName).find(eventResultResponse) != std::string::npos
+                 || std::string(eventData.eventName).find(eventAbortedResultResponse) != std::string::npos
+                 || std::string(eventData.eventName).find(eventCancelResult) != std::string::npos)
             {
                 std::string actionResultCallbackFnc = savedCode.actionResultCallbackFnc;
                 replaceCommonEventPlaceholders(actionResultCallbackFnc, eventData);
-                writeAfterCommand(str, "/*ACTION_FNC_LIST*/", actionResultCallbackFnc);
+                if(!checkIfStrPresent(str, actionResultCallbackFnc)){
+                    writeAfterCommand(str, "/*ACTION_FNC_LIST*/", actionResultCallbackFnc);
+                }
 
-                std::string actionResultRequestLambda = savedCode.actionResultRequestLambda;
-                replaceCommonEventPlaceholders(actionResultRequestLambda, eventData);
-                writeAfterCommand(str, "/*ACTION_LAMBDA_LIST*/", actionResultRequestLambda);
+                if (std::string(eventData.eventName).find(eventResultResponse) != std::string::npos) {
+                    std::string actionResultRequestLambda = savedCode.actionResultRequestLambda;
+                    replaceCommonEventPlaceholders(actionResultRequestLambda, eventData);
+                    if(!checkIfStrPresent(str, actionResultRequestLambda)){
+                        writeAfterCommand(str, "/*ACTION_LAMBDA_LIST*/", actionResultRequestLambda);
+                    }
+                }
 
             }
         }

@@ -86,7 +86,7 @@ bool $className$::start(int argc, char*argv[])
                                                                             	std::placeholders::_2));
   m_haltService->configure_introspection(m_node->get_clock(), rclcpp::SystemDefaultsQoS(), RCL_SERVICE_INTROSPECTION_CONTENTS);/*END_HALT*/
   /*ACTION_LIST_C*//*ACTION_C*/
-  m_actionClient = rclcpp_action::create_client<$eventData.interfaceName$::action::$eventData.functionName$>(m_node, "/$eventData.componentName$/$eventData.functionName$");
+  m_actionClient = rclcpp_action::create_client<$eventData.interfaceName$::action::$eventData.functionName$>(m_node, "$eventData.clientName$");
   m_send_goal_options.goal_response_callback = std::bind(&$className$::goal_response_callback, this, std::placeholders::_1);
   m_send_goal_options.feedback_callback =   std::bind(&$className$::feedback_callback, this, std::placeholders::_1, std::placeholders::_2);
   m_send_goal_options.result_callback =  std::bind(&$className$::result_callback, this, std::placeholders::_1);
@@ -179,7 +179,7 @@ bool $className$::start(int argc, char*argv[])
     RCLCPP_INFO(m_node->get_logger(), "calling send goal");
     std::shared_ptr<rclcpp::Node> node$eventData.functionName$ = rclcpp::Node::make_shared(m_name + "SkillNode$eventData.functionName$");
     rclcpp_action::Client<$eventData.interfaceName$::action::$eventData.functionName$>::SharedPtr client$eventData.functionName$  =
-    rclcpp_action::create_client<$eventData.interfaceName$::action::$eventData.functionName$>(node$eventData.functionName$, "/$eventData.componentName$/$eventData.functionName$");
+    rclcpp_action::create_client<$eventData.interfaceName$::action::$eventData.functionName$>(node$eventData.functionName$, "$eventData.clientName$");
     $eventData.interfaceName$::action::$eventData.functionName$::Goal goal_msg;
     /*SEND_PARAM_LIST*//*SEND_PARAM*/
     std::string temp = event.data().toMap()["$IT->FIRST$"].toString().toStdString();
@@ -193,7 +193,7 @@ bool $className$::start(int argc, char*argv[])
       RCLCPP_INFO(m_node->get_logger(), "$className$::$eventData.componentName$.$eventData.functionName$.ResultRequest");
       std::shared_ptr<rclcpp::Node> node$eventData.functionName$ = rclcpp::Node::make_shared(m_name + "SkillNode$eventData.functionName$");
       rclcpp_action::Client<$eventData.interfaceName$::action::$eventData.functionName$>::SharedPtr client$eventData.functionName$  =
-        rclcpp_action::create_client<$eventData.interfaceName$::action::$eventData.functionName$>(node$eventData.functionName$, "/$eventData.componentName$/GoToPoi");
+        rclcpp_action::create_client<$eventData.interfaceName$::action::$eventData.functionName$>(node$eventData.functionName$, "$eventData.clientName$");
       RCLCPP_INFO(m_node->get_logger(), "result request");
   });
   /*END_ACTION_RESULT_REQUEST*/
@@ -346,14 +346,21 @@ void $className$::feedback_callback(
 /*ACTION_RESULT_CALLBACK_FNC*/
 void $className$::result_callback(const  rclcpp_action::ClientGoalHandle<$eventData.interfaceName$::action::$eventData.functionName$>::WrappedResult & result)
 {
+  QVariantMap data;
   switch (result.code) {
     case rclcpp_action::ResultCode::SUCCEEDED:
+      m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.ResultResponse", data);
+      RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.ResultResponse");
       break;
     case rclcpp_action::ResultCode::ABORTED:
       RCLCPP_ERROR(m_node->get_logger(), "Goal was aborted");
+      m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.AbortedResultResponse", data);
+      RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.AbortedResultResponse");
       break;
     case rclcpp_action::ResultCode::CANCELED:
       RCLCPP_ERROR(m_node->get_logger(), "Goal was canceled");
+      m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.CancelResult", data);
+      RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.CancelResult");
       break;
     default:
       RCLCPP_ERROR(m_node->get_logger(), "Unknown result code");
@@ -361,8 +368,4 @@ void $className$::result_callback(const  rclcpp_action::ClientGoalHandle<$eventD
   }
   //std::cout << "Result received: " << result.result->is_ok << std::endl;
   // RCLCPP_INFO(m_node->get_logger(), "Result received: %d ", result.result->is_ok);
-  QVariantMap data;
-  // data.insert("is_ok", result.result->is_ok);
-  m_stateMachine.submitEvent("$eventData.componentName$.$eventData.functionName$.ResultResponse", data);
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "$eventData.componentName$.$eventData.functionName$.ResultResponse");
 }/*END_ACTION_RESULT_CALLBACK_FNC*/

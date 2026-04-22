@@ -308,30 +308,33 @@ bool findInterfaceType(const fileDataStr fileData, eventDataStr& eventData, tiny
 
 
     bool is_action_server = findElementByTagAndAttValue(root, std::string("ros_action_server"), std::string("action_name"), std::string("/" + eventData.componentName + "/" + eventData.functionName), element);
+    if (!is_action_server && !eventData.componentName.empty()) {
+        is_action_server = findElementByTagAndAttValue(root, std::string("ros_action_server"), std::string("action_name"), std::string("/" + eventData.componentName), element);
+    }
     add_to_log("is_action_server: " + std::to_string(is_action_server) + " at line " + std::to_string(__LINE__));
     if (is_action_server) {
         getElementAttValue(element, std::string("type"), eventData.messageInterfaceType);
+        getElementAttValue(element, std::string("action_name"), eventData.serverName);
         eventData.rosInterfaceType = "action-server"; // type of the interface in ROS
         eventData.interfaceName = eventData.messageInterfaceType.substr(0, eventData.messageInterfaceType.find_last_of("/"));
         
         add_to_log("interfaceName: " + eventData.interfaceName + " at line " + std::to_string(__LINE__));
         eventData.interfaceType = "action";
-        // eventData.serverName = "/" + eventData.componentName + "/" + eventData.functionName;
         return true;
     }
 
-
-
-
     bool is_action_client = findElementByTagAndAttValue(root, std::string("ros_action_client"), std::string("action_name"), std::string("/" + eventData.componentName + "/" + eventData.functionName), element);
+    if (!is_action_client && !eventData.componentName.empty()) {
+        is_action_client = findElementByTagAndAttValue(root, std::string("ros_action_client"), std::string("action_name"), std::string("/" + eventData.componentName), element);
+    }
     add_to_log("is_action_client: " + std::to_string(is_action_client) + " at line " + std::to_string(__LINE__));
     if (is_action_client) {
         getElementAttValue(element, std::string("type"), eventData.messageInterfaceType);
+        getElementAttValue(element, std::string("action_name"), eventData.clientName);
         eventData.rosInterfaceType = "action-client"; // type of the interface in ROS
         eventData.interfaceName = eventData.messageInterfaceType.substr(0, eventData.messageInterfaceType.find_last_of("/"));
         add_to_log("interfaceName: " + eventData.interfaceName + " at line " + std::to_string(__LINE__));
         eventData.interfaceType = "action";
-        eventData.clientName = "/" + eventData.componentName + "/" + eventData.functionName;
         return true;
     }
 
