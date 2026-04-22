@@ -115,23 +115,31 @@ bool deleteElementFromVector(std::vector<tinyxml2::XMLElement*>& elements)
  */
 bool replaceTagName(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* element, const std::string& newTagName)
 {
+    std::cout << "Replacing tag name '" << element->Value() << "' with '" << newTagName << "'" << std::endl;
     if (!element || !doc) {
         std::cerr << "Invalid document or element." << std::endl;
         return false;
     }
+    std::cout << " line " << __LINE__ << std::endl;
 
     // Create a new element with the new tag name
     tinyxml2::XMLElement* newElement = doc->NewElement(newTagName.c_str());
+    std::cout << " line " << __LINE__ << std::endl;
 
     // Copy attributes from the old element to the new element
+    std::cout << " line " << __LINE__ << std::endl;
     for (const tinyxml2::XMLAttribute* attr = element->FirstAttribute(); attr; attr = attr->Next()) {
         newElement->SetAttribute(attr->Name(), attr->Value());
+    std::cout << " line " << __LINE__ << std::endl;
     }
+    std::cout << " line " << __LINE__ << std::endl;
 
     // Copy the text content of the old element to the new element
+    std::cout << " line " << __LINE__ << std::endl;
     if (element->GetText()) {
         newElement->SetText(element->GetText());
     }
+    std::cout << " line " << __LINE__ << std::endl;
 
     // Move child elements from the old element to the new element
     for (tinyxml2::XMLElement* child = element->FirstChildElement(); child; ) {
@@ -140,9 +148,11 @@ bool replaceTagName(tinyxml2::XMLDocument* doc, tinyxml2::XMLElement* element, c
         child = next;
     }
 
+    std::cout << " line " << __LINE__ << std::endl;
     // Replace the old element with the new element in the document
     element->Parent()->InsertAfterChild(element, newElement);
     element->Parent()->DeleteChild(element);
+    std::cout << " line " << __LINE__ << std::endl;
 
     return true;
 }
@@ -504,6 +514,43 @@ bool findElementByTagAndAttValueContaining(tinyxml2::XMLElement* root, const std
     return false;
 }
 
+std::string buildCanonicalActionEventPrefix(const char* actionNameAttr, const char* actionTypeAttr)
+{
+    if (!actionNameAttr) {
+        return "";
+    }
+
+    std::string actionName(actionNameAttr);
+    if (actionName.empty()) {
+        return actionName;
+    }
+
+    if (actionName.front() == '/') {
+        actionName.erase(0, 1);
+    }
+
+    // Multi-segment action names already match the expected /component/function shape.
+    if (actionName.find('/') != std::string::npos) {
+        return "/" + actionName;
+    }
+
+    std::string actionTypeName;
+    if (actionTypeAttr) {
+        actionTypeName = actionTypeAttr;
+        size_t lastSlash = actionTypeName.find_last_of('/');
+        if (lastSlash != std::string::npos) {
+            actionTypeName = actionTypeName.substr(lastSlash + 1);
+        }
+    }
+
+    if (actionTypeName.empty()) {
+        return "/" + actionName;
+    }
+
+    // Single-segment action names still need a stable function segment for codegen.
+    return "/" + actionName + "/" + actionTypeName;
+}
+
 /**
  * @brief replaces the value of the event attribute in all elements in a vector from / to .
  * 
@@ -725,20 +772,28 @@ bool Translator(fileDataStr& fileData){
     if( !readHLXMLFile(doc, fileContent, fileData.inputFileName)){
         return false;
     }
-
+    std::cout << "line " << __LINE__ << std::endl;
     // Get Root and SkillData
+    std::cout << "line " << __LINE__ << std::endl;
     tinyxml2::XMLElement* root = doc.RootElement();
     if (!root) {
         std::cerr << "No root element found" << std::endl;
         return false;
+    std::cout << "line " << __LINE__ << std::endl;
     }
+    std::cout << "line " << __LINE__ << std::endl;
     getDataFromRootNameHighLevel(root->Attribute("name"), skillData);
+    std::cout << "line " << __LINE__ << std::endl;
 
     // Add log print for each state entry
+    std::cout << "line " << __LINE__ << std::endl;
     if (fileData.debug_mode) {
         addLogToStateEntries(&doc, root);
     }
+    std::cout << "line " << __LINE__ << std::endl;
+    // replace ascxml tag with scxml 
 
+    std::cout << "line " << __LINE__ << std::endl;
     // Get Skill Type
     tinyxml2::XMLElement* haltServerElement;
     if(findElementByTagAndAttValueContaining(root, std::string("ros_service_server"), std::string("type"), std::string("bt_interfaces_dummy/HaltAction"), haltServerElement) ||
@@ -777,9 +832,10 @@ bool Translator(fileDataStr& fileData){
      for (tinyxml2::XMLElement* element : actionVector) {
         const char* name = element->Attribute("name");
         const char* actionName = element->Attribute("action_name");
+        const char* actionType = element->Attribute("type");
 
         if (name && actionName) {
-            nameToActionNameMap[name] = actionName;
+            nameToActionNameMap[name] = buildCanonicalActionEventPrefix(actionName, actionType);
         } else {
             std::cerr << "Missing attribute in ros_action_client tag\n";
         }
@@ -936,6 +992,29 @@ bool Translator(fileDataStr& fileData){
     appendAttributeValueFromVector(actionHandleSuccessResultVector, "event", ".ResultResponse");
     replaceTagNameFromVector(&doc, actionHandleSuccessResultVector, "transition");
     replaceAttributeValueSubstringFromVector(assignVector, "expr", "_wrapped_result.result.", "_event.data.");
+
+    // Translate elements with tag ros_action_handle_aborted_result
+    std::vector<tinyxml2::XMLElement*> actionHandleAbortedResultVector;
+    findElementVectorByTag(root, std::string("ros_action_handle_aborted_result"), actionHandleAbortedResultVector);
+    replaceAttributeNameFromVector(actionHandleAbortedResultVector, "name", "event");
+    for (auto& element : actionHandleAbortedResultVector) {
+        const char* eventValue = element->Attribute("event");
+        if (eventValue) {
+            std::string eventStr(eventValue);
+            auto it = nameToActionNameMap.find(eventStr);
+            if (it != nameToActionNameMap.end()) {
+                element->SetAttribute("event", it->second.c_str());
+                add_to_log("Updating: " + eventStr + " -> " + it->second);
+            } else {
+                add_to_log("No update for: " + eventStr);
+            }
+        } else {
+            add_to_log("No 'event' attribute found");
+        }
+    }
+    replaceEventValueFromVectorFromSlashToPoint(actionHandleAbortedResultVector);
+    appendAttributeValueFromVector(actionHandleAbortedResultVector, "event", ".AbortedResultResponse");
+    replaceTagNameFromVector(&doc, actionHandleAbortedResultVector, "transition");
 
     // Translate elements with tag ros_action_handle_cancel_response
     std::vector<tinyxml2::XMLElement*> actionHandleCancelResultVector;
